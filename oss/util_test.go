@@ -1,6 +1,8 @@
 package oss
 
 import (
+	"bytes"
+	"fmt"
 	"net"
 	"sync"
 )
@@ -42,7 +44,10 @@ func (r *RequestRecorder) listen() {
 		r.Err = err
 		return
 	}
-	r.Request = string(request[:n])
+	req := request[:n]
+	req = bytes.Replace(req, []byte{'\r'}, nil, -1)
+	req = bytes.TrimSpace(req)
+	r.Request = string(req)
 	conn.Close()
 }
 
@@ -52,4 +57,8 @@ func (r *RequestRecorder) Wait() {
 
 func (r *RequestRecorder) Close() {
 	r.listener.Close()
+}
+
+func p(v ...interface{}) {
+	fmt.Println(v...)
 }

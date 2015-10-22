@@ -28,7 +28,7 @@ Host: %s
 User-Agent: aliyun-sdk-go/0.1.1 (Linux/3.16.0-51-generic/x86_64;go1.5.1)
 Content-Length: 0
 Accept-Encoding: identity
-Authorization: OSS your-id:qKkbehZghgryl+VGYs0rE83gV2g=
+Authorization: OSS your-id:h4f1mblhxCOYBJ3jrO+ofuOLO8o=
 Date: %s
 X-Oss-Acl: private`, rec.URL(), now)
 	if rec.Err != nil {
