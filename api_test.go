@@ -35,6 +35,6 @@ X-Oss-Acl: private`, rec.URL(), now)
 		t.Fatal(err)
 	}
 	if rec.Request != expected {
-		t.Fatalf("\n--- EXPECT ---\n%s\n--- BUT GOT ---\n%s", expected, rec.Request)
+		t.Fatalf(expectBut, expected, rec.Request)
 	}
 }

@@ -5,6 +5,8 @@ import (
 	"sync"
 )
 
+const expectBut = "\n--- EXPECT ---\n%s\n--- BUT GOT ---\n%s"
+
 type RequestRecorder struct {
 	listener net.Listener
 	Request  string
