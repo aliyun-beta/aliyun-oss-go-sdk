@@ -52,11 +52,7 @@ func (a *API) GetBucket(name string) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Accept-Encoding", "identity")
-	req.Header.Set("Date", a.now().UTC().Format(gmtTime))
-	req.Header.Set("User-Agent", userAgent)
-	auth := authorization{req: req, secret: []byte(a.accessKeySecret)}
-	req.Header.Set("Authorization", "OSS "+a.accessKeyID+":"+auth.value())
+	a.setCommonHeaders(req)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
@@ -65,17 +61,21 @@ func (a *API) GetBucket(name string) error {
 	return err
 }
 
+func (a *API) setCommonHeaders(req *http.Request) {
+	req.Header.Set("Accept-Encoding", "identity")
+	req.Header.Set("Date", a.now().UTC().Format(gmtTime))
+	req.Header.Set("User-Agent", userAgent)
+	auth := authorization{req: req, secret: []byte(a.accessKeySecret)}
+	req.Header.Set("Authorization", "OSS "+a.accessKeyID+":"+auth.value())
+}
+
 func (a *API) GetObjectToFile(bucket, object, file string) error {
 	verb := "GET"
 	req, err := http.NewRequest(verb, "http://"+a.endPoint+"/"+bucket+"/"+object, nil)
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Accept-Encoding", "identity")
-	req.Header.Set("Date", a.now().UTC().Format(gmtTime))
-	req.Header.Set("User-Agent", userAgent)
-	auth := authorization{req: req, secret: []byte(a.accessKeySecret)}
-	req.Header.Set("Authorization", "OSS "+a.accessKeyID+":"+auth.value())
+	a.setCommonHeaders(req)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
@@ -106,12 +106,8 @@ func (a *API) PutObjectFromFile(bucket, object, file string) error {
 		return err
 	}
 	req.ContentLength = fInfo.Size()
-	req.Header.Set("Accept-Encoding", "identity")
-	req.Header.Set("Date", a.now().UTC().Format(gmtTime))
-	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Content-Type", strings.TrimSuffix(mime.TypeByExtension(path.Ext(file)), "; charset=utf-8"))
-	auth := authorization{req: req, secret: []byte(a.accessKeySecret)}
-	req.Header.Set("Authorization", "OSS "+a.accessKeyID+":"+auth.value())
+	a.setCommonHeaders(req)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
