@@ -1,6 +1,7 @@
 package oss
 
 import (
+	"io"
 	"mime"
 	"net/http"
 	"os"
@@ -42,6 +43,50 @@ func (a *API) PutBucket(name string, acl ACL) error {
 		return err
 	}
 	defer resp.Body.Close()
+	return err
+}
+
+func (a *API) GetBucket(name string) error {
+	verb := "GET"
+	req, err := http.NewRequest(verb, "http://"+a.endPoint+"/"+name+"/", nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Accept-Encoding", "identity")
+	req.Header.Set("Date", a.now().UTC().Format(gmtTime))
+	req.Header.Set("User-Agent", userAgent)
+	auth := authorization{req: req, secret: []byte(a.accessKeySecret)}
+	req.Header.Set("Authorization", "OSS "+a.accessKeyID+":"+auth.value())
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	return err
+}
+
+func (a *API) GetObjectToFile(bucket, object, file string) error {
+	verb := "GET"
+	req, err := http.NewRequest(verb, "http://"+a.endPoint+"/"+bucket+"/"+object, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Accept-Encoding", "identity")
+	req.Header.Set("Date", a.now().UTC().Format(gmtTime))
+	req.Header.Set("User-Agent", userAgent)
+	auth := authorization{req: req, secret: []byte(a.accessKeySecret)}
+	req.Header.Set("Authorization", "OSS "+a.accessKeyID+":"+auth.value())
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	w, err := os.Create(file)
+	if err != nil {
+		return err
+	}
+	defer w.Close()
+	_, err = io.Copy(w, resp.Body)
 	return err
 }
 
