@@ -32,35 +32,31 @@ func (a *API) PutBucket(name string, acl ACL) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Accept-Encoding", "identity")
-	req.Header.Set("Date", a.now().UTC().Format(gmtTime))
 	req.Header.Set("X-Oss-Acl", string(acl))
-	req.Header.Set("User-Agent", userAgent)
-	auth := authorization{req: req, secret: []byte(a.accessKeySecret)}
-	req.Header.Set("Authorization", "OSS "+a.accessKeyID+":"+auth.value())
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := a.do(req)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
-	return err
+	return nil
 }
 
-func (a *API) GetBucket(name string) error {
-	verb := "GET"
-	req, err := http.NewRequest(verb, "http://"+a.endPoint+"/"+name+"/", nil)
-	if err != nil {
-		return err
-	}
+func (a *API) do(req *http.Request) (*http.Response, error) {
 	a.setCommonHeaders(req)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	defer resp.Body.Close()
-	return err
+	if resp.StatusCode/100 > 2 {
+		defer resp.Body.Close()
+		if xmlError, err := parseErrorXML(resp.Body); err != nil {
+			return nil, err
+		} else {
+			return nil, xmlError
+		}
+	}
+	return resp, nil
 }
-
 func (a *API) setCommonHeaders(req *http.Request) {
 	req.Header.Set("Accept-Encoding", "identity")
 	req.Header.Set("Date", a.now().UTC().Format(gmtTime))
@@ -69,14 +65,27 @@ func (a *API) setCommonHeaders(req *http.Request) {
 	req.Header.Set("Authorization", "OSS "+a.accessKeyID+":"+auth.value())
 }
 
+func (a *API) GetBucket(name string) error {
+	verb := "GET"
+	req, err := http.NewRequest(verb, "http://"+a.endPoint+"/"+name+"/", nil)
+	if err != nil {
+		return err
+	}
+	resp, err := a.do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	return nil
+}
+
 func (a *API) GetObjectToFile(bucket, object, file string) error {
 	verb := "GET"
 	req, err := http.NewRequest(verb, "http://"+a.endPoint+"/"+bucket+"/"+object, nil)
 	if err != nil {
 		return err
 	}
-	a.setCommonHeaders(req)
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := a.do(req)
 	if err != nil {
 		return err
 	}
@@ -107,13 +116,12 @@ func (a *API) PutObjectFromFile(bucket, object, file string) error {
 	}
 	req.ContentLength = fInfo.Size()
 	req.Header.Set("Content-Type", strings.TrimSuffix(mime.TypeByExtension(path.Ext(file)), "; charset=utf-8"))
-	a.setCommonHeaders(req)
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := a.do(req)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
-	return err
+	return nil
 }
 
 type Bucket struct {
