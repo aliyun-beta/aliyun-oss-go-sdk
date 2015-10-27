@@ -1,6 +1,7 @@
 package oss
 
 import (
+	"encoding/xml"
 	"io"
 	"mime"
 	"net/http"
@@ -26,17 +27,18 @@ func New(endPoint, accessKeyID, accessKeySecret string) *API {
 	}
 }
 
-func (a *API) GetService() error {
+func (a *API) GetService() (*ListAllMyBucketsResult, error) {
 	req, err := http.NewRequest("GET", "http://"+a.endPoint+"/", nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	resp, err := a.do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer resp.Body.Close()
-	return nil
+	result := new(ListAllMyBucketsResult)
+	return result, xml.NewDecoder(resp.Body).Decode(result)
 }
 
 func (a *API) PutBucket(name string, acl ACL) error {

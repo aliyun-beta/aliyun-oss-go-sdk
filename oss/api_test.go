@@ -2,6 +2,7 @@ package oss
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -16,7 +17,33 @@ func testNow() time.Time {
 }
 
 func TestGetService(t *testing.T) {
-	rec, err := NewMockServer("")
+	rec, err := NewMockServer(`HTTP/1.1 200 OK
+Date: Thu, 15 May 2014 11:18:32 GMT
+Content-Type: application/xml
+Content-Length: 556
+Connection: close
+Server: AliyunOSS
+x-oss-request-id: 5374A2880232A65C23002D74
+
+<?xml version="1.0" encoding="UTF-8"?>
+<ListAllMyBucketsResult>
+  <Owner>
+    <ID>ut_test_put_bucket</ID>
+    <DisplayName>ut_test_put_bucket</DisplayName>
+  </Owner>
+  <Buckets>
+    <Bucket>
+      <Location>oss-cn-hangzhou-a</Location>
+      <Name>xz02tphky6fjfiuc0</Name>
+      <CreationDate>2014-05-15T11:18:32.001Z</CreationDate>
+    </Bucket>
+    <Bucket>
+      <Location>oss-cn-hangzhou-a</Location>
+      <Name>xz02tphky6fjfiuc1</Name>
+      <CreationDate>2014-05-15T11:18:32.002Z</CreationDate>
+    </Bucket>
+  </Buckets>
+</ListAllMyBucketsResult>`)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,8 +51,10 @@ func TestGetService(t *testing.T) {
 	id, secret := "ayahghai0juiSie", "quitie*ph3Lah{F"
 	api := New(rec.URL(), id, secret)
 	api.now = testNow
-	go api.GetService()
-	rec.Wait()
+	result, err := api.GetService()
+	if err != nil {
+		t.Fatal(err)
+	}
 	expected := fmt.Sprintf(`GET / HTTP/1.1
 Host: %s
 User-Agent: aliyun-sdk-go/0.1.1 (Linux/3.16.0-51-generic/x86_64;go1.5.1)
@@ -37,6 +66,27 @@ Date: %s`, rec.URL(), testTime)
 	}
 	if rec.Request != expected {
 		t.Fatalf(expectBut, expected, rec.Request)
+	}
+	expectedResult := &ListAllMyBucketsResult{
+		Owner: Owner{
+			ID:          "ut_test_put_bucket",
+			DisplayName: "ut_test_put_bucket",
+		},
+		Buckets: []Bucket{
+			{
+				Location:     "oss-cn-hangzhou-a",
+				Name:         "xz02tphky6fjfiuc0",
+				CreationDate: parseTime(time.RFC3339Nano, "2014-05-15T11:18:32.001Z"),
+			},
+			{
+				Location:     "oss-cn-hangzhou-a",
+				Name:         "xz02tphky6fjfiuc1",
+				CreationDate: parseTime(time.RFC3339Nano, "2014-05-15T11:18:32.002Z"),
+			},
+		},
+	}
+	if !reflect.DeepEqual(result, expectedResult) {
+		t.Fatalf(expectBut, expectedResult, result)
 	}
 }
 
