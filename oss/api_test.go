@@ -15,6 +15,31 @@ func testNow() time.Time {
 	return tm
 }
 
+func TestGetService(t *testing.T) {
+	rec, err := NewRequestRecorder()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rec.Close()
+	id, secret := "ayahghai0juiSie", "quitie*ph3Lah{F"
+	api := New(rec.URL(), id, secret)
+	api.now = testNow
+	go api.GetService()
+	rec.Wait()
+	expected := fmt.Sprintf(`GET / HTTP/1.1
+Host: %s
+User-Agent: aliyun-sdk-go/0.1.1 (Linux/3.16.0-51-generic/x86_64;go1.5.1)
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:uATT/A0hkaO68KDsD79n17pNA5c=
+Date: %s`, rec.URL(), testTime)
+	if rec.Err != nil {
+		t.Fatal(err)
+	}
+	if rec.Request != expected {
+		t.Fatalf(expectBut, expected, rec.Request)
+	}
+}
+
 func TestPutBucket(t *testing.T) {
 	rec, err := NewRequestRecorder()
 	if err != nil {

@@ -1,3 +1,12 @@
+Aliyun OSS Go SDK
+=================
+
+Quick Start
+-----------
+
+```bash
+go get -u github.com/aliyun/aliyun-oss-go-sdk/oss
+```
 
 Differences with Python SDK
 ---------------------------
