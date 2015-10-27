@@ -4,7 +4,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"strings"
 )
 
 type ErrorXML struct {
@@ -20,12 +19,5 @@ func (e *ErrorXML) Error() string {
 
 func parseErrorXML(rd io.Reader) (*ErrorXML, error) {
 	e := new(ErrorXML)
-	if err := xml.NewDecoder(rd).Decode(&e); err != nil {
-		return nil, err
-	}
-	e.Code = strings.TrimSpace(e.Code)
-	e.Message = strings.TrimSpace(e.Message)
-	e.RequestID = strings.TrimSpace(e.RequestID)
-	e.HostID = strings.TrimSpace(e.HostID)
-	return e, nil
+	return e, xml.NewDecoder(rd).Decode(&e)
 }

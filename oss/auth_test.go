@@ -2,10 +2,11 @@ package oss
 
 import (
 	"net/http"
+	"os"
 	"testing"
 )
 
-func TestSign(t *testing.T) {
+func TestAuth(t *testing.T) {
 	req, err := http.NewRequest("PUT", "/oss-example/nelson", nil)
 	if err != nil {
 		t.Fatal(err)
@@ -26,6 +27,22 @@ func TestSign(t *testing.T) {
 		t.Fatalf(expectBut, expected, actual)
 	}
 	if actual, expected := auth.value(), "26NBxoKdsyly4EDv6inkoDft/yA="; actual != expected {
+		t.Fatalf(expectBut, expected, actual)
+	}
+}
+
+func TestContentMD5(t *testing.T) {
+	f, err := os.Open("testdata/h-content-md5.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	req, err := http.NewRequest("GET", "/", f)
+	if err != nil {
+		t.Fatal(err)
+	}
+	(&authorization{req: req}).setContentMD5()
+	if expected, actual := "0TMnkhCZtrIjdTtJk6x3+Q==", req.Header.Get("Content-Md5"); actual != expected {
 		t.Fatalf(expectBut, expected, actual)
 	}
 }

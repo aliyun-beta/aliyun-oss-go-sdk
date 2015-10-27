@@ -16,7 +16,7 @@ func testNow() time.Time {
 }
 
 func TestGetService(t *testing.T) {
-	rec, err := NewRequestRecorder()
+	rec, err := NewMockServer("")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,15 +41,16 @@ Date: %s`, rec.URL(), testTime)
 }
 
 func TestPutBucket(t *testing.T) {
-	rec, err := NewRequestRecorder()
+	rec, err := NewMockServer("HTTP/1.1 200 OK\n")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer rec.Close()
 	api := New(rec.URL(), "your-id", "your-secret")
 	api.now = testNow
-	go api.PutBucket("bucket_name", PrivateACL)
-	rec.Wait()
+	if err := api.PutBucket("bucket_name", PrivateACL); err != nil {
+		t.Fatal(err)
+	}
 	expected := fmt.Sprintf(`PUT /bucket_name/ HTTP/1.1
 Host: %s
 User-Agent: aliyun-sdk-go/0.1.1 (Linux/3.16.0-51-generic/x86_64;go1.5.1)
@@ -67,7 +68,7 @@ X-Oss-Acl: private`, rec.URL(), testTime)
 }
 
 func TestPutObjectFromFile(t *testing.T) {
-	rec, err := NewRequestRecorder()
+	rec, err := NewMockServer("HTTP/1.1 200 OK\n")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +97,7 @@ sfweruewpinbeewa`, rec.URL(), testTime)
 }
 
 func TestGetBucket(t *testing.T) {
-	rec, err := NewRequestRecorder()
+	rec, err := NewMockServer("HTTP/1.1 200 OK\n")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,7 +122,7 @@ Date: %s`, rec.URL(), testTime)
 }
 
 func TestGetObjectToFile(t *testing.T) {
-	rec, err := NewRequestRecorder()
+	rec, err := NewMockServer("HTTP/1.1 200 OK\n")
 	if err != nil {
 		t.Fatal(err)
 	}
