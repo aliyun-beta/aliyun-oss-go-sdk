@@ -133,8 +133,8 @@ Host: %s
 User-Agent: aliyun-sdk-go/0.1.1 (Linux/3.16.0-51-generic/x86_64;go1.5.1)
 Content-Length: 17
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:CzZjudedDKEx9AkBtLCTnjfuPgE=
-Content-Type: text/plain
+Authorization: OSS ayahghai0juiSie:PrCp4qvn6aHefdgTPfNyW83zPAY=
+Content-Type: text/plain; charset=utf-8
 Date: %s
 
 sfweruewpinbeewa`, rec.URL(), testTime)

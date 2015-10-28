@@ -2,12 +2,12 @@ package oss
 
 import (
 	"encoding/xml"
+	"fmt"
 	"io"
 	"mime"
 	"net/http"
 	"os"
 	"path"
-	"strings"
 	"time"
 )
 
@@ -28,11 +28,7 @@ func New(endPoint, accessKeyID, accessKeySecret string) *API {
 }
 
 func (a *API) GetService() (*ListAllMyBucketsResult, error) {
-	req, err := http.NewRequest("GET", "http://"+a.endPoint+"/", nil)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := a.do(req)
+	resp, err := a.do("GET", "", nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -42,12 +38,7 @@ func (a *API) GetService() (*ListAllMyBucketsResult, error) {
 }
 
 func (a *API) PutBucket(name string, acl ACL) error {
-	req, err := http.NewRequest("PUT", "http://"+a.endPoint+"/"+name+"/", nil)
-	if err != nil {
-		return err
-	}
-	req.Header.Set("X-Oss-Acl", string(acl))
-	resp, err := a.do(req)
+	resp, err := a.do("PUT", name+"/", http.Header{"X-Oss-Acl": []string{string(acl)}}, nil)
 	if err != nil {
 		return err
 	}
@@ -56,11 +47,7 @@ func (a *API) PutBucket(name string, acl ACL) error {
 }
 
 func (a *API) GetBucket(name string) error {
-	req, err := http.NewRequest("GET", "http://"+a.endPoint+"/"+name+"/", nil)
-	if err != nil {
-		return err
-	}
-	resp, err := a.do(req)
+	resp, err := a.do("GET", name+"/", nil, nil)
 	if err != nil {
 		return err
 	}
@@ -69,11 +56,7 @@ func (a *API) GetBucket(name string) error {
 }
 
 func (a *API) GetObjectToFile(bucket, object, file string) error {
-	req, err := http.NewRequest("GET", "http://"+a.endPoint+"/"+bucket+"/"+object, nil)
-	if err != nil {
-		return err
-	}
-	resp, err := a.do(req)
+	resp, err := a.do("GET", bucket+"/"+object, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -88,22 +71,12 @@ func (a *API) GetObjectToFile(bucket, object, file string) error {
 }
 
 func (a *API) PutObjectFromFile(bucket, object, file string) error {
-	fInfo, err := os.Lstat(file)
-	if err != nil {
-		return err
-	}
 	rd, err := os.Open(file)
 	if err != nil {
 		return err
 	}
 	defer rd.Close()
-	req, err := http.NewRequest("PUT", "http://"+a.endPoint+"/"+bucket+"/"+object, rd)
-	if err != nil {
-		return err
-	}
-	req.ContentLength = fInfo.Size()
-	req.Header.Set("Content-Type", strings.TrimSuffix(mime.TypeByExtension(path.Ext(file)), "; charset=utf-8"))
-	resp, err := a.do(req)
+	resp, err := a.do("PUT", bucket+"/"+object, nil, rd)
 	if err != nil {
 		return err
 	}
@@ -111,8 +84,17 @@ func (a *API) PutObjectFromFile(bucket, object, file string) error {
 	return nil
 }
 
-func (a *API) do(req *http.Request) (*http.Response, error) {
-	a.setCommonHeaders(req)
+func (a *API) do(method, resource string, header http.Header, body io.Reader) (*http.Response, error) {
+	req, err := http.NewRequest(method, fmt.Sprintf("http://%s/%s", a.endPoint, resource), body)
+	if err != nil {
+		return nil, err
+	}
+	if header != nil {
+		req.Header = header
+	}
+	if err := a.setCommonHeaders(req); err != nil {
+		return nil, err
+	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -127,10 +109,19 @@ func (a *API) do(req *http.Request) (*http.Response, error) {
 	}
 	return resp, nil
 }
-func (a *API) setCommonHeaders(req *http.Request) {
+func (a *API) setCommonHeaders(req *http.Request) error {
+	if f, ok := req.Body.(*os.File); ok {
+		fInfo, err := os.Stat(f.Name())
+		if err != nil {
+			return err
+		}
+		req.Header.Set("Content-Type", mime.TypeByExtension(path.Ext(f.Name())))
+		req.ContentLength = fInfo.Size()
+	}
 	req.Header.Set("Accept-Encoding", "identity")
 	req.Header.Set("Date", a.now().UTC().Format(gmtTime))
 	req.Header.Set("User-Agent", userAgent)
 	auth := authorization{req: req, secret: []byte(a.accessKeySecret)}
 	req.Header.Set("Authorization", "OSS "+a.accessKeyID+":"+auth.value())
+	return nil
 }
