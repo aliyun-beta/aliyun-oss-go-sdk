@@ -9,7 +9,10 @@ import (
 	"sync"
 )
 
-const expectBut = "\n--- EXPECT ---\n%v\n--- BUT GOT ---\n%v"
+const (
+	expectBut         = "\n--- EXPECT ---\n%v\n--- BUT GOT ---\n%v"
+	testcaseExpectBut = "testcase %d:\n--- EXPECT ---\n%v\n--- BUT GOT ---\n%v"
+)
 
 type response struct {
 	headers []string
