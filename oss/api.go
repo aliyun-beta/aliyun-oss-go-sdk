@@ -46,13 +46,14 @@ func (a *API) PutBucket(name string, acl ACL) error {
 	return nil
 }
 
-func (a *API) GetBucket(name string) error {
+func (a *API) GetBucket(name string) (*ListBucketResult, error) {
 	resp, err := a.do("GET", name+"/", nil, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer resp.Body.Close()
-	return nil
+	result := new(ListBucketResult)
+	return result, xml.NewDecoder(resp.Body).Decode(result)
 }
 
 func (a *API) GetObjectToFile(bucket, object, file string) error {

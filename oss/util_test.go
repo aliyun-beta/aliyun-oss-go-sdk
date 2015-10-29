@@ -56,7 +56,7 @@ type MockServer struct {
 }
 
 func NewMockServer(resp string) (*MockServer, error) {
-	lis, err := net.Listen("tcp", "127.0.0.1:0")
+	lis, err := net.Listen("tcp", "localhost:0")
 	if err != nil {
 		return nil, err
 	}

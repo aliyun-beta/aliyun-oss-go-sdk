@@ -5,17 +5,37 @@ import (
 )
 
 type ListAllMyBucketsResult struct {
-	Owner   Owner    `xml:"Owner"`
+	Owner   Owner
 	Buckets []Bucket `xml:"Buckets>Bucket"`
 }
 
 type Owner struct {
-	ID          string `xml:"ID"`
-	DisplayName string `xml:"DisplayName"`
+	ID          string
+	DisplayName string
 }
 
 type Bucket struct {
-	Location     string    `xml:"Location"`
-	Name         string    `xml:"Name"`
-	CreationDate time.Time `xml:"CreationDate"`
+	Location     string
+	Name         string
+	CreationDate time.Time
+}
+
+type ListBucketResult struct {
+	Name           string
+	Prefix         string
+	Marker         string
+	MaxKeys        int
+	Delimiter      string
+	IsTruncated    bool
+	Contents       []Content
+	CommonPrefixes []string `xml:"CommonPrefixes>Prefix"`
+}
+type Content struct {
+	Key          string
+	LastModified time.Time
+	ETag         string
+	Type         string
+	Size         int
+	StorageClass string
+	Owner        Owner
 }

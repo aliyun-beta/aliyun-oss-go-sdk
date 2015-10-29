@@ -24,6 +24,7 @@ Unclear issues in Spec
 ----------------------
 
 * Resource or ResourceType in Error XML?
+* Host: <bucketname>.oss-cn-hangzhou.aliyuncs.com?
 
 Author
 ------
