@@ -39,3 +39,12 @@ type Content struct {
 	StorageClass string
 	Owner        Owner
 }
+
+type AccessControlPolicy struct {
+	Owner             Owner
+	AccessControlList AccessControlList
+}
+
+type AccessControlList struct {
+	Grant string
+}

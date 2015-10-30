@@ -239,19 +239,70 @@ wefpofjwefew`,
 		response:         "HTTP/1.1 200 OK\n",
 		expectedResponse: nil,
 	},
+
+	{
+		request: func(a *API) (interface{}, error) {
+			r, err := a.GetBucketACL("bucket_name")
+			return r, err
+		},
+		expectedRequest: `GET /bucket_name/?acl HTTP/1.1
+Host: %s
+User-Agent: %s
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:LKyy+96PVVFIFgIYgwz3DD3CEzs=
+Date: %s`,
+		response: `HTTP/1.1 200 OK
+x-oss-request-id: 6f720c98-40fe-6de0-047b-e7fb08c4059b
+Date: Fri, 24 Feb 2012 04:11:23 GMT
+Content-Length: 253
+Content-Tupe: application/xml
+Connection: close
+Server: AliyunOSS
+
+<?xml version="1.0" ?>
+<AccessControlPolicy>
+    <Owner>
+        <ID>00220120222</ID>
+        <DisplayName>user_example</DisplayName>
+    </Owner>
+    <AccessControlList>
+        <Grant>public-read</Grant>
+    </AccessControlList>
+</AccessControlPolicy>`,
+		expectedResponse: &AccessControlPolicy{
+			Owner: Owner{
+				ID:          "00220120222",
+				DisplayName: "user_example",
+			},
+			AccessControlList: AccessControlList{
+				Grant: "public-read",
+			},
+		},
+	},
 }
 
 func TestGetObjectToFile(t *testing.T) {
-	rec, err := NewMockServer("HTTP/1.1 200 OK\n")
+	rec, err := NewMockServer(`HTTP/1.1 200 OK
+x-oss-request-id: 3a89276f-2e2d-7965-3ff9-51c875b99c41
+x-oss-object-type: Normal
+Date: Fri, 24 Feb 2012 06:38:30 GMT
+Last-Modified: Fri, 24 Feb 2012 06:07:48 GMT
+ETag: "5B3C1A2E053D763E1B002CC607C5A0FE "
+Content-Type: text/plain
+Content-Length: 7
+Server: AliyunOSS
+
+abcdef`)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer rec.Close()
-	id, secret := "ayahghai0juiSie", "quitie*ph3Lah{F"
-	api := New(rec.URL(), id, secret)
+	api := New(rec.URL(), testID, testSecret)
 	api.now = testTime
-	go api.GetObjectToFile("bucket_name", "object_name", "file.txt")
-	rec.Wait()
+	err = api.GetObjectToFile("bucket_name", "object_name", "file.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
 	expected := fmt.Sprintf(`GET /bucket_name/object_name HTTP/1.1
 Host: %s
 User-Agent: %s

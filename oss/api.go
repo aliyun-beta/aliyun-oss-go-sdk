@@ -41,6 +41,10 @@ func (a *API) GetBucket(name string) (res *ListBucketResult, _ error) {
 	return res, a.do("GET", name+"/", nil, nil, &res)
 }
 
+func (a *API) GetBucketACL(name string) (res *AccessControlPolicy, _ error) {
+	return res, a.do("GET", name+"/?acl", nil, nil, &res)
+}
+
 func (a *API) GetObjectToFile(bucket, object, file string) error {
 	w, err := os.Create(file)
 	if err != nil {

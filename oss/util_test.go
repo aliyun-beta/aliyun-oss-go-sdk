@@ -6,7 +6,6 @@ import (
 	"io"
 	"net"
 	"strings"
-	"sync"
 )
 
 const (
@@ -55,7 +54,6 @@ type MockServer struct {
 	Request  string
 	Err      error
 	resp     *response
-	wg       sync.WaitGroup
 }
 
 func NewMockServer(resp string) (*MockServer, error) {
@@ -64,7 +62,6 @@ func NewMockServer(resp string) (*MockServer, error) {
 		return nil, err
 	}
 	rec := &MockServer{listener: lis, resp: newResponse(resp)}
-	rec.wg.Add(1)
 	go rec.listen()
 	return rec, nil
 }
@@ -74,7 +71,6 @@ func (r *MockServer) URL() string {
 }
 
 func (r *MockServer) listen() {
-	defer r.wg.Done()
 	var err error
 	r.conn, err = r.listener.Accept()
 	if err != nil {
@@ -92,10 +88,6 @@ func (r *MockServer) listen() {
 	req = bytes.TrimSpace(req)
 	r.Request = string(req)
 	r.resp.Write(r.conn)
-}
-
-func (r *MockServer) Wait() {
-	r.wg.Wait()
 }
 
 func (r *MockServer) Close() {
