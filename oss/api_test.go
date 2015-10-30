@@ -30,6 +30,7 @@ type testcase struct {
 
 var apiTestcases = []testcase{
 
+	// authorization fail
 	{
 		request: func(a *API) (interface{}, error) {
 			r, err := a.GetService()
@@ -50,7 +51,7 @@ Date: %s`,
     <RequestId>1D842BC5425544BB</RequestId>
     <HostId>oss-cn-hangzhou.aliyuncs.com</HostId>
 </Error>`,
-		expectedResponse: nil,
+		expectedResponse: new(ListAllMyBucketsResult),
 		expectedError: &ErrorXML{
 			Code:      "AccessDenied",
 			Message:   "Query-string authentication requires the Signature, Expires and OSSAccessKeyId parameters",

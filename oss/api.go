@@ -28,47 +28,26 @@ func New(endPoint, accessKeyID, accessKeySecret string) *API {
 }
 
 func (a *API) GetService() (*ListAllMyBucketsResult, error) {
-	resp, err := a.do("GET", "", nil, nil)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
 	result := new(ListAllMyBucketsResult)
-	return result, xml.NewDecoder(resp.Body).Decode(result)
+	return result, a.do("GET", "", nil, nil, result)
 }
 
 func (a *API) PutBucket(name string, acl ACL) error {
-	resp, err := a.do("PUT", name+"/", http.Header{"X-Oss-Acl": []string{string(acl)}}, nil)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	return nil
+	return a.do("PUT", name+"/", http.Header{"X-Oss-Acl": []string{string(acl)}}, nil, nil)
 }
 
 func (a *API) GetBucket(name string) (*ListBucketResult, error) {
-	resp, err := a.do("GET", name+"/", nil, nil)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
 	result := new(ListBucketResult)
-	return result, xml.NewDecoder(resp.Body).Decode(result)
+	return result, a.do("GET", name+"/", nil, nil, result)
 }
 
 func (a *API) GetObjectToFile(bucket, object, file string) error {
-	resp, err := a.do("GET", bucket+"/"+object, nil, nil)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
 	w, err := os.Create(file)
 	if err != nil {
 		return err
 	}
 	defer w.Close()
-	_, err = io.Copy(w, resp.Body)
-	return err
+	return a.do("GET", bucket+"/"+object, nil, nil, w)
 }
 
 func (a *API) PutObjectFromFile(bucket, object, file string) error {
@@ -77,38 +56,39 @@ func (a *API) PutObjectFromFile(bucket, object, file string) error {
 		return err
 	}
 	defer rd.Close()
-	resp, err := a.do("PUT", bucket+"/"+object, nil, rd)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	return nil
+	return a.do("PUT", bucket+"/"+object, nil, rd, nil)
 }
 
-func (a *API) do(method, resource string, header http.Header, body io.Reader) (*http.Response, error) {
+func (a *API) do(method, resource string, header http.Header, body io.Reader, result interface{}) error {
 	req, err := http.NewRequest(method, fmt.Sprintf("http://%s/%s", a.endPoint, resource), body)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if header != nil {
 		req.Header = header
 	}
 	if err := a.setCommonHeaders(req); err != nil {
-		return nil, err
+		return err
 	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode/100 > 2 {
-		defer resp.Body.Close()
 		if xmlError, err := parseErrorXML(resp.Body); err != nil {
-			return nil, err
+			return err
 		} else {
-			return nil, xmlError
+			return xmlError
 		}
 	}
-	return resp, nil
+	if w, ok := result.(io.Writer); ok {
+		_, err = io.Copy(w, resp.Body)
+		return err
+	} else if result != nil {
+		return xml.NewDecoder(resp.Body).Decode(result)
+	}
+	return nil
 }
 func (a *API) setCommonHeaders(req *http.Request) error {
 	if f, ok := req.Body.(*os.File); ok {
