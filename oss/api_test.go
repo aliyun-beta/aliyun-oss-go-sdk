@@ -51,7 +51,7 @@ Date: %s`,
     <RequestId>1D842BC5425544BB</RequestId>
     <HostId>oss-cn-hangzhou.aliyuncs.com</HostId>
 </Error>`,
-		expectedResponse: new(ListAllMyBucketsResult),
+		expectedResponse: nil,
 		expectedError: &ErrorXML{
 			Code:      "AccessDenied",
 			Message:   "Query-string authentication requires the Signature, Expires and OSSAccessKeyId parameters",

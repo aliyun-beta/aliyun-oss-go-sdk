@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"reflect"
 	"time"
 )
 
@@ -27,18 +28,16 @@ func New(endPoint, accessKeyID, accessKeySecret string) *API {
 	}
 }
 
-func (a *API) GetService() (*ListAllMyBucketsResult, error) {
-	result := new(ListAllMyBucketsResult)
-	return result, a.do("GET", "", nil, nil, result)
+func (a *API) GetService() (res *ListAllMyBucketsResult, _ error) {
+	return res, a.do("GET", "", nil, nil, &res)
 }
 
 func (a *API) PutBucket(name string, acl ACL) error {
 	return a.do("PUT", name+"/", http.Header{"X-Oss-Acl": []string{string(acl)}}, nil, nil)
 }
 
-func (a *API) GetBucket(name string) (*ListBucketResult, error) {
-	result := new(ListBucketResult)
-	return result, a.do("GET", name+"/", nil, nil, result)
+func (a *API) GetBucket(name string) (res *ListBucketResult, _ error) {
+	return res, a.do("GET", name+"/", nil, nil, &res)
 }
 
 func (a *API) GetObjectToFile(bucket, object, file string) error {
@@ -86,9 +85,15 @@ func (a *API) do(method, resource string, header http.Header, body io.Reader, re
 		_, err = io.Copy(w, resp.Body)
 		return err
 	} else if result != nil {
+		alloc(reflect.ValueOf(result))
 		return xml.NewDecoder(resp.Body).Decode(result)
 	}
 	return nil
+}
+func alloc(v reflect.Value) {
+	if v.IsNil() {
+		v.Set(reflect.New(v.Type().Elem()))
+	}
 }
 func (a *API) setCommonHeaders(req *http.Request) error {
 	if f, ok := req.Body.(*os.File); ok {
