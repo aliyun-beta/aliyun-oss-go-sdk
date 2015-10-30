@@ -38,7 +38,7 @@ var apiTestcases = []testcase{
 		},
 		expectedRequest: `GET / HTTP/1.1
 Host: %s
-User-Agent: aliyun-sdk-go/0.1.1 (Linux/3.16.0-51-generic/x86_64;go1.5.1)
+User-Agent: %s
 Accept-Encoding: identity
 Authorization: OSS ayahghai0juiSie:uATT/A0hkaO68KDsD79n17pNA5c=
 Date: %s`,
@@ -67,7 +67,7 @@ Date: %s`,
 		},
 		expectedRequest: `GET / HTTP/1.1
 Host: %s
-User-Agent: aliyun-sdk-go/0.1.1 (Linux/3.16.0-51-generic/x86_64;go1.5.1)
+User-Agent: %s
 Accept-Encoding: identity
 Authorization: OSS ayahghai0juiSie:uATT/A0hkaO68KDsD79n17pNA5c=
 Date: %s`,
@@ -124,7 +124,7 @@ x-oss-request-id: 5374A2880232A65C23002D74
 		},
 		expectedRequest: `PUT /bucket_name/ HTTP/1.1
 Host: %s
-User-Agent: aliyun-sdk-go/0.1.1 (Linux/3.16.0-51-generic/x86_64;go1.5.1)
+User-Agent: %s
 Content-Length: 0
 Accept-Encoding: identity
 Authorization: OSS ayahghai0juiSie:fPC3Cfuif1iGi5LKNRg033EGZcU=
@@ -141,7 +141,7 @@ X-Oss-Acl: private`,
 		},
 		expectedRequest: `GET /bucket_name/ HTTP/1.1
 Host: %s
-User-Agent: aliyun-sdk-go/0.1.1 (Linux/3.16.0-51-generic/x86_64;go1.5.1)
+User-Agent: %s
 Accept-Encoding: identity
 Authorization: OSS ayahghai0juiSie:7hm0/FE4TpkY8OSFunFmTg1TR0Y=
 Date: %s`,
@@ -210,7 +210,7 @@ Server: AliyunOSS
 		},
 		expectedRequest: `PUT /bucket_name/object_name HTTP/1.1
 Host: %s
-User-Agent: aliyun-sdk-go/0.1.1 (Linux/3.16.0-51-generic/x86_64;go1.5.1)
+User-Agent: %s
 Content-Length: 17
 Accept-Encoding: identity
 Authorization: OSS ayahghai0juiSie:PrCp4qvn6aHefdgTPfNyW83zPAY=
@@ -228,7 +228,7 @@ sfweruewpinbeewa`,
 		},
 		expectedRequest: `PUT /bucket_name/object_name HTTP/1.1
 Host: %s
-User-Agent: aliyun-sdk-go/0.1.1 (Linux/3.16.0-51-generic/x86_64;go1.5.1)
+User-Agent: %s
 Content-Length: 12
 Accept-Encoding: identity
 Authorization: OSS ayahghai0juiSie:cUN83rKdXAq2MRbzQZYWJC4hIRg=
@@ -254,10 +254,10 @@ func TestGetObjectToFile(t *testing.T) {
 	rec.Wait()
 	expected := fmt.Sprintf(`GET /bucket_name/object_name HTTP/1.1
 Host: %s
-User-Agent: aliyun-sdk-go/0.1.1 (Linux/3.16.0-51-generic/x86_64;go1.5.1)
+User-Agent: %s
 Accept-Encoding: identity
 Authorization: OSS ayahghai0juiSie:gkiiIu1xWb5BtqGgF4Pb52mHJWs=
-Date: %s`, rec.URL(), testTimeText)
+Date: %s`, rec.URL(), userAgent, testTimeText)
 	if rec.Err != nil {
 		t.Fatal(err)
 	}
@@ -286,7 +286,7 @@ func testAPI(t *testing.T, i int, testcase *testcase) {
 	if !reflect.DeepEqual(err, testcase.expectedError) {
 		t.Fatalf(testcaseExpectBut, i, testcase.expectedError, err)
 	}
-	expectedRequest := fmt.Sprintf(testcase.expectedRequest, rec.URL(), testTimeText)
+	expectedRequest := fmt.Sprintf(testcase.expectedRequest, rec.URL(), userAgent, testTimeText)
 	if rec.Err != nil {
 		t.Fatal("testcase", i, err)
 	}
