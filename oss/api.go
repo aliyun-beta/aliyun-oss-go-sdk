@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -47,6 +48,10 @@ func (a *API) GetObjectToFile(bucket, object, file string) error {
 	}
 	defer w.Close()
 	return a.do("GET", bucket+"/"+object, nil, nil, w)
+}
+
+func (a *API) PutObjectFromString(bucket, object, str string) error {
+	return a.do("PUT", bucket+"/"+object, http.Header{"Content-Type": []string{"application/octet-stream"}}, strings.NewReader(str), nil)
 }
 
 func (a *API) PutObjectFromFile(bucket, object, file string) error {

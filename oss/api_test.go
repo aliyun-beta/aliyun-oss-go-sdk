@@ -221,6 +221,24 @@ sfweruewpinbeewa`,
 		response:         "HTTP/1.1 200 OK\n",
 		expectedResponse: nil,
 	},
+
+	{
+		request: func(a *API) (interface{}, error) {
+			return nil, a.PutObjectFromString("bucket_name", "object_name", "wefpofjwefew")
+		},
+		expectedRequest: `PUT /bucket_name/object_name HTTP/1.1
+Host: %s
+User-Agent: aliyun-sdk-go/0.1.1 (Linux/3.16.0-51-generic/x86_64;go1.5.1)
+Content-Length: 12
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:cUN83rKdXAq2MRbzQZYWJC4hIRg=
+Content-Type: application/octet-stream
+Date: %s
+
+wefpofjwefew`,
+		response:         "HTTP/1.1 200 OK\n",
+		expectedResponse: nil,
+	},
 }
 
 func TestGetObjectToFile(t *testing.T) {
