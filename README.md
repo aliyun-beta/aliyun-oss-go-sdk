@@ -19,6 +19,7 @@ Differences with Python SDK
   - Parameters will be omitted if the argument is not set
   - HTTP header keys are automatically converted into canonical format, e.g.
     x-oss-acl becomes X-Oss-Acl
+  - Go always send URL parameters in canonical order
 
 Unclear issues in Spec
 ----------------------

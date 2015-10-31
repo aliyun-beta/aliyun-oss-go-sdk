@@ -13,7 +13,7 @@ const (
 	testSecret     = "quitie*ph3Lah{F"
 	testBucketName = "bucket_name"
 	testObjectName = "object_name"
-	testFileName   = "testdata/test.txt"
+	testFileName   = "testdata/test"
 )
 
 var (
@@ -324,34 +324,33 @@ Date: %s`,
 		expectedResponse: nil,
 	},
 
-	/*
-	   	{
-	   		request: func(a *API) (interface{}, error) {
-	   			r, err := a.AppendObjectFromFile(testBucketName, testObjectName, testFileName, 0)
-	   			return r, err
-	   		},
-	   		expectedRequest: `POST /bucket_name/object_name?position=0&append HTTP/1.1
-	   Host: %s
-	   User-Agent: %s
-	   Content-Length: 17
-	   Accept-Encoding: identity
-	   Authorization: OSS ayahghai0juiSie:pTwcHEynVLcFuA99DVwYrxr2nlk=
-	   Content-Type: application/octet-stream
-	   Date: %s
+	{
+		request: func(a *API) (interface{}, error) {
+			r, err := a.AppendObjectFromFile(testBucketName, testObjectName, testFileName, 0)
+			return r, err
+		},
+		expectedRequest: `POST /bucket_name/object_name?append&position=0 HTTP/1.1
+Host: %s
+User-Agent: %s
+Content-Length: 17
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:pTwcHEynVLcFuA99DVwYrxr2nlk=
+Content-Type: application/octet-stream
+Date: %s
 
-	   sfweruewpinbeewa`,
-	   		response: `HTTP/1.1 200 OK
-	   Date: Wed, 08 Jul 2015 06:57:01 GMT
-	   ETag: "0F7230CAA4BE94CCBDC99C5500000000"
-	   Connection: close
-	   Content-Length: 0
-	   Server: AliyunOSS
-	   x-oss-hash-crc64ecma: 14741617095266562575
-	   x-oss-next-append-position: 17
-	   x-oss-request-id: 559CC9BDC755F95A64485981`,
-	   		expectedResponse: 17,
-	   	},
-	*/
+sfweruewpinbeewa`,
+		response: `HTTP/1.1 200 OK
+Date: Wed, 08 Jul 2015 06:57:01 GMT
+ETag: "0F7230CAA4BE94CCBDC99C5500000000"
+Connection: close
+Content-Length: 0
+Server: AliyunOSS
+x-oss-hash-crc64ecma: 14741617095266562575
+x-oss-next-append-position: 17
+x-oss-request-id: 559CC9BDC755F95A64485981
+`,
+		expectedResponse: AppendPosition(17),
+	},
 }
 
 func TestGetObjectToFile(t *testing.T) {
@@ -404,7 +403,7 @@ func testAPI(t *testing.T, i int, testcase *testcase) {
 	api := New(rec.URL(), testID, testSecret)
 	api.now = testTime
 	response, err := testcase.request(api)
-	if v := reflect.ValueOf(response); !v.IsValid() || v.IsNil() {
+	if v := reflect.ValueOf(response); !v.IsValid() || (v.Kind() == reflect.Ptr && v.IsNil()) {
 		response = nil
 	}
 	if !reflect.DeepEqual(err, testcase.expectedError) {

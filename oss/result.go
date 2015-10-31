@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -70,6 +71,8 @@ type LocationConstraint struct {
 	Value string `xml:",chardata"`
 }
 
+type AppendPosition int
+
 func (r *LocationConstraint) parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
@@ -81,6 +84,14 @@ func (r *ListBucketResult) parse(resp *http.Response) error {
 }
 func (r *AccessControlPolicy) parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
+}
+func (r *AppendPosition) parse(resp *http.Response) error {
+	i, err := strconv.Atoi(resp.Header.Get("X-Oss-Next-Append-Position"))
+	if err != nil {
+		return err
+	}
+	*r = AppendPosition(i)
+	return nil
 }
 
 type file string

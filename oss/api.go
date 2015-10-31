@@ -62,7 +62,7 @@ func (a *API) GetObjectToFile(bucket, object, fileName string) error {
 
 func (a *API) PutObjectFromString(bucket, object, str string, options ...Option) error {
 	return a.do("PUT", bucket+"/"+object, nil,
-		append([]Option{Header.ContentType("application/octet-stream"), Body(strings.NewReader(str))}, options...)...)
+		append([]Option{Header.ContentType("application/octet-stream"), httpBody(strings.NewReader(str))}, options...)...)
 }
 
 func (a *API) PutObjectFromFile(bucket, object, file string, options ...Option) error {
@@ -71,16 +71,16 @@ func (a *API) PutObjectFromFile(bucket, object, file string, options ...Option) 
 		return err
 	}
 	defer rd.Close()
-	return a.do("PUT", bucket+"/"+object, nil, append([]Option{Body(rd)}, options...)...)
+	return a.do("PUT", bucket+"/"+object, nil, append([]Option{httpBody(rd)}, options...)...)
 }
 
-func (a *API) AppendObjectFromFile(bucket, object, file string, position int, options ...Option) (int, error) {
+func (a *API) AppendObjectFromFile(bucket, object, file string, position AppendPosition, options ...Option) (res AppendPosition, _ error) {
 	rd, err := os.Open(file)
 	if err != nil {
 		return 0, err
 	}
 	defer rd.Close()
-	return 0, a.do("PUT", bucket+"/"+object, nil, append([]Option{Body(rd)}, options...)...)
+	return res, a.do("POST", fmt.Sprintf("%s/%s?append&position=%d", bucket, object, position), &res, append([]Option{httpBody(rd)}, options...)...)
 }
 
 func (a *API) do(method, resource string, result interface{}, options ...Option) error {
@@ -122,9 +122,11 @@ func (a *API) handleResponse(resp *http.Response, result interface{}) error {
 		return nil
 	}
 	if v := reflect.ValueOf(result); v.Kind() == reflect.Ptr {
-		v = v.Elem()
-		v.Set(reflect.New(v.Type().Elem()))
-		result = v.Interface()
+		if v.Elem().Kind() == reflect.Ptr {
+			v = v.Elem()
+			v.Set(reflect.New(v.Type().Elem()))
+			result = v.Interface()
+		}
 	}
 	if respParser, ok := result.(responseParser); ok {
 		return respParser.parse(resp)
