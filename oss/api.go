@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"reflect"
 	"strings"
 	"time"
 )
@@ -98,15 +97,9 @@ func (a *API) do(method, resource string, header http.Header, body io.Reader, re
 		_, err = io.Copy(w, resp.Body)
 		return err
 	} else if result != nil {
-		alloc(reflect.ValueOf(result))
 		return xml.NewDecoder(resp.Body).Decode(result)
 	}
 	return nil
-}
-func alloc(v reflect.Value) {
-	if v.IsNil() {
-		v.Set(reflect.New(v.Type().Elem()))
-	}
 }
 func (a *API) setCommonHeaders(req *http.Request) error {
 	if f, ok := req.Body.(*os.File); ok {
