@@ -351,6 +351,29 @@ x-oss-request-id: 559CC9BDC755F95A64485981
 `,
 		expectedResponse: AppendPosition(17),
 	},
+
+	{
+		request: func(a *API) (interface{}, error) {
+			r, err := a.HeadObject(testBucketName, testObjectName)
+			return r, err
+		},
+		expectedRequest: `HEAD /bucket_name/object_name HTTP/1.1
+Host: %s
+User-Agent: %s
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:nK5UyJ5cD6+AShftVF8YQI2+Oo4=
+Date: %s`,
+		response: `HTTP/1.1 200 OK
+x-oss-request-id: 06d4be30-2216-9264-757a-8f8b19b254bb
+ETag: "fba9dede5f27731c9771645a39863328"
+Content-Length: 344606
+`,
+		expectedResponse: Header{
+			"X-Oss-Request-Id": []string{"06d4be30-2216-9264-757a-8f8b19b254bb"},
+			"Etag":             []string{`"fba9dede5f27731c9771645a39863328"`},
+			"Content-Length":   []string{"344606"},
+		},
+	},
 }
 
 func TestGetObjectToFile(t *testing.T) {

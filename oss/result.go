@@ -73,6 +73,8 @@ type LocationConstraint struct {
 
 type AppendPosition int
 
+type Header map[string][]string
+
 func (r *LocationConstraint) parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
@@ -91,6 +93,10 @@ func (r *AppendPosition) parse(resp *http.Response) error {
 		return err
 	}
 	*r = AppendPosition(i)
+	return nil
+}
+func (r *Header) parse(resp *http.Response) error {
+	*r = Header(resp.Header)
 	return nil
 }
 
