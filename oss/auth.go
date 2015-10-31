@@ -6,6 +6,7 @@ import (
 	"crypto/md5"
 	"crypto/sha1"
 	"encoding/base64"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"sort"
@@ -17,18 +18,19 @@ type authorization struct {
 	secret []byte
 }
 
-func (a *authorization) setContentMD5() {
-	if _, ok := a.req.Header["Content-Md5"]; ok {
-		return
+func setContentMD5(req *http.Request) error {
+	if _, ok := req.Header["Content-Md5"]; ok {
+		return errors.New("Content-Md5 is already set")
 	}
-	if a.req.Body == nil {
-		return
+	if req.Body == nil {
+		return errors.New("body is nil")
 	}
-	buf, _ := ioutil.ReadAll(a.req.Body)
-	a.req.Body = ioutil.NopCloser(bytes.NewReader(buf))
+	buf, _ := ioutil.ReadAll(req.Body)
+	req.Body = ioutil.NopCloser(bytes.NewReader(buf))
 	sum := md5.Sum(buf)
 	b64 := base64.StdEncoding.EncodeToString(sum[:])
-	a.req.Header.Set("Content-Md5", b64)
+	req.Header.Set("Content-Md5", b64)
+	return nil
 }
 
 func (a *authorization) canonicalizedOSSHeaders() []byte {

@@ -1,11 +1,9 @@
 package oss
 
 import (
-	"bytes"
 	"encoding/xml"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime"
 	"net/http"
 	"os"
@@ -65,17 +63,18 @@ func (a *API) GetObjectToFile(bucket, object, file string) error {
 	return a.do("GET", bucket+"/"+object, w)
 }
 
-func (a *API) PutObjectFromString(bucket, object, str string) error {
-	return a.do("PUT", bucket+"/"+object, nil, Header.ContentType("application/octet-stream"), Body(strings.NewReader(str)))
+func (a *API) PutObjectFromString(bucket, object, str string, options ...Option) error {
+	return a.do("PUT", bucket+"/"+object, nil,
+		append([]Option{Header.ContentType("application/octet-stream"), Body(strings.NewReader(str))}, options...)...)
 }
 
-func (a *API) PutObjectFromFile(bucket, object, file string) error {
+func (a *API) PutObjectFromFile(bucket, object, file string, options ...Option) error {
 	rd, err := os.Open(file)
 	if err != nil {
 		return err
 	}
 	defer rd.Close()
-	return a.do("PUT", bucket+"/"+object, nil, Body(rd))
+	return a.do("PUT", bucket+"/"+object, nil, append([]Option{Body(rd)}, options...)...)
 }
 
 func (a *API) do(method, resource string, result interface{}, options ...Option) error {
@@ -122,45 +121,4 @@ func (a *API) setCommonHeaders(req *http.Request) error {
 	auth := authorization{req: req, secret: []byte(a.accessKeySecret)}
 	req.Header.Set("Authorization", "OSS "+a.accessKeyID+":"+auth.value())
 	return nil
-}
-
-type Option func(*http.Request) error
-
-var Header HeaderT
-
-type HeaderT struct{}
-
-func (HeaderT) ACL(acl ACL) Option {
-	return func(req *http.Request) error {
-		req.Header.Set("X-Oss-Acl", string(acl))
-		return nil
-	}
-}
-
-func (HeaderT) ContentType(value string) Option {
-	return func(req *http.Request) error {
-		req.Header.Set("Content-Type", value)
-		return nil
-	}
-}
-
-func Body(body io.Reader) Option {
-	return func(req *http.Request) error {
-		rc, ok := body.(io.ReadCloser)
-		if !ok && body != nil {
-			rc = ioutil.NopCloser(body)
-		}
-		req.Body = rc
-		if body != nil {
-			switch v := body.(type) {
-			case *bytes.Buffer:
-				req.ContentLength = int64(v.Len())
-			case *bytes.Reader:
-				req.ContentLength = int64(v.Len())
-			case *strings.Reader:
-				req.ContentLength = int64(v.Len())
-			}
-		}
-		return nil
-	}
 }

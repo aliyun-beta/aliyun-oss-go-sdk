@@ -41,7 +41,7 @@ func TestContentMD5(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	(&authorization{req: req}).setContentMD5()
+	setContentMD5(req)
 	if expected, actual := "0TMnkhCZtrIjdTtJk6x3+Q==", req.Header.Get("Content-Md5"); actual != expected {
 		t.Fatalf(expectBut, expected, actual)
 	}
