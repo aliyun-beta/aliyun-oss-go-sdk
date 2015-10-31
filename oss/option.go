@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"io"
 	"io/ioutil"
+	"mime"
 	"net/http"
+	"os"
+	"path"
 	"strings"
 )
 
@@ -49,6 +52,14 @@ func setHeader(key, value string) Option {
 
 func Body(body io.Reader) Option {
 	return func(req *http.Request) error {
+		if f, ok := body.(*os.File); ok {
+			fInfo, err := os.Stat(f.Name())
+			if err != nil {
+				return err
+			}
+			req.Header.Set("Content-Type", mime.TypeByExtension(path.Ext(f.Name())))
+			req.ContentLength = fInfo.Size()
+		}
 		rc, ok := body.(io.ReadCloser)
 		if !ok && body != nil {
 			rc = ioutil.NopCloser(body)

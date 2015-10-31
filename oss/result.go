@@ -1,7 +1,10 @@
 package oss
 
 import (
+	"encoding/xml"
+	"io"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -65,4 +68,29 @@ type AccessControlList struct {
 
 type LocationConstraint struct {
 	Value string `xml:",chardata"`
+}
+
+func (r *LocationConstraint) parse(resp *http.Response) error {
+	return xml.NewDecoder(resp.Body).Decode(r)
+}
+func (r *ListAllMyBucketsResult) parse(resp *http.Response) error {
+	return xml.NewDecoder(resp.Body).Decode(r)
+}
+func (r *ListBucketResult) parse(resp *http.Response) error {
+	return xml.NewDecoder(resp.Body).Decode(r)
+}
+func (r *AccessControlPolicy) parse(resp *http.Response) error {
+	return xml.NewDecoder(resp.Body).Decode(r)
+}
+
+type file string
+
+func (f file) parse(resp *http.Response) error {
+	w, err := os.Create(string(f))
+	if err != nil {
+		return err
+	}
+	defer w.Close()
+	_, err = io.Copy(w, resp.Body)
+	return err
 }

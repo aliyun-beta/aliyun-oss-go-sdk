@@ -1,13 +1,10 @@
 package oss
 
 import (
-	"encoding/xml"
 	"fmt"
-	"io"
-	"mime"
 	"net/http"
 	"os"
-	"path"
+	"reflect"
 	"strings"
 	"time"
 )
@@ -54,13 +51,13 @@ func (a *API) DeleteBucket(name string) error {
 	return a.do("DELETE", name+"/", nil)
 }
 
-func (a *API) GetObjectToFile(bucket, object, file string) error {
-	w, err := os.Create(file)
-	if err != nil {
-		return err
-	}
-	defer w.Close()
-	return a.do("GET", bucket+"/"+object, w)
+func (a *API) GetObjectToFile(bucket, object, fileName string) error {
+	// w, err := os.Create(file)
+	// if err != nil {
+	// 	return err
+	// }
+	// defer w.Close()
+	return a.do("GET", bucket+"/"+object, file(fileName))
 }
 
 func (a *API) PutObjectFromString(bucket, object, str string, options ...Option) error {
@@ -87,16 +84,8 @@ func (a *API) AppendObjectFromFile(bucket, object, file string, position int, op
 }
 
 func (a *API) do(method, resource string, result interface{}, options ...Option) error {
-	req, err := http.NewRequest(method, fmt.Sprintf("http://%s/%s", a.endPoint, resource), nil)
+	req, err := a.newRequest(method, resource, options)
 	if err != nil {
-		return err
-	}
-	for _, option := range options {
-		if err := option(req); err != nil {
-			return err
-		}
-	}
-	if err := a.setCommonHeaders(req); err != nil {
 		return err
 	}
 	resp, err := a.client.Do(req)
@@ -104,30 +93,41 @@ func (a *API) do(method, resource string, result interface{}, options ...Option)
 		return err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode/100 > 2 {
-		return parseError(resp)
-	}
-	if w, ok := result.(io.Writer); ok {
-		_, err = io.Copy(w, resp.Body)
-		return err
-	} else if result != nil {
-		return xml.NewDecoder(resp.Body).Decode(result)
-	}
-	return nil
+	return a.handleResponse(resp, result)
 }
-func (a *API) setCommonHeaders(req *http.Request) error {
-	if f, ok := req.Body.(*os.File); ok {
-		fInfo, err := os.Stat(f.Name())
-		if err != nil {
-			return err
+
+func (a *API) newRequest(method, resource string, options []Option) (*http.Request, error) {
+	req, err := http.NewRequest(method, fmt.Sprintf("http://%s/%s", a.endPoint, resource), nil)
+	if err != nil {
+		return nil, err
+	}
+	for _, option := range options {
+		if err := option(req); err != nil {
+			return nil, err
 		}
-		req.Header.Set("Content-Type", mime.TypeByExtension(path.Ext(f.Name())))
-		req.ContentLength = fInfo.Size()
 	}
 	req.Header.Set("Accept-Encoding", "identity")
 	req.Header.Set("Date", a.now().UTC().Format(gmtTime))
 	req.Header.Set("User-Agent", userAgent)
 	auth := authorization{req: req, secret: []byte(a.accessKeySecret)}
 	req.Header.Set("Authorization", "OSS "+a.accessKeyID+":"+auth.value())
-	return nil
+	return req, nil
+}
+
+func (a *API) handleResponse(resp *http.Response, result interface{}) error {
+	if resp.StatusCode/100 > 2 {
+		return parseError(resp)
+	}
+	if result == nil {
+		return nil
+	}
+	if v := reflect.ValueOf(result); v.Kind() == reflect.Ptr {
+		v = v.Elem()
+		v.Set(reflect.New(v.Type().Elem()))
+		result = v.Interface()
+	}
+	if respParser, ok := result.(responseParser); ok {
+		return respParser.parse(resp)
+	}
+	panic(fmt.Sprintf("result %#v should implement responseParser interface", result))
 }
