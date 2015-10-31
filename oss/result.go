@@ -82,6 +82,11 @@ type Deleted struct {
 	Key string
 }
 
+type CopyObjectResult struct {
+	LastModified string
+	ETag         string
+}
+
 func (r *LocationConstraint) parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
@@ -107,6 +112,9 @@ func (r *Header) parse(resp *http.Response) error {
 	return nil
 }
 func (r *DeleteResult) parse(resp *http.Response) error {
+	return xml.NewDecoder(resp.Body).Decode(r)
+}
+func (r *CopyObjectResult) parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
 

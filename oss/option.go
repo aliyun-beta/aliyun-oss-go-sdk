@@ -71,6 +71,9 @@ func IfMatch(value string) Option {
 func IfNoneMatch(value string) Option {
 	return setHeader("If-None-Match", value)
 }
+func CopySource(sourceBucket, sourceObject string) Option {
+	return setHeader("X-Oss-Copy-Source", "/"+sourceBucket+"/"+sourceObject)
+}
 func setHeader(key, value string) Option {
 	return func(req *http.Request) error {
 		req.Header.Set(key, value)

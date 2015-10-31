@@ -439,6 +439,38 @@ Server: AliyunOSS
 			},
 		},
 	},
+
+	{
+		request: func(a *API) (interface{}, error) {
+			r, err := a.CopyObject("source_bucket", "source_object", "target_bucket", "target_object")
+			return r, err
+		},
+		expectedRequest: `PUT /target_bucket/target_object HTTP/1.1
+Host: %s
+User-Agent: %s
+Content-Length: 0
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:mRUja421nH8GsCJJ4vWuQszdW8g=
+Date: %s
+X-Oss-Copy-Source: /source_bucket/source_object`,
+		response: `HTTP/1.1 200 OK
+x-oss-request-id: 3dfb2597-72a0-b3f7-320f-8b6627a96e68
+Content-Type: application/xml
+Content-Length: 241
+Connection: close
+Date: Fri, 24 Feb 2012 07:18:48 GMT
+Server: AliyunOSS
+
+<?xml version="1.0" encoding="UTF-8"?>
+<CopyObjectResult xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">
+    <LastModified>Fri, 24 Feb 2012 07:18:48 GMT</LastModified>
+    <ETag>"5B3C1A2E053D763E1B002CC607C5A0FE"</ETag>
+</CopyObjectResult>`,
+		expectedResponse: &CopyObjectResult{
+			LastModified: "Fri, 24 Feb 2012 07:18:48 GMT",
+			ETag:         `"5B3C1A2E053D763E1B002CC607C5A0FE"`,
+		},
+	},
 }
 
 func TestGetObjectToFile(t *testing.T) {
