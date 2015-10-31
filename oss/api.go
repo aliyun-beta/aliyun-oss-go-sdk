@@ -35,8 +35,8 @@ func (a *API) PutBucket(name string, acl ACLType) error {
 	return a.do("PUT", name+"/", nil, ACL(acl))
 }
 
-func (a *API) GetBucket(name string) (res *ListBucketResult, _ error) {
-	return res, a.do("GET", name+"/", &res)
+func (a *API) GetBucket(name string, options ...Option) (res *ListBucketResult, _ error) {
+	return res, a.do("GET", name+"/", &res, options...)
 }
 
 func (a *API) GetBucketACL(name string) (res *AccessControlPolicy, _ error) {

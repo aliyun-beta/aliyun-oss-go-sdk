@@ -2,6 +2,7 @@ package oss
 
 import (
 	"bytes"
+	"encoding/xml"
 	"io"
 	"io/ioutil"
 	"mime"
@@ -101,5 +102,20 @@ func addParam(key, value string) Option {
 		q.Add(key, value)
 		req.URL.RawQuery = q.Encode()
 		return nil
+	}
+}
+
+type CreateBucketConfiguration struct {
+	LocationConstraint string
+}
+
+func BucketLocation(value string) Option {
+	return func(req *http.Request) error {
+		var w bytes.Buffer
+		w.WriteString(xml.Header)
+		if err := xml.NewEncoder(&w).Encode(CreateBucketConfiguration{LocationConstraint: value}); err != nil {
+			return err
+		}
+		return httpBody(bytes.NewReader(w.Bytes()))(req)
 	}
 }

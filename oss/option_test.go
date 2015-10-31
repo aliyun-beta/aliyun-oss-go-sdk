@@ -1,6 +1,7 @@
 package oss
 
 import (
+	"io/ioutil"
 	"net/http"
 	"testing"
 )
@@ -104,5 +105,23 @@ func TestParamOptions(t *testing.T) {
 		if expected, actual := testcase.value, req.URL.Query().Get(testcase.key); actual != expected {
 			t.Fatalf(testcaseExpectBut, i, expected, actual)
 		}
+	}
+}
+
+func TestBucketLocationContraint(t *testing.T) {
+	req, err := http.NewRequest("PUT", "", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := BucketLocation("oss-cn-beijing")(req); err != nil {
+		t.Fatal(err)
+	}
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if expected, actual := `<?xml version="1.0" encoding="UTF-8"?>
+<CreateBucketConfiguration><LocationConstraint>oss-cn-beijing</LocationConstraint></CreateBucketConfiguration>`, string(body); actual != expected {
+		t.Fatalf(expectBut, expected, actual)
 	}
 }
