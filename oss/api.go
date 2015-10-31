@@ -87,6 +87,10 @@ func (a *API) HeadObject(bucket, object string) (res Header, _ error) {
 	return res, a.do("HEAD", bucket+"/"+object, &res)
 }
 
+func (a *API) DeleteObject(bucket, object string) error {
+	return a.do("DELETE", bucket+"/"+object, nil)
+}
+
 func (a *API) do(method, resource string, result interface{}, options ...Option) error {
 	req, err := a.newRequest(method, resource, options)
 	if err != nil {

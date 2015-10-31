@@ -374,6 +374,20 @@ Content-Length: 344606
 			"Content-Length":   []string{"344606"},
 		},
 	},
+
+	{
+		request: func(a *API) (interface{}, error) {
+			return nil, a.DeleteObject(testBucketName, testObjectName)
+		},
+		expectedRequest: `DELETE /bucket_name/object_name HTTP/1.1
+Host: %s
+User-Agent: %s
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:SAfVfVFR6w1tFpfqE0xBGZaryb8=
+Date: %s`,
+		response:         "HTTP/1.1 200 OK\n",
+		expectedResponse: nil,
+	},
 }
 
 func TestGetObjectToFile(t *testing.T) {
