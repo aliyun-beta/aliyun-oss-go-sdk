@@ -48,6 +48,61 @@ var headerTestcases = []optionTestCase{
 		key:    "Expires",
 		value:  "Thu, 01 Dec 1994 16:00:00 GMT",
 	},
+	{
+		option: ResponseContentType("plain/text"),
+		key:    "Response-Content-Type",
+		value:  "plain/text",
+	},
+	{
+		option: ResponseContentLanguage("en"),
+		key:    "Response-Content-Language",
+		value:  "en",
+	},
+	{
+		option: ResponseCacheControl("no-cache"),
+		key:    "Response-Cache-Control",
+		value:  "no-cache",
+	},
+	{
+		option: ResponseContentDisposition("Attachment; filename=example.txt"),
+		key:    "Response-Content-Disposition",
+		value:  "Attachment; filename=example.txt",
+	},
+	{
+		option: ResponseContentEncoding("gzip"),
+		key:    "Response-Content-Encoding",
+		value:  "gzip",
+	},
+	{
+		option: ResponseExpires("Thu, 01 Dec 1994 16:00:00 GMT"),
+		key:    "Response-Expires",
+		value:  "Thu, 01 Dec 1994 16:00:00 GMT",
+	},
+	{
+		option: Range("bytes=0-9"),
+		key:    "Range",
+		value:  "bytes=0-9",
+	},
+	{
+		option: IfModifiedSince("Fri, 24 Feb 2012 06:38:30 GMT"),
+		key:    "If-Modified-Since",
+		value:  "Fri, 24 Feb 2012 06:38:30 GMT",
+	},
+	{
+		option: IfUnmodifiedSince("Fri, 24 Feb 2012 06:38:30 GMT"),
+		key:    "If-Unmodified-Since",
+		value:  "Fri, 24 Feb 2012 06:38:30 GMT",
+	},
+	{
+		option: IfMatch("xyzzy"),
+		key:    "If-Match",
+		value:  "xyzzy",
+	},
+	{
+		option: IfNoneMatch("xyzzy"),
+		key:    "If-None-Match",
+		value:  "xyzzy",
+	},
 }
 
 func TestHeaderOptions(t *testing.T) {

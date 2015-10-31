@@ -35,8 +35,41 @@ func ContentEncoding(value string) Option {
 func Expires(value string) Option {
 	return setHeader("Expires", value)
 }
+func ResponseContentType(value string) Option {
+	return setHeader("Response-Content-Type", value)
+}
+func ResponseContentLanguage(value string) Option {
+	return setHeader("Response-Content-Language", value)
+}
+func ResponseCacheControl(value string) Option {
+	return setHeader("Response-Cache-Control", value)
+}
+func ResponseContentDisposition(value string) Option {
+	return setHeader("Response-Content-Disposition", value)
+}
+func ResponseContentEncoding(value string) Option {
+	return setHeader("Response-Content-Encoding", value)
+}
+func ResponseExpires(value string) Option {
+	return setHeader("Response-Expires", value)
+}
 func Meta(key, value string) Option {
 	return setHeader("X-Oss-Meta-"+key, value)
+}
+func Range(value string) Option {
+	return setHeader("Range", value)
+}
+func IfModifiedSince(value string) Option {
+	return setHeader("If-Modified-Since", value)
+}
+func IfUnmodifiedSince(value string) Option {
+	return setHeader("If-Unmodified-Since", value)
+}
+func IfMatch(value string) Option {
+	return setHeader("If-Match", value)
+}
+func IfNoneMatch(value string) Option {
+	return setHeader("If-None-Match", value)
 }
 func setHeader(key, value string) Option {
 	return func(req *http.Request) error {

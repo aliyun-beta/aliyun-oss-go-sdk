@@ -51,7 +51,7 @@ func (a *API) DeleteBucket(name string) error {
 	return a.do("DELETE", name+"/", nil)
 }
 
-func (a *API) GetObjectToFile(bucket, object, fileName string) error {
+func (a *API) GetObjectToFile(bucket, object, fileName string, options ...Option) error {
 	// w, err := os.Create(file)
 	// if err != nil {
 	// 	return err
