@@ -53,11 +53,13 @@ Date: %s`,
     <HostId>oss-cn-hangzhou.aliyuncs.com</HostId>
 </Error>`,
 		expectedResponse: nil,
-		expectedError: &ErrorXML{
-			Code:      "AccessDenied",
-			Message:   "Query-string authentication requires the Signature, Expires and OSSAccessKeyId parameters",
-			RequestID: "1D842BC5425544BB",
-			HostID:    "oss-cn-hangzhou.aliyuncs.com",
+		expectedError: &Error{
+			Code:           "AccessDenied",
+			Message:        "Query-string authentication requires the Signature, Expires and OSSAccessKeyId parameters",
+			RequestID:      "1D842BC5425544BB",
+			HostID:         "oss-cn-hangzhou.aliyuncs.com",
+			HTTPStatusCode: 403,
+			HTTPStatus:     "403 Forbidden",
 		},
 	},
 
@@ -304,6 +306,20 @@ Server: AliyunOSS
 		expectedResponse: &LocationConstraint{
 			Value: "oss-cn-hangzhou",
 		},
+	},
+
+	{
+		request: func(a *API) (interface{}, error) {
+			return nil, a.DeleteBucket(testBucketName)
+		},
+		expectedRequest: `DELETE /bucket_name/ HTTP/1.1
+Host: %s
+User-Agent: %s
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:L4mtpy/LSUGq1J/oNTOd/lnMEw8=
+Date: %s`,
+		response:         "HTTP/1.1 200\n",
+		expectedResponse: nil,
 	},
 }
 

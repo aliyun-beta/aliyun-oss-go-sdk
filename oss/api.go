@@ -49,6 +49,10 @@ func (a *API) GetBucketLocation(name string) (res *LocationConstraint, _ error) 
 	return res, a.do("GET", name+"/?location", nil, nil, &res)
 }
 
+func (a *API) DeleteBucket(name string) error {
+	return a.do("DELETE", name+"/", nil, nil, nil)
+}
+
 func (a *API) GetObjectToFile(bucket, object, file string) error {
 	w, err := os.Create(file)
 	if err != nil {
@@ -88,11 +92,7 @@ func (a *API) do(method, resource string, header http.Header, body io.Reader, re
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode/100 > 2 {
-		if xmlError, err := parseErrorXML(resp.Body); err != nil {
-			return err
-		} else {
-			return xmlError
-		}
+		return parseError(resp)
 	}
 	if w, ok := result.(io.Writer); ok {
 		_, err = io.Copy(w, resp.Body)
