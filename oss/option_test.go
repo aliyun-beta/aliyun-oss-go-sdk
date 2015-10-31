@@ -13,6 +13,11 @@ type headerTestcase struct {
 
 var headerTestcases = []headerTestcase{
 	{
+		option: Header.Meta("User", "baymax"),
+		key:    "X-Oss-Meta-User",
+		value:  "baymax",
+	},
+	{
 		option: Header.ACL(PrivateACL),
 		key:    "X-Oss-Acl",
 		value:  "private",

@@ -12,6 +12,8 @@ const (
 	testID         = "ayahghai0juiSie"
 	testSecret     = "quitie*ph3Lah{F"
 	testBucketName = "bucket_name"
+	testObjectName = "object_name"
+	testFileName   = "testdata/test.txt"
 )
 
 var (
@@ -321,6 +323,35 @@ Date: %s`,
 		response:         "HTTP/1.1 200\n",
 		expectedResponse: nil,
 	},
+
+	/*
+	   	{
+	   		request: func(a *API) (interface{}, error) {
+	   			r, err := a.AppendObjectFromFile(testBucketName, testObjectName, testFileName, 0)
+	   			return r, err
+	   		},
+	   		expectedRequest: `POST /bucket_name/object_name?position=0&append HTTP/1.1
+	   Host: %s
+	   User-Agent: %s
+	   Content-Length: 17
+	   Accept-Encoding: identity
+	   Authorization: OSS ayahghai0juiSie:pTwcHEynVLcFuA99DVwYrxr2nlk=
+	   Content-Type: application/octet-stream
+	   Date: %s
+
+	   sfweruewpinbeewa`,
+	   		response: `HTTP/1.1 200 OK
+	   Date: Wed, 08 Jul 2015 06:57:01 GMT
+	   ETag: "0F7230CAA4BE94CCBDC99C5500000000"
+	   Connection: close
+	   Content-Length: 0
+	   Server: AliyunOSS
+	   x-oss-hash-crc64ecma: 14741617095266562575
+	   x-oss-next-append-position: 17
+	   x-oss-request-id: 559CC9BDC755F95A64485981`,
+	   		expectedResponse: 17,
+	   	},
+	*/
 }
 
 func TestGetObjectToFile(t *testing.T) {

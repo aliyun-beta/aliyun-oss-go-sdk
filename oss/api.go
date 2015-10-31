@@ -77,6 +77,15 @@ func (a *API) PutObjectFromFile(bucket, object, file string, options ...Option) 
 	return a.do("PUT", bucket+"/"+object, nil, append([]Option{Body(rd)}, options...)...)
 }
 
+func (a *API) AppendObjectFromFile(bucket, object, file string, position int, options ...Option) (int, error) {
+	rd, err := os.Open(file)
+	if err != nil {
+		return 0, err
+	}
+	defer rd.Close()
+	return 0, a.do("PUT", bucket+"/"+object, nil, append([]Option{Body(rd)}, options...)...)
+}
+
 func (a *API) do(method, resource string, result interface{}, options ...Option) error {
 	req, err := http.NewRequest(method, fmt.Sprintf("http://%s/%s", a.endPoint, resource), nil)
 	if err != nil {

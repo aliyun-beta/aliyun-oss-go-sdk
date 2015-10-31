@@ -37,6 +37,9 @@ func (*HeaderT) ContentEncoding(value string) Option {
 func (*HeaderT) Expires(value string) Option {
 	return setHeader("Expires", value)
 }
+func (*HeaderT) Meta(key, value string) Option {
+	return setHeader("X-Oss-Meta-"+key, value)
+}
 func setHeader(key, value string) Option {
 	return func(req *http.Request) error {
 		req.Header.Set(key, value)
