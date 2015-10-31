@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// API is the entry object for all OSS methods
 type API struct {
 	endPoint        string
 	accessKeyID     string
@@ -17,6 +18,7 @@ type API struct {
 	client          *http.Client
 }
 
+// New creates an API object
 func New(endPoint, accessKeyID, accessKeySecret string) *API {
 	return &API{
 		endPoint:        endPoint,
@@ -27,10 +29,12 @@ func New(endPoint, accessKeyID, accessKeySecret string) *API {
 	}
 }
 
+// GetService list all buckets
 func (a *API) GetService() (res *ListAllMyBucketsResult, _ error) {
 	return res, a.do("GET", "", &res)
 }
 
+// PutBucket creates a new bucket
 func (a *API) PutBucket(name string, acl ACLType) error {
 	return a.do("PUT", name+"/", nil, ACL(acl))
 }
@@ -97,6 +101,10 @@ func (a *API) DeleteObjects(bucket string, quiet bool, objects ...string) (res *
 
 func (a *API) CopyObject(sourceBucket, sourceObject, targetBucket, targetObject string, options ...Option) (res *CopyObjectResult, _ error) {
 	return res, a.do("PUT", targetBucket+"/"+targetObject, &res, append(options, CopySource(sourceBucket, sourceObject))...)
+}
+
+func (a *API) InitMultipartUpload(bucket, object string) (res *InitiateMultipartUploadResult, _ error) {
+	return res, a.do("POST", bucket+"/"+object+"?uploads", &res, ContentType("application/octet-stream"))
 }
 
 func (a *API) do(method, resource string, result interface{}, options ...Option) error {

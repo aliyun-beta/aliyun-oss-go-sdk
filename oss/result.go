@@ -87,6 +87,12 @@ type CopyObjectResult struct {
 	ETag         string
 }
 
+type InitiateMultipartUploadResult struct {
+	Bucket   string
+	Key      string
+	UploadID string `xml:"UploadId"`
+}
+
 func (r *LocationConstraint) parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
@@ -115,6 +121,9 @@ func (r *DeleteResult) parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
 func (r *CopyObjectResult) parse(resp *http.Response) error {
+	return xml.NewDecoder(resp.Body).Decode(r)
+}
+func (r *InitiateMultipartUploadResult) parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
 

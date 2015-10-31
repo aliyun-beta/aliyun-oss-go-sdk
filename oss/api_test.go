@@ -471,6 +471,40 @@ Server: AliyunOSS
 			ETag:         `"5B3C1A2E053D763E1B002CC607C5A0FE"`,
 		},
 	},
+
+	{
+		request: func(a *API) (interface{}, error) {
+			r, err := a.InitMultipartUpload(testBucketName, testObjectName)
+			return r, err
+		},
+		expectedRequest: `POST /bucket_name/object_name?uploads HTTP/1.1
+Host: %s
+User-Agent: %s
+Content-Length: 0
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:i0ZMmOYrcPZibjOyuazIcpqP45Q=
+Content-Type: application/octet-stream
+Date: %s`,
+		response: `HTTP/1.1 200 OK
+Content-Length: 273
+Server: AliyunOSS
+Connection: close
+x-oss-request-id: 42c25703-7503-fbd8-670a-bda01eaec618
+Date: Wed, 22 Feb 2012 08:32:21 GMT
+Content-Type: application/xml
+
+<?xml version="1.0" encoding="UTF-8"?>
+<InitiateMultipartUploadResult xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">
+    <Bucket>bucket_name</Bucket>
+    <Key>multipart.data</Key>
+    <UploadId>0004B9894A22E5B1888A1E29F8236E2D</UploadId>
+</InitiateMultipartUploadResult>`,
+		expectedResponse: &InitiateMultipartUploadResult{
+			Bucket:   "bucket_name",
+			Key:      "multipart.data",
+			UploadID: "0004B9894A22E5B1888A1E29F8236E2D",
+		},
+	},
 }
 
 func TestGetObjectToFile(t *testing.T) {
