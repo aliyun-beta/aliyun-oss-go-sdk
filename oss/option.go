@@ -74,6 +74,27 @@ func IfNoneMatch(value string) Option {
 func CopySource(sourceBucket, sourceObject string) Option {
 	return setHeader("X-Oss-Copy-Source", "/"+sourceBucket+"/"+sourceObject)
 }
+func CopySourceIfMatch(value string) Option {
+	return setHeader("X-Oss-Copy-Source-If-Match", value)
+}
+func CopySourceIfNoneMatch(value string) Option {
+	return setHeader("X-Oss-Copy-Source-If-None-Match", value)
+}
+func CopySourceIfModifiedSince(value string) Option {
+	return setHeader("X-Oss-Copy-Source-If-Modified-Since", value)
+}
+func CopySourceIfUnmodifiedSince(value string) Option {
+	return setHeader("X-Oss-Copy-Source-If-Unmodified-Since", value)
+}
+func MetadataDirective(directive MetadataDirectiveType) Option {
+	return setHeader("X-Oss-Metadata-Directive", string(directive))
+}
+func ServerSideEncryption(value string) Option {
+	return setHeader("X-Oss-Server-Side-Encryption", value)
+}
+func ObjectACL(acl ACLType) Option {
+	return setHeader("X-Oss-Object-Acl", string(acl))
+}
 func setHeader(key, value string) Option {
 	return func(req *http.Request) error {
 		req.Header.Set(key, value)

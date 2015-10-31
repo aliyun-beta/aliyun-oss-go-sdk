@@ -103,6 +103,46 @@ var headerTestcases = []optionTestCase{
 		key:    "If-None-Match",
 		value:  "xyzzy",
 	},
+	{
+		option: CopySource("bucket_name", "object_name"),
+		key:    "X-Oss-Copy-Source",
+		value:  "/bucket_name/object_name",
+	},
+	{
+		option: CopySourceIfModifiedSince("Fri, 24 Feb 2012 06:38:30 GMT"),
+		key:    "X-Oss-Copy-Source-If-Modified-Since",
+		value:  "Fri, 24 Feb 2012 06:38:30 GMT",
+	},
+	{
+		option: CopySourceIfUnmodifiedSince("Fri, 24 Feb 2012 06:38:30 GMT"),
+		key:    "X-Oss-Copy-Source-If-Unmodified-Since",
+		value:  "Fri, 24 Feb 2012 06:38:30 GMT",
+	},
+	{
+		option: CopySourceIfMatch("xyzzy"),
+		key:    "X-Oss-Copy-Source-If-Match",
+		value:  "xyzzy",
+	},
+	{
+		option: CopySourceIfNoneMatch("xyzzy"),
+		key:    "X-Oss-Copy-Source-If-None-Match",
+		value:  "xyzzy",
+	},
+	{
+		option: MetadataDirective(CopyMeta),
+		key:    "X-Oss-Metadata-Directive",
+		value:  "COPY",
+	},
+	{
+		option: ServerSideEncryption("AES256"),
+		key:    "X-Oss-Server-Side-Encryption",
+		value:  "AES256",
+	},
+	{
+		option: ObjectACL(PrivateACL),
+		key:    "X-Oss-Object-Acl",
+		value:  "private",
+	},
 }
 
 func TestHeaderOptions(t *testing.T) {
