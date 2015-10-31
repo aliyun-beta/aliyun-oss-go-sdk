@@ -31,8 +31,8 @@ func (a *API) GetService() (res *ListAllMyBucketsResult, _ error) {
 	return res, a.do("GET", "", &res)
 }
 
-func (a *API) PutBucket(name string, acl ACL) error {
-	return a.do("PUT", name+"/", nil, Header.ACL(acl))
+func (a *API) PutBucket(name string, acl ACLType) error {
+	return a.do("PUT", name+"/", nil, ACL(acl))
 }
 
 func (a *API) GetBucket(name string) (res *ListBucketResult, _ error) {
@@ -62,7 +62,7 @@ func (a *API) GetObjectToFile(bucket, object, fileName string) error {
 
 func (a *API) PutObjectFromString(bucket, object, str string, options ...Option) error {
 	return a.do("PUT", bucket+"/"+object, nil,
-		append([]Option{Header.ContentType("application/octet-stream"), httpBody(strings.NewReader(str))}, options...)...)
+		append([]Option{ContentType("application/octet-stream"), httpBody(strings.NewReader(str))}, options...)...)
 }
 
 func (a *API) PutObjectFromFile(bucket, object, file string, options ...Option) error {

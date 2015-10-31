@@ -8,39 +8,33 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 )
 
 type (
-	Option  func(*http.Request) error
-	HeaderT struct {
-		ContentMD5 Option
-	}
+	Option func(*http.Request) error
 )
 
-var Header = &HeaderT{
-	ContentMD5: setContentMD5,
-}
-
-func (*HeaderT) ACL(acl ACL) Option {
+func ACL(acl ACLType) Option {
 	return setHeader("X-Oss-Acl", string(acl))
 }
-func (*HeaderT) ContentType(value string) Option {
+func ContentType(value string) Option {
 	return setHeader("Content-Type", value)
 }
-func (*HeaderT) CacheControl(value string) Option {
+func CacheControl(value string) Option {
 	return setHeader("Cache-Control", value)
 }
-func (*HeaderT) ContentDisposition(value string) Option {
+func ContentDisposition(value string) Option {
 	return setHeader("Content-Disposition", value)
 }
-func (*HeaderT) ContentEncoding(value string) Option {
+func ContentEncoding(value string) Option {
 	return setHeader("Content-Encoding", value)
 }
-func (*HeaderT) Expires(value string) Option {
+func Expires(value string) Option {
 	return setHeader("Expires", value)
 }
-func (*HeaderT) Meta(key, value string) Option {
+func Meta(key, value string) Option {
 	return setHeader("X-Oss-Meta-"+key, value)
 }
 func setHeader(key, value string) Option {
@@ -84,4 +78,28 @@ func typeByExtension(file string) string {
 		typ = "application/octet-stream"
 	}
 	return typ
+}
+
+func Delimiter(value string) Option {
+	return addParam("delimiter", value)
+}
+func Marker(value string) Option {
+	return addParam("marker", value)
+}
+func MaxKeys(value int) Option {
+	return addParam("maxkeys", strconv.Itoa(value))
+}
+func Prefix(value string) Option {
+	return addParam("prefix", value)
+}
+func EncodingType(value string) Option {
+	return addParam("encoding-type", value)
+}
+func addParam(key, value string) Option {
+	return func(req *http.Request) error {
+		q := req.URL.Query()
+		q.Add(key, value)
+		req.URL.RawQuery = q.Encode()
+		return nil
+	}
 }

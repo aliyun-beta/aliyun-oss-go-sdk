@@ -5,51 +5,51 @@ import (
 	"testing"
 )
 
-type headerTestcase struct {
+type optionTestCase struct {
 	option Option
 	key    string
 	value  string
 }
 
-var headerTestcases = []headerTestcase{
+var headerTestcases = []optionTestCase{
 	{
-		option: Header.Meta("User", "baymax"),
+		option: Meta("User", "baymax"),
 		key:    "X-Oss-Meta-User",
 		value:  "baymax",
 	},
 	{
-		option: Header.ACL(PrivateACL),
+		option: ACL(PrivateACL),
 		key:    "X-Oss-Acl",
 		value:  "private",
 	},
 	{
-		option: Header.ContentType("plain/text"),
+		option: ContentType("plain/text"),
 		key:    "Content-Type",
 		value:  "plain/text",
 	},
 	{
-		option: Header.CacheControl("no-cache"),
+		option: CacheControl("no-cache"),
 		key:    "Cache-Control",
 		value:  "no-cache",
 	},
 	{
-		option: Header.ContentDisposition("Attachment; filename=example.txt"),
+		option: ContentDisposition("Attachment; filename=example.txt"),
 		key:    "Content-Disposition",
 		value:  "Attachment; filename=example.txt",
 	},
 	{
-		option: Header.ContentEncoding("gzip"),
+		option: ContentEncoding("gzip"),
 		key:    "Content-Encoding",
 		value:  "gzip",
 	},
 	{
-		option: Header.Expires("Thu, 01 Dec 1994 16:00:00 GMT"),
+		option: Expires("Thu, 01 Dec 1994 16:00:00 GMT"),
 		key:    "Expires",
 		value:  "Thu, 01 Dec 1994 16:00:00 GMT",
 	},
 }
 
-func TestOptions(t *testing.T) {
+func TestHeaderOptions(t *testing.T) {
 	for i, testcase := range headerTestcases {
 		req, err := http.NewRequest("GET", "", nil)
 		if err != nil {
@@ -59,6 +59,49 @@ func TestOptions(t *testing.T) {
 			t.Fatal("testcase", i, err)
 		}
 		if expected, actual := testcase.value, req.Header.Get(testcase.key); actual != expected {
+			t.Fatalf(testcaseExpectBut, i, expected, actual)
+		}
+	}
+}
+
+var paramTestCases = []optionTestCase{
+	{
+		option: Delimiter("/"),
+		key:    "delimiter",
+		value:  "/",
+	},
+	{
+		option: Marker("abc"),
+		key:    "marker",
+		value:  "abc",
+	},
+	{
+		option: MaxKeys(150),
+		key:    "maxkeys",
+		value:  "150",
+	},
+	{
+		option: Prefix("fun"),
+		key:    "prefix",
+		value:  "fun",
+	},
+	{
+		option: EncodingType("ascii"),
+		key:    "encoding-type",
+		value:  "ascii",
+	},
+}
+
+func TestParamOptions(t *testing.T) {
+	for i, testcase := range paramTestCases {
+		req, err := http.NewRequest("GET", "", nil)
+		if err != nil {
+			t.Fatal("testcase", i, err)
+		}
+		if err := testcase.option(req); err != nil {
+			t.Fatal("testcase", i, err)
+		}
+		if expected, actual := testcase.value, req.URL.Query().Get(testcase.key); actual != expected {
 			t.Fatalf(testcaseExpectBut, i, expected, actual)
 		}
 	}

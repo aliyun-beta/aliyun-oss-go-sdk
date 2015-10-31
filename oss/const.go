@@ -3,12 +3,12 @@ package oss
 // Version of the Go SDK
 const Version = "0.1.1"
 
-type ACL string
+type ACLType string
 
 const (
-	PrivateACL      = ACL("private")
-	PublicReadACL   = ACL("public-read")
-	PublicReadWrite = ACL("public-read-write")
+	PrivateACL      = ACLType("private")
+	PublicReadACL   = ACLType("public-read")
+	PublicReadWrite = ACLType("public-read-write")
 )
 
 const (
