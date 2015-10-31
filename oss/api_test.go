@@ -391,7 +391,7 @@ Date: %s`,
 
 	{
 		request: func(a *API) (interface{}, error) {
-			r, err := a.DeleteObjects(testBucketName, "obj1", "obj2", "obj3")
+			r, err := a.DeleteObjects(testBucketName, false, "obj1", "obj2", "obj3")
 			return r, err
 		},
 		expectedRequest: `POST /bucket_name/?delete HTTP/1.1
