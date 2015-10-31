@@ -45,6 +45,10 @@ func (a *API) GetBucketACL(name string) (res *AccessControlPolicy, _ error) {
 	return res, a.do("GET", name+"/?acl", nil, nil, &res)
 }
 
+func (a *API) GetBucketLocation(name string) (res *LocationConstraint, _ error) {
+	return res, a.do("GET", name+"/?location", nil, nil, &res)
+}
+
 func (a *API) GetObjectToFile(bucket, object, file string) error {
 	w, err := os.Create(file)
 	if err != nil {

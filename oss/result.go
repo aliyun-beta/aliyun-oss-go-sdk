@@ -48,3 +48,7 @@ type AccessControlPolicy struct {
 type AccessControlList struct {
 	Grant string
 }
+
+type LocationConstraint struct {
+	Value string `xml:",chardata"`
+}

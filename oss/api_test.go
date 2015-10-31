@@ -8,9 +8,10 @@ import (
 )
 
 const (
-	testTimeText = "Wed, 21 Oct 2015 15:56:35 GMT"
-	testID       = "ayahghai0juiSie"
-	testSecret   = "quitie*ph3Lah{F"
+	testTimeText   = "Wed, 21 Oct 2015 15:56:35 GMT"
+	testID         = "ayahghai0juiSie"
+	testSecret     = "quitie*ph3Lah{F"
+	testBucketName = "bucket_name"
 )
 
 var (
@@ -277,6 +278,31 @@ Server: AliyunOSS
 			AccessControlList: AccessControlList{
 				Grant: "public-read",
 			},
+		},
+	},
+
+	{
+		request: func(a *API) (interface{}, error) {
+			r, err := a.GetBucketLocation(testBucketName)
+			return r, err
+		},
+		expectedRequest: `GET /bucket_name/?location HTTP/1.1
+Host: %s
+User-Agent: %s
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:ycP0hM0Uk40gkqXhljFeHVTWkko=
+Date: %s`,
+		response: `HTTP/1.1 200
+x-oss-request-id: 513836E0F687780D1A690708
+Date: Fri, 15 Mar 2013 05:31:04 GMT
+Connection: close
+Content-Length: 143
+Server: AliyunOSS
+
+<?xml version="1.0" encoding="UTF-8"?>
+<LocationConstraint xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">oss-cn-hangzhou</LocationConstraint>`,
+		expectedResponse: &LocationConstraint{
+			Value: "oss-cn-hangzhou",
 		},
 	},
 }
