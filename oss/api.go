@@ -91,6 +91,10 @@ func (a *API) DeleteObject(bucket, object string) error {
 	return a.do("DELETE", bucket+"/"+object, nil)
 }
 
+func (a *API) DeleteObjects(bucket string, objects ...string) (res *DeleteResult, _ error) {
+	return res, a.do("POST", bucket+"/?delete", &res, deleteObjects(objects, false), ContentMD5)
+}
+
 func (a *API) do(method, resource string, result interface{}, options ...Option) error {
 	req, err := a.newRequest(method, resource, options)
 	if err != nil {

@@ -18,7 +18,7 @@ type authorization struct {
 	secret []byte
 }
 
-func setContentMD5(req *http.Request) error {
+func ContentMD5(req *http.Request) error {
 	if _, ok := req.Header["Content-Md5"]; ok {
 		return errors.New("Content-Md5 is already set")
 	}

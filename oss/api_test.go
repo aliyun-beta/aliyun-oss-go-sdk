@@ -388,6 +388,57 @@ Date: %s`,
 		response:         "HTTP/1.1 200 OK\n",
 		expectedResponse: nil,
 	},
+
+	{
+		request: func(a *API) (interface{}, error) {
+			r, err := a.DeleteObjects(testBucketName, "obj1", "obj2", "obj3")
+			return r, err
+		},
+		expectedRequest: `POST /bucket_name/?delete HTTP/1.1
+Host: %s
+User-Agent: %s
+Content-Length: 172
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:Jk4IiThihXCj8bmIwFPbc7kHbco=
+Content-Md5: Tbx4zkqDSc6oNRnTo4dndg==
+Date: %s
+
+<?xml version="1.0" encoding="UTF-8"?>
+<Delete><Quiet>false</Quiet><Object><Key>obj1</Key></Object><Object><Key>obj2</Key></Object><Object><Key>obj3</Key></Object></Delete>`,
+		response: `HTTP/1.1 200 OK
+x-oss-request-id: 78320852-7eee-b697-75e1-b6db0f4849e7
+Date: Wed, 29 Feb 2012 12:26:16 GMT
+Content-Length: 274
+Content-Type: application/xml
+Connection: close
+Server: AliyunOSS
+
+<?xml version="1.0" encoding="UTF-8"?>
+<DeleteResult xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">
+    <Deleted>
+       <Key>obj1</Key>
+    </Deleted>
+    <Deleted>
+       <Key>obj2</Key>
+    </Deleted>
+    <Deleted>
+       <Key>obj3</Key>
+    </Deleted>
+</DeleteResult>`,
+		expectedResponse: &DeleteResult{
+			Deleted: []Deleted{
+				{
+					Key: "obj1",
+				},
+				{
+					Key: "obj2",
+				},
+				{
+					Key: "obj3",
+				},
+			},
+		},
+	},
 }
 
 func TestGetObjectToFile(t *testing.T) {
@@ -408,7 +459,7 @@ abcdef`)
 	defer rec.Close()
 	api := New(rec.URL(), testID, testSecret)
 	api.now = testTime
-	err = api.GetObjectToFile("bucket_name", "object_name", "file.txt")
+	err = api.GetObjectToFile(testBucketName, testObjectName, "file.txt")
 	if err != nil {
 		t.Fatal(err)
 	}

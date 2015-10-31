@@ -75,6 +75,13 @@ type AppendPosition int
 
 type Header map[string][]string
 
+type DeleteResult struct {
+	Deleted []Deleted
+}
+type Deleted struct {
+	Key string
+}
+
 func (r *LocationConstraint) parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
@@ -98,6 +105,9 @@ func (r *AppendPosition) parse(resp *http.Response) error {
 func (r *Header) parse(resp *http.Response) error {
 	*r = Header(resp.Header)
 	return nil
+}
+func (r *DeleteResult) parse(resp *http.Response) error {
+	return xml.NewDecoder(resp.Body).Decode(r)
 }
 
 type file string

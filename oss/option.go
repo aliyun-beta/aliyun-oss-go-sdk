@@ -152,3 +152,26 @@ func BucketLocation(value string) Option {
 		return httpBody(bytes.NewReader(w.Bytes()))(req)
 	}
 }
+
+type Delete struct {
+	Quiet  bool
+	Object []Object
+}
+type Object struct {
+	Key string
+}
+
+func deleteObjects(objects []string, quiet bool) Option {
+	return func(req *http.Request) error {
+		var w bytes.Buffer
+		w.WriteString(xml.Header)
+		del := Delete{Quiet: quiet}
+		for _, key := range objects {
+			del.Object = append(del.Object, Object{Key: key})
+		}
+		if err := xml.NewEncoder(&w).Encode(del); err != nil {
+			return err
+		}
+		return httpBody(bytes.NewReader(w.Bytes()))(req)
+	}
+}
