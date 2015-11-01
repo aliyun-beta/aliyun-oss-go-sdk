@@ -649,28 +649,30 @@ Date: %s`,
 	},
 
 	{
-		name: "PutObjectFromFile",
+		name: "DeleteBucketLifecycle",
 		request: func(a *API) (interface{}, error) {
-			return nil, a.PutObjectFromFile("bucket-name", testObjectName, testFileName)
+			return nil, a.DeleteBucketLifecycle(testBucketName)
 		},
-		expectedRequest: `PUT /object/name HTTP/1.1
+		expectedRequest: `DELETE /?lifecycle HTTP/1.1
 Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
-Content-Length: 16
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:gbvg8Xcdy0qvDT2e7uUdtj6/VZE=
-Content-Type: application/octet-stream
-Date: %s
-
-sfweruewpinbeewa`,
-		response:         "HTTP/1.1 200 OK\n",
+Authorization: OSS ayahghai0juiSie:OImj+a+NC4oGhFL3lsSRj8iY6XI=
+Date: %s`,
+		response: `HTTP/1.1 204 No Content
+x-oss-request-id: 534B372F74E88A4D89060124
+Date: Mon, 14 Apr 2014 01:17:35 GMT
+Connection: close
+Content-Length: 0
+Server: AliyunOSS
+`,
 		expectedResponse: nil,
 	},
 
 	{
-		name: "PutObjectFromString",
+		name: "PutObject",
 		request: func(a *API) (interface{}, error) {
-			return nil, a.PutObjectFromString("bucket-name", "object/name", "wefpofjwefew")
+			return nil, a.PutObject("bucket-name", "object/name", strings.NewReader("wefpofjwefew"))
 		},
 		expectedRequest: `PUT /object/name HTTP/1.1
 Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
@@ -684,6 +686,39 @@ Date: %s
 wefpofjwefew`,
 		response:         "HTTP/1.1 200 OK\n",
 		expectedResponse: nil,
+	},
+
+	{
+		name: "CopyObject",
+		request: func(a *API) (interface{}, error) {
+			r, err := a.CopyObject("source-bucket", "source-object", "target-bucket", "target-object")
+			return r, err
+		},
+		expectedRequest: `PUT /target-object HTTP/1.1
+Host: target-bucket.oss-cn-hangzhou.aliyuncs.com
+User-Agent: %s
+Content-Length: 0
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:83kiZ9FOf79+NONgJAXk00Hzk4g=
+Date: %s
+X-Oss-Copy-Source: /source-bucket/source-object`,
+		response: `HTTP/1.1 200 OK
+x-oss-request-id: 3dfb2597-72a0-b3f7-320f-8b6627a96e68
+Content-Type: application/xml
+Content-Length: 241
+Connection: close
+Date: Fri, 24 Feb 2012 07:18:48 GMT
+Server: AliyunOSS
+
+<?xml version="1.0" encoding="UTF-8"?>
+<CopyObjectResult xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">
+    <LastModified>Fri, 24 Feb 2012 07:18:48 GMT</LastModified>
+    <ETag>"5B3C1A2E053D763E1B002CC607C5A0FE"</ETag>
+</CopyObjectResult>`,
+		expectedResponse: &CopyObjectResult{
+			LastModified: "Fri, 24 Feb 2012 07:18:48 GMT",
+			ETag:         `"5B3C1A2E053D763E1B002CC607C5A0FE"`,
+		},
 	},
 
 	{
@@ -720,9 +755,9 @@ abcdef`,
 	},
 
 	{
-		name: "AppendObjectFromFile",
+		name: "AppendObject",
 		request: func(a *API) (interface{}, error) {
-			r, err := a.AppendObjectFromFile(testBucketName, testObjectName, testFileName, 0)
+			r, err := a.AppendObject(testBucketName, testObjectName, strings.NewReader("sfweruewpinbeewa"), 0)
 			return r, err
 		},
 		expectedRequest: `POST /object/name?append&position=0 HTTP/1.1
@@ -746,30 +781,6 @@ x-oss-next-append-position: 16
 x-oss-request-id: 559CC9BDC755F95A64485981
 `,
 		expectedResponse: AppendPosition(16),
-	},
-
-	{
-		name: "HeadObject",
-		request: func(a *API) (interface{}, error) {
-			r, err := a.HeadObject(testBucketName, testObjectName)
-			return r, err
-		},
-		expectedRequest: `HEAD /object/name HTTP/1.1
-Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
-User-Agent: %s
-Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:B29hiJ0Fu10nq+kyeb4+vM6Cwns=
-Date: %s`,
-		response: `HTTP/1.1 200 OK
-x-oss-request-id: 06d4be30-2216-9264-757a-8f8b19b254bb
-ETag: "fba9dede5f27731c9771645a39863328"
-Content-Length: 344606
-`,
-		expectedResponse: Header{
-			"X-Oss-Request-Id": []string{"06d4be30-2216-9264-757a-8f8b19b254bb"},
-			"Etag":             []string{`"fba9dede5f27731c9771645a39863328"`},
-			"Content-Length":   []string{"344606"},
-		},
 	},
 
 	{
@@ -839,35 +850,26 @@ Server: AliyunOSS
 	},
 
 	{
-		name: "CopyObject",
+		name: "HeadObject",
 		request: func(a *API) (interface{}, error) {
-			r, err := a.CopyObject("source-bucket", "source-object", "target-bucket", "target-object")
+			r, err := a.HeadObject(testBucketName, testObjectName)
 			return r, err
 		},
-		expectedRequest: `PUT /target-object HTTP/1.1
-Host: target-bucket.oss-cn-hangzhou.aliyuncs.com
+		expectedRequest: `HEAD /object/name HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
-Content-Length: 0
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:83kiZ9FOf79+NONgJAXk00Hzk4g=
-Date: %s
-X-Oss-Copy-Source: /source-bucket/source-object`,
+Authorization: OSS ayahghai0juiSie:B29hiJ0Fu10nq+kyeb4+vM6Cwns=
+Date: %s`,
 		response: `HTTP/1.1 200 OK
-x-oss-request-id: 3dfb2597-72a0-b3f7-320f-8b6627a96e68
-Content-Type: application/xml
-Content-Length: 241
-Connection: close
-Date: Fri, 24 Feb 2012 07:18:48 GMT
-Server: AliyunOSS
-
-<?xml version="1.0" encoding="UTF-8"?>
-<CopyObjectResult xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">
-    <LastModified>Fri, 24 Feb 2012 07:18:48 GMT</LastModified>
-    <ETag>"5B3C1A2E053D763E1B002CC607C5A0FE"</ETag>
-</CopyObjectResult>`,
-		expectedResponse: &CopyObjectResult{
-			LastModified: "Fri, 24 Feb 2012 07:18:48 GMT",
-			ETag:         `"5B3C1A2E053D763E1B002CC607C5A0FE"`,
+x-oss-request-id: 06d4be30-2216-9264-757a-8f8b19b254bb
+ETag: "fba9dede5f27731c9771645a39863328"
+Content-Length: 344606
+`,
+		expectedResponse: Header{
+			"X-Oss-Request-Id": []string{"06d4be30-2216-9264-757a-8f8b19b254bb"},
+			"Etag":             []string{`"fba9dede5f27731c9771645a39863328"`},
+			"Content-Length":   []string{"344606"},
 		},
 	},
 
@@ -1246,27 +1248,6 @@ Date: %s`,
 		response: `HTTP/1.1 204 No Content
 x-oss-request-id: 5051845BC4689A033D0022BC
 Date: Fri, 24 Feb 2012 05:45:34 GMT
-Connection: close
-Content-Length: 0
-Server: AliyunOSS
-`,
-		expectedResponse: nil,
-	},
-
-	{
-		name: "DeleteLifecycle",
-		request: func(a *API) (interface{}, error) {
-			return nil, a.DeleteLifecycle(testBucketName)
-		},
-		expectedRequest: `DELETE /?lifecycle HTTP/1.1
-Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
-User-Agent: %s
-Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:OImj+a+NC4oGhFL3lsSRj8iY6XI=
-Date: %s`,
-		response: `HTTP/1.1 204 No Content
-x-oss-request-id: 534B372F74E88A4D89060124
-Date: Mon, 14 Apr 2014 01:17:35 GMT
 Connection: close
 Content-Length: 0
 Server: AliyunOSS

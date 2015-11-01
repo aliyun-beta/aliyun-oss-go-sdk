@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"reflect"
 	"regexp"
-	"strings"
 	"time"
 )
 
@@ -121,54 +119,44 @@ func (a *API) DeleteBucketWebsite(name string) error {
 	return a.do("DELETE", name, "?website", nil)
 }
 
-func (a *API) GetObject(bucket, object string, w io.Writer, options ...Option) error {
-	return a.do("GET", bucket, object, &writerResult{w})
+// DeleteBucketLifecycle deletes the lifecycle configuration of a bucket
+func (a *API) DeleteBucketLifecycle(bucket string) error {
+	return a.do("DELETE", bucket, "?lifecycle", nil)
 }
 
+// PutObject uploads a file from an io.Reader
 func (a *API) PutObject(bucket, object string, rd io.Reader, options ...Option) error {
 	return a.do("PUT", bucket, object, nil, append([]Option{httpBody(rd)}, options...)...)
 }
 
-func (a *API) PutObjectFromString(bucket, object, str string, options ...Option) error {
-	return a.PutObject(bucket, object, strings.NewReader(str), options...)
+// CopyObject copies an existing object on OSS to another object
+func (a *API) CopyObject(sourceBucket, sourceObject, targetBucket, targetObject string, options ...Option) (res *CopyObjectResult, _ error) {
+	return res, a.do("PUT", targetBucket, targetObject, &res, append(options, CopySource(sourceBucket, sourceObject))...)
 }
 
-func (a *API) PutObjectFromFile(bucket, object, file string, options ...Option) error {
-	rd, err := os.Open(file)
-	if err != nil {
-		return err
-	}
-	defer rd.Close()
-	return a.PutObject(bucket, object, rd, options...)
+// GetObject returns an object and write it to an io.Writer
+func (a *API) GetObject(bucket, object string, w io.Writer, options ...Option) error {
+	return a.do("GET", bucket, object, &writerResult{w})
 }
 
+// AppendObject uploads a file by append to it from an io.Reader
 func (a *API) AppendObject(bucket, object string, rd io.Reader, position AppendPosition, options ...Option) (res AppendPosition, _ error) {
 	return res, a.do("POST", bucket, fmt.Sprintf("%s?append&position=%d", object, position), &res, append([]Option{httpBody(rd)}, options...)...)
 }
 
-func (a *API) AppendObjectFromFile(bucket, object, file string, position AppendPosition, options ...Option) (res AppendPosition, _ error) {
-	rd, err := os.Open(file)
-	if err != nil {
-		return 0, err
-	}
-	defer rd.Close()
-	return a.AppendObject(bucket, object, rd, position, options...)
-}
-
-func (a *API) HeadObject(bucket, object string) (res Header, _ error) {
-	return res, a.do("HEAD", bucket, object, &res)
-}
-
+// DeleteObject deletes an object
 func (a *API) DeleteObject(bucket, object string) error {
 	return a.do("DELETE", bucket, object, nil)
 }
 
+// DeleteObjects deletes multiple objects
 func (a *API) DeleteObjects(bucket string, quiet bool, objects ...string) (res *DeleteResult, _ error) {
 	return res, a.do("POST", bucket, "?delete", &res, xmlBody(newDelete(objects, quiet)), ContentMD5)
 }
 
-func (a *API) CopyObject(sourceBucket, sourceObject, targetBucket, targetObject string, options ...Option) (res *CopyObjectResult, _ error) {
-	return res, a.do("PUT", targetBucket, targetObject, &res, append(options, CopySource(sourceBucket, sourceObject))...)
+// HeadObject returns only the metadata of an object in HTTP headers
+func (a *API) HeadObject(bucket, object string) (res Header, _ error) {
+	return res, a.do("HEAD", bucket, object, &res)
 }
 
 func (a *API) InitUpload(bucket, object string, options ...Option) (res *InitiateMultipartUploadResult, _ error) {
@@ -205,10 +193,6 @@ func (a *API) GetCORS(bucket string) (res *CORSConfiguration, _ error) {
 
 func (a *API) DeleteCORS(bucket string) error {
 	return a.do("DELETE", bucket, "?cors", nil)
-}
-
-func (a *API) DeleteLifecycle(bucket string) error {
-	return a.do("DELETE", bucket, "?lifecycle", nil)
 }
 
 func (a *API) do(method, bucket, object string, result interface{}, options ...Option) error {

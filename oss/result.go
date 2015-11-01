@@ -14,6 +14,7 @@ type responseParser interface {
 
 // XML result types
 type (
+	// ListAllMyBucketsResult is returned by GetService
 	ListAllMyBucketsResult struct {
 		Owner   Owner
 		Buckets []Bucket `xml:"Buckets>Bucket"`
