@@ -12,69 +12,37 @@ import (
 	"strings"
 )
 
-func httpBody(body io.Reader) Option {
-	return func(req *http.Request) error {
-		fileName := ""
-		if f, ok := body.(*os.File); ok {
-			fInfo, err := os.Stat(f.Name())
-			if err != nil {
-				return err
-			}
-			fileName = f.Name()
-			req.ContentLength = fInfo.Size()
-		}
-		req.Header.Set("Content-Type", typeByExtension(fileName))
-		rc, ok := body.(io.ReadCloser)
-		if !ok && body != nil {
-			rc = ioutil.NopCloser(body)
-		}
-		req.Body = rc
-		if body != nil {
-			switch v := body.(type) {
-			case *bytes.Buffer:
-				req.ContentLength = int64(v.Len())
-			case *bytes.Reader:
-				req.ContentLength = int64(v.Len())
-			case *strings.Reader:
-				req.ContentLength = int64(v.Len())
-			}
-		}
-		return nil
+type (
+	CreateBucketConfiguration struct {
+		LocationConstraint string
 	}
-}
-func typeByExtension(file string) string {
-	typ := mime.TypeByExtension(path.Ext(file))
-	if typ == "" {
-		typ = "application/octet-stream"
-	}
-	return typ
-}
 
-func xmlBody(obj interface{}) Option {
-	return func(req *http.Request) error {
-		var w bytes.Buffer
-		w.WriteString(xml.Header)
-		if err := xml.NewEncoder(&w).Encode(obj); err != nil {
-			return err
-		}
-		return httpBody(bytes.NewReader(w.Bytes()))(req)
+	Delete struct {
+		Quiet  bool
+		Object []Object
 	}
-}
+	Object struct {
+		Key string
+	}
 
-type CreateBucketConfiguration struct {
-	LocationConstraint string
-}
+	CompleteMultipartUpload struct {
+		Part []Part
+	}
+
+	CORSConfiguration struct {
+		CORSRule []CORSRule
+	}
+	CORSRule struct {
+		AllowedOrigin []string
+		AllowedMethod []string
+		AllowedHeader []string
+		ExposeHeader  []string
+		MaxAgeSeconds int `xml:"MaxAgeSeconds,omitempty"`
+	}
+)
 
 func BucketLocation(value string) Option {
 	return xmlBody(&CreateBucketConfiguration{LocationConstraint: value})
-}
-
-type Delete struct {
-	Quiet  bool
-	Object []Object
-}
-type Object struct {
-	Key string
 }
 
 func newDelete(objects []string, quiet bool) *Delete {
@@ -85,6 +53,50 @@ func newDelete(objects []string, quiet bool) *Delete {
 	return del
 }
 
-type CompleteMultipartUpload struct {
-	Part []Part
+func xmlBody(obj interface{}) Option {
+	return func(req *http.Request) error {
+		var w bytes.Buffer
+		w.WriteString(xml.Header)
+		if err := xml.NewEncoder(&w).Encode(obj); err != nil {
+			return err
+		}
+		req.ContentLength = int64(w.Len())
+		req.Body = ioutil.NopCloser(bytes.NewReader(w.Bytes()))
+		return nil
+	}
+}
+
+func httpBody(body io.Reader) Option {
+	return func(req *http.Request) error {
+		rc, ok := body.(io.ReadCloser)
+		if !ok && body != nil {
+			rc = ioutil.NopCloser(body)
+		}
+		req.Body = rc
+		fileName := ""
+		switch v := body.(type) {
+		case *bytes.Buffer:
+			req.ContentLength = int64(v.Len())
+		case *bytes.Reader:
+			req.ContentLength = int64(v.Len())
+		case *strings.Reader:
+			req.ContentLength = int64(v.Len())
+		case *os.File:
+			fInfo, err := os.Stat(v.Name())
+			if err != nil {
+				return err
+			}
+			fileName = v.Name()
+			req.ContentLength = fInfo.Size()
+		}
+		req.Header.Set("Content-Type", typeByExtension(fileName))
+		return nil
+	}
+}
+func typeByExtension(file string) string {
+	typ := mime.TypeByExtension(path.Ext(file))
+	if typ == "" {
+		typ = "application/octet-stream"
+	}
+	return typ
 }

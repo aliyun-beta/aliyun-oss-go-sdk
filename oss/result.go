@@ -171,16 +171,6 @@ func (r *writerResult) parse(resp *http.Response) error {
 	return err
 }
 
-type writeCloserResult struct {
-	io.WriteCloser
-}
-
-func (r *writeCloserResult) parse(resp *http.Response) error {
-	defer r.WriteCloser.Close()
-	_, err := io.Copy(r.WriteCloser, resp.Body)
-	return err
-}
-
 type UploadPartResult struct {
 	ETag string
 }

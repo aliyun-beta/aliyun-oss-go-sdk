@@ -400,9 +400,8 @@ Host: %s
 User-Agent: %s
 Content-Length: 172
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:GzAhrZD72N0LfQwwt9wMWRZ9Y9s=
+Authorization: OSS ayahghai0juiSie:Jk4IiThihXCj8bmIwFPbc7kHbco=
 Content-Md5: Tbx4zkqDSc6oNRnTo4dndg==
-Content-Type: application/octet-stream
 Date: %s
 
 <?xml version="1.0" encoding="UTF-8"?>
@@ -551,9 +550,8 @@ Host: %s
 User-Agent: %s
 Content-Length: 174
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:zcxSjO/5scyvFT4yXvmgKWnbhDE=
+Authorization: OSS ayahghai0juiSie:vnZp7SnuGTXV5KPYq+GV+ws5Ff4=
 Content-Md5: zJBKGLrHC8XqtxxS7kZM+Q==
-Content-Type: application/octet-stream
 Date: %s
 
 <?xml version="1.0" encoding="UTF-8"?>
@@ -745,6 +743,46 @@ Date: Thu, 23 Feb 2012 07:13:28 GMT
 				},
 			},
 		},
+	},
+
+	{
+		request: func(a *API) (interface{}, error) {
+			return nil, a.PutCORS(testBucketName, &CORSConfiguration{
+				CORSRule: []CORSRule{
+					{
+						AllowedOrigin: []string{"*"},
+						AllowedMethod: []string{"PUT", "GET"},
+						AllowedHeader: []string{"Authorization"},
+					},
+					{
+						AllowedOrigin: []string{"http://www.a.com", "http://www.b.com"},
+						AllowedMethod: []string{"GET"},
+						AllowedHeader: []string{"Authorization"},
+						ExposeHeader:  []string{"x-oss-test", "x-oss-test1"},
+						MaxAgeSeconds: 100,
+					},
+				},
+			})
+		},
+		expectedRequest: `PUT /bucket_name/?cors HTTP/1.1
+Host: %s
+User-Agent: %s
+Content-Length: 549
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:AZ9v6CeAbKAWaphXg3GHuZ26FuM=
+Content-Md5: dCyZ6ocGwvoNqax+nPRAlg==
+Date: %s
+
+<?xml version="1.0" encoding="UTF-8"?>
+<CORSConfiguration><CORSRule><AllowedOrigin>*</AllowedOrigin><AllowedMethod>PUT</AllowedMethod><AllowedMethod>GET</AllowedMethod><AllowedHeader>Authorization</AllowedHeader></CORSRule><CORSRule><AllowedOrigin>http://www.a.com</AllowedOrigin><AllowedOrigin>http://www.b.com</AllowedOrigin><AllowedMethod>GET</AllowedMethod><AllowedHeader>Authorization</AllowedHeader><ExposeHeader>x-oss-test</ExposeHeader><ExposeHeader>x-oss-test1</ExposeHeader><MaxAgeSeconds>100</MaxAgeSeconds></CORSRule></CORSConfiguration>`,
+		response: `HTTP/1.1 200 OK
+x-oss-request-id: 50519080C4689A033D00235F
+Date: Fri, 04 May 2012 03:21:12 GMT
+Content-Length: 0
+Connection: close
+Server: AliyunOSS
+`,
+		expectedResponse: nil,
 	},
 }
 
