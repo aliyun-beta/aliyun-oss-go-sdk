@@ -95,6 +95,12 @@ func ServerSideEncryption(value string) Option {
 func ObjectACL(acl ACLType) Option {
 	return setHeader("X-Oss-Object-Acl", string(acl))
 }
+func ContentLength(length int64) Option {
+	return func(req *http.Request) error {
+		req.ContentLength = length
+		return nil
+	}
+}
 func setHeader(key, value string) Option {
 	return func(req *http.Request) error {
 		req.Header.Set(key, value)
@@ -104,14 +110,16 @@ func setHeader(key, value string) Option {
 
 func httpBody(body io.Reader) Option {
 	return func(req *http.Request) error {
+		fileName := ""
 		if f, ok := body.(*os.File); ok {
 			fInfo, err := os.Stat(f.Name())
 			if err != nil {
 				return err
 			}
-			req.Header.Set("Content-Type", typeByExtension(f.Name()))
+			fileName = f.Name()
 			req.ContentLength = fInfo.Size()
 		}
+		req.Header.Set("Content-Type", typeByExtension(fileName))
 		rc, ok := body.(io.ReadCloser)
 		if !ok && body != nil {
 			rc = ioutil.NopCloser(body)

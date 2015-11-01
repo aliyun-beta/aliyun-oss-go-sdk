@@ -2,6 +2,7 @@ package oss
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"reflect"
@@ -103,8 +104,12 @@ func (a *API) CopyObject(sourceBucket, sourceObject, targetBucket, targetObject 
 	return res, a.do("PUT", targetBucket+"/"+targetObject, &res, append(options, CopySource(sourceBucket, sourceObject))...)
 }
 
-func (a *API) InitMultipartUpload(bucket, object string) (res *InitiateMultipartUploadResult, _ error) {
-	return res, a.do("POST", bucket+"/"+object+"?uploads", &res, ContentType("application/octet-stream"))
+func (a *API) InitMultipartUpload(bucket, object string, options ...Option) (res *InitiateMultipartUploadResult, _ error) {
+	return res, a.do("POST", bucket+"/"+object+"?uploads", &res, append(options, ContentType("application/octet-stream"))...)
+}
+
+func (a *API) UploadPart(bucket, object string, uploadID string, partNumber int, rd io.Reader, size int64) error {
+	return a.do("PUT", fmt.Sprintf("%s/%s?partNumber=%d&uploadId=%s", bucket, object, partNumber, uploadID), nil, httpBody(&io.LimitedReader{R: rd, N: size}), ContentLength(size))
 }
 
 func (a *API) do(method, resource string, result interface{}, options ...Option) error {

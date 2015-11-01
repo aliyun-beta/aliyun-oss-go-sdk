@@ -3,6 +3,7 @@ package oss
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 )
@@ -211,15 +212,15 @@ Server: AliyunOSS
 
 	{
 		request: func(a *API) (interface{}, error) {
-			return nil, a.PutObjectFromFile("bucket_name", "object_name", "testdata/test.txt")
+			return nil, a.PutObjectFromFile("bucket_name", "object_name", testFileName)
 		},
 		expectedRequest: `PUT /bucket_name/object_name HTTP/1.1
 Host: %s
 User-Agent: %s
-Content-Length: 17
+Content-Length: 16
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:PrCp4qvn6aHefdgTPfNyW83zPAY=
-Content-Type: text/plain; charset=utf-8
+Authorization: OSS ayahghai0juiSie:cUN83rKdXAq2MRbzQZYWJC4hIRg=
+Content-Type: application/octet-stream
 Date: %s
 
 sfweruewpinbeewa`,
@@ -332,7 +333,7 @@ Date: %s`,
 		expectedRequest: `POST /bucket_name/object_name?append&position=0 HTTP/1.1
 Host: %s
 User-Agent: %s
-Content-Length: 17
+Content-Length: 16
 Accept-Encoding: identity
 Authorization: OSS ayahghai0juiSie:pTwcHEynVLcFuA99DVwYrxr2nlk=
 Content-Type: application/octet-stream
@@ -346,10 +347,10 @@ Connection: close
 Content-Length: 0
 Server: AliyunOSS
 x-oss-hash-crc64ecma: 14741617095266562575
-x-oss-next-append-position: 17
+x-oss-next-append-position: 16
 x-oss-request-id: 559CC9BDC755F95A64485981
 `,
-		expectedResponse: AppendPosition(17),
+		expectedResponse: AppendPosition(16),
 	},
 
 	{
@@ -399,8 +400,9 @@ Host: %s
 User-Agent: %s
 Content-Length: 172
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:Jk4IiThihXCj8bmIwFPbc7kHbco=
+Authorization: OSS ayahghai0juiSie:GzAhrZD72N0LfQwwt9wMWRZ9Y9s=
 Content-Md5: Tbx4zkqDSc6oNRnTo4dndg==
+Content-Type: application/octet-stream
 Date: %s
 
 <?xml version="1.0" encoding="UTF-8"?>
@@ -504,6 +506,30 @@ Content-Type: application/xml
 			Key:      "multipart.data",
 			UploadID: "0004B9894A22E5B1888A1E29F8236E2D",
 		},
+	},
+
+	{
+		request: func(a *API) (interface{}, error) {
+			return nil, a.UploadPart(testBucketName, testObjectName, "0004B9895DBBB6EC98E36", 1, strings.NewReader(`sfweruewpinbeewa`), 16)
+		},
+		expectedRequest: `PUT /bucket_name/object_name?partNumber=1&uploadId=0004B9895DBBB6EC98E36 HTTP/1.1
+Host: %s
+User-Agent: %s
+Content-Length: 16
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:im5VQx0x3baFKjafCmEiDxClVU0=
+Content-Type: application/octet-stream
+Date: %s
+
+sfweruewpinbeewa`,
+		response: `HTTP/1.1 200 OK
+Server: AliyunOSS
+Connection: close
+ETag: 7265F4D211B56873A381D321F586E4A9
+x-oss-request-id: 3e6aba62-1eae-d246-6118-8ff42cd0c21a
+Date: Wed, 22 Feb 2012 08:32:21 GMT
+`,
+		expectedResponse: nil,
 	},
 }
 
