@@ -806,6 +806,48 @@ Server: AliyunOSS
 `,
 		expectedResponse: nil,
 	},
+
+	{
+		name: "GetCORS",
+		request: func(a *API) (interface{}, error) {
+			r, err := a.GetCORS(testBucketName)
+			return r, err
+		},
+		expectedRequest: `GET /bucket_name/?cors HTTP/1.1
+Host: %s
+User-Agent: %s
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:PBEn27rJaD+O4E/2gN22KbaMbcE=
+Date: %s`,
+		response: `HTTP/1.1 200
+x-oss-request-id: 50519080C4689A033D00235F
+Date: Thu, 13 Sep 2012 07:51:28 GMT
+Connection: close
+Content-Length: 317
+Server: AliyunOSS
+
+<?xml version="1.0" encoding="UTF-8"?>
+<CORSConfiguration>
+    <CORSRule>
+      <AllowedOrigin>*</AllowedOrigin>
+      <AllowedMethod>GET</AllowedMethod>
+      <AllowedHeader>*</AllowedHeader>
+      <ExposeHeader>x-oss-test</ExposeHeader>
+      <MaxAgeSeconds>100</MaxAgeSeconds>
+    </CORSRule>
+</CORSConfiguration>`,
+		expectedResponse: &CORSConfiguration{
+			CORSRule: []CORSRule{
+				{
+					AllowedOrigin: []string{"*"},
+					AllowedMethod: []string{"GET"},
+					AllowedHeader: []string{"*"},
+					ExposeHeader:  []string{"x-oss-test"},
+					MaxAgeSeconds: 100,
+				},
+			},
+		},
+	},
 }
 
 func TestGetObjectToFile(t *testing.T) {

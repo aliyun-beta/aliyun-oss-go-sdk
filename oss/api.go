@@ -143,6 +143,10 @@ func (a *API) PutCORS(bucket string, corsConfig *CORSConfiguration) error {
 	return a.do("PUT", bucket+"/?cors", nil, xmlBody(corsConfig), ContentMD5)
 }
 
+func (a *API) GetCORS(bucket string) (res *CORSConfiguration, _ error) {
+	return res, a.do("GET", bucket+"/?cors", &res)
+}
+
 func (a *API) do(method, resource string, result interface{}, options ...Option) error {
 	req, err := a.newRequest(method, resource, options)
 	if err != nil {
