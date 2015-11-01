@@ -10,7 +10,8 @@ import (
 
 const (
 	expectBut         = "\n--- EXPECT ---\n%v\n--- BUT GOT ---\n%v"
-	testcaseExpectBut = "testcase %d:\n--- EXPECT ---\n%v\n--- BUT GOT ---\n%v"
+	testcaseExpectBut = "testcase %v:\n--- EXPECT ---\n%v\n--- BUT GOT ---\n%v"
+	testcaseErr       = "testcase %s: %v"
 )
 
 type response struct {

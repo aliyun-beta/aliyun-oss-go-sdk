@@ -25,6 +25,7 @@ var (
 )
 
 type testcase struct {
+	name             string
 	request          func(*API) (interface{}, error)
 	expectedRequest  string
 	response         string
@@ -34,8 +35,8 @@ type testcase struct {
 
 var apiTestcases = []testcase{
 
-	// authorization fail
 	{
+		name: "authorization fail",
 		request: func(a *API) (interface{}, error) {
 			r, err := a.GetService()
 			return r, err
@@ -67,6 +68,7 @@ Date: %s`,
 	},
 
 	{
+		name: "GetService",
 		request: func(a *API) (interface{}, error) {
 			r, err := a.GetService()
 			return r, err
@@ -125,6 +127,7 @@ x-oss-request-id: 5374A2880232A65C23002D74
 	},
 
 	{
+		name: "PutBucket",
 		request: func(a *API) (interface{}, error) {
 			return nil, a.PutBucket("bucket_name", PrivateACL)
 		},
@@ -141,6 +144,7 @@ X-Oss-Acl: private`,
 	},
 
 	{
+		name: "GetBucket",
 		request: func(a *API) (interface{}, error) {
 			r, err := a.GetBucket("bucket_name")
 			return r, err
@@ -211,6 +215,7 @@ Server: AliyunOSS
 	},
 
 	{
+		name: "PutObjectFromFile",
 		request: func(a *API) (interface{}, error) {
 			return nil, a.PutObjectFromFile("bucket_name", "object_name", testFileName)
 		},
@@ -229,6 +234,7 @@ sfweruewpinbeewa`,
 	},
 
 	{
+		name: "PutObjectFromString",
 		request: func(a *API) (interface{}, error) {
 			return nil, a.PutObjectFromString("bucket_name", "object_name", "wefpofjwefew")
 		},
@@ -247,6 +253,7 @@ wefpofjwefew`,
 	},
 
 	{
+		name: "GetBucketACL",
 		request: func(a *API) (interface{}, error) {
 			r, err := a.GetBucketACL("bucket_name")
 			return r, err
@@ -287,6 +294,7 @@ Server: AliyunOSS
 	},
 
 	{
+		name: "GetBucketLocation",
 		request: func(a *API) (interface{}, error) {
 			r, err := a.GetBucketLocation(testBucketName)
 			return r, err
@@ -312,6 +320,7 @@ Server: AliyunOSS
 	},
 
 	{
+		name: "DeleteBucket",
 		request: func(a *API) (interface{}, error) {
 			return nil, a.DeleteBucket(testBucketName)
 		},
@@ -326,6 +335,7 @@ Date: %s`,
 	},
 
 	{
+		name: "AppendObjectFromFile",
 		request: func(a *API) (interface{}, error) {
 			r, err := a.AppendObjectFromFile(testBucketName, testObjectName, testFileName, 0)
 			return r, err
@@ -354,6 +364,7 @@ x-oss-request-id: 559CC9BDC755F95A64485981
 	},
 
 	{
+		name: "HeadObject",
 		request: func(a *API) (interface{}, error) {
 			r, err := a.HeadObject(testBucketName, testObjectName)
 			return r, err
@@ -377,6 +388,7 @@ Content-Length: 344606
 	},
 
 	{
+		name: "DeleteObject",
 		request: func(a *API) (interface{}, error) {
 			return nil, a.DeleteObject(testBucketName, testObjectName)
 		},
@@ -391,6 +403,7 @@ Date: %s`,
 	},
 
 	{
+		name: "DeleteObjects",
 		request: func(a *API) (interface{}, error) {
 			r, err := a.DeleteObjects(testBucketName, false, "obj1", "obj2", "obj3")
 			return r, err
@@ -442,6 +455,7 @@ Server: AliyunOSS
 	},
 
 	{
+		name: "CopyObject",
 		request: func(a *API) (interface{}, error) {
 			r, err := a.CopyObject("source_bucket", "source_object", "target_bucket", "target_object")
 			return r, err
@@ -474,6 +488,7 @@ Server: AliyunOSS
 	},
 
 	{
+		name: "InitUpload",
 		request: func(a *API) (interface{}, error) {
 			r, err := a.InitUpload(testBucketName, testObjectName)
 			return r, err
@@ -508,6 +523,7 @@ Content-Type: application/xml
 	},
 
 	{
+		name: "UploadPart",
 		request: func(a *API) (interface{}, error) {
 			r, err := a.UploadPart(testBucketName, testObjectName, "0004B9895DBBB6EC98E36", 1, strings.NewReader(`sfweruewpinbeewa`), 16)
 			return r, err
@@ -533,6 +549,7 @@ Date: Wed, 22 Feb 2012 08:32:21 GMT
 	},
 
 	{
+		name: "CompleteUpload",
 		request: func(a *API) (interface{}, error) {
 			list := &CompleteMultipartUpload{
 				Part: []Part{
@@ -580,6 +597,7 @@ Date: Fri, 24 Feb 2012 10:19:18 GMT
 	},
 
 	{
+		name: "CancelUpload",
 		request: func(a *API) (interface{}, error) {
 			return nil, a.CancelUpload(testBucketName, testObjectName, "0004B9895DBBB6EC98E36")
 		},
@@ -597,7 +615,9 @@ Date: Wed, 22 Feb 2012 08:32:21 GMT
 `,
 		expectedResponse: nil,
 	},
+
 	{
+		name: "ListUploads",
 		request: func(a *API) (interface{}, error) {
 			r, err := a.ListUploads(testBucketName, testObjectName)
 			return r, err
@@ -670,6 +690,7 @@ Date: Thu, 23 Feb 2012 06:14:27 GMT
 	},
 
 	{
+		name: "ListParts",
 		request: func(a *API) (interface{}, error) {
 			r, err := a.ListParts(testBucketName, testObjectName, "0004B9895DBBB6EC98E36")
 			return r, err
@@ -746,6 +767,7 @@ Date: Thu, 23 Feb 2012 07:13:28 GMT
 	},
 
 	{
+		name: "PutCORS",
 		request: func(a *API) (interface{}, error) {
 			return nil, a.PutCORS(testBucketName, &CORSConfiguration{
 				CORSRule: []CORSRule{
@@ -824,13 +846,13 @@ Date: %s`, rec.URL(), userAgent, testTimeText)
 
 func TestAPIs(t *testing.T) {
 	for i := range apiTestcases {
-		testAPI(t, i, &apiTestcases[i])
+		testAPI(t, &apiTestcases[i])
 	}
 }
-func testAPI(t *testing.T, i int, testcase *testcase) {
+func testAPI(t *testing.T, testcase *testcase) {
 	rec, err := NewMockServer(testcase.response)
 	if err != nil {
-		t.Fatal(i, err)
+		t.Fatalf(testcaseErr, testcase.name, err)
 	}
 	defer rec.Close()
 	api := New(rec.URL(), testID, testSecret)
@@ -840,16 +862,16 @@ func testAPI(t *testing.T, i int, testcase *testcase) {
 		response = nil
 	}
 	if !reflect.DeepEqual(err, testcase.expectedError) {
-		t.Fatalf(testcaseExpectBut, i, testcase.expectedError, err)
+		t.Fatalf(testcaseExpectBut, testcase.name, testcase.expectedError, err)
 	}
 	expectedRequest := fmt.Sprintf(testcase.expectedRequest, rec.URL(), userAgent, testTimeText)
 	if rec.Err != nil {
-		t.Fatal("testcase", i, err)
+		t.Fatalf(testcaseErr, testcase.name, err)
 	}
 	if rec.Request != expectedRequest {
-		t.Fatalf(testcaseExpectBut, i, expectedRequest, rec.Request)
+		t.Fatalf(testcaseExpectBut, testcase.name, expectedRequest, rec.Request)
 	}
 	if !reflect.DeepEqual(response, testcase.expectedResponse) {
-		t.Fatalf(testcaseExpectBut, i, testcase.expectedResponse, response)
+		t.Fatalf(testcaseExpectBut, testcase.name, testcase.expectedResponse, response)
 	}
 }
