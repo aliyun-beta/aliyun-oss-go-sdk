@@ -1,13 +1,44 @@
 package oss
 
 import (
+	"net"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type (
 	Option func(*http.Request) error
 )
+
+var (
+	ossHosts = []string{
+		"aliyun-inc.com", "aliyuncs.com", "alibaba.net", "s3.amazonaws.com",
+	}
+)
+
+func bucketHost(bucket string) Option {
+	return func(req *http.Request) error {
+		if isOSSDomain(req.Host) {
+			req.Host = bucket + "." + req.Host
+		}
+		return nil
+	}
+}
+func isOSSDomain(hostPort string) bool {
+	host, _, err := net.SplitHostPort(hostPort)
+	if err != nil {
+		host = hostPort
+	}
+	for _, ossHost := range ossHosts {
+		if strings.HasSuffix(host, ossHost) {
+			return true
+		}
+	}
+	return false
+	// ip := net.ParseIP(host)
+	// return ip == nil
+}
 
 func ACL(acl ACLType) Option {
 	return setHeader("X-Oss-Acl", string(acl))
@@ -26,24 +57,6 @@ func ContentEncoding(value string) Option {
 }
 func Expires(value string) Option {
 	return setHeader("Expires", value)
-}
-func ResponseContentType(value string) Option {
-	return setHeader("Response-Content-Type", value)
-}
-func ResponseContentLanguage(value string) Option {
-	return setHeader("Response-Content-Language", value)
-}
-func ResponseCacheControl(value string) Option {
-	return setHeader("Response-Cache-Control", value)
-}
-func ResponseContentDisposition(value string) Option {
-	return setHeader("Response-Content-Disposition", value)
-}
-func ResponseContentEncoding(value string) Option {
-	return setHeader("Response-Content-Encoding", value)
-}
-func ResponseExpires(value string) Option {
-	return setHeader("Response-Expires", value)
 }
 func Meta(key, value string) Option {
 	return setHeader("X-Oss-Meta-"+key, value)
@@ -114,6 +127,24 @@ func Prefix(value string) Option {
 }
 func EncodingType(value string) Option {
 	return addParam("encoding-type", value)
+}
+func ResponseContentType(value string) Option {
+	return addParam("Response-Content-Type", value)
+}
+func ResponseContentLanguage(value string) Option {
+	return addParam("Response-Content-Language", value)
+}
+func ResponseCacheControl(value string) Option {
+	return addParam("Response-Cache-Control", value)
+}
+func ResponseContentDisposition(value string) Option {
+	return addParam("Response-Content-Disposition", value)
+}
+func ResponseContentEncoding(value string) Option {
+	return addParam("Response-Content-Encoding", value)
+}
+func ResponseExpires(value string) Option {
+	return addParam("Response-Expires", value)
 }
 func addParam(key, value string) Option {
 	return func(req *http.Request) error {

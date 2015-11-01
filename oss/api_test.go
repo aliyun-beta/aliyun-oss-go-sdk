@@ -3,6 +3,8 @@ package oss
 import (
 	"bytes"
 	"fmt"
+	"net"
+	"net/http"
 	"reflect"
 	"strings"
 	"testing"
@@ -13,9 +15,10 @@ const (
 	testTimeText   = "Wed, 21 Oct 2015 15:56:35 GMT"
 	testID         = "ayahghai0juiSie"
 	testSecret     = "quitie*ph3Lah{F"
-	testBucketName = "bucket_name"
-	testObjectName = "object_name"
+	testBucketName = "bucket-name"
+	testObjectName = "object/name"
 	testFileName   = "testdata/test"
+	testEndpoint   = "oss-cn-hangzhou.aliyuncs.com"
 )
 
 var (
@@ -43,7 +46,7 @@ var apiTestcases = []testcase{
 			return r, err
 		},
 		expectedRequest: `GET / HTTP/1.1
-Host: %s
+Host: oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Accept-Encoding: identity
 Authorization: OSS ayahghai0juiSie:uATT/A0hkaO68KDsD79n17pNA5c=
@@ -75,7 +78,7 @@ Date: %s`,
 			return r, err
 		},
 		expectedRequest: `GET / HTTP/1.1
-Host: %s
+Host: oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Accept-Encoding: identity
 Authorization: OSS ayahghai0juiSie:uATT/A0hkaO68KDsD79n17pNA5c=
@@ -130,14 +133,14 @@ x-oss-request-id: 5374A2880232A65C23002D74
 	{
 		name: "PutBucket",
 		request: func(a *API) (interface{}, error) {
-			return nil, a.PutBucket("bucket_name", PrivateACL)
+			return nil, a.PutBucket("bucket-name", PrivateACL)
 		},
-		expectedRequest: `PUT /bucket_name/ HTTP/1.1
-Host: %s
+		expectedRequest: `PUT / HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Content-Length: 0
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:fPC3Cfuif1iGi5LKNRg033EGZcU=
+Authorization: OSS ayahghai0juiSie:g4VuHXgdXYmY+EnBsd6GPpc1fk0=
 Date: %s
 X-Oss-Acl: private`,
 		response:         "HTTP/1.1 200 OK\n",
@@ -147,14 +150,14 @@ X-Oss-Acl: private`,
 	{
 		name: "GetBucket",
 		request: func(a *API) (interface{}, error) {
-			r, err := a.GetBucket("bucket_name")
+			r, err := a.GetBucket(testBucketName)
 			return r, err
 		},
-		expectedRequest: `GET /bucket_name/ HTTP/1.1
-Host: %s
+		expectedRequest: `GET / HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:7hm0/FE4TpkY8OSFunFmTg1TR0Y=
+Authorization: OSS ayahghai0juiSie:VVbyxjdp2eJ8g5t7o7XxlFy0kNo=
 Date: %s`,
 		response: `HTTP/1.1 200 OK
 x-oss-request-id: 0b05f9b1-539e-a858-0a81-9ca13d8a8011
@@ -218,14 +221,14 @@ Server: AliyunOSS
 	{
 		name: "PutObjectFromFile",
 		request: func(a *API) (interface{}, error) {
-			return nil, a.PutObjectFromFile("bucket_name", "object_name", testFileName)
+			return nil, a.PutObjectFromFile("bucket-name", testObjectName, testFileName)
 		},
-		expectedRequest: `PUT /bucket_name/object_name HTTP/1.1
-Host: %s
+		expectedRequest: `PUT /object/name HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Content-Length: 16
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:cUN83rKdXAq2MRbzQZYWJC4hIRg=
+Authorization: OSS ayahghai0juiSie:gbvg8Xcdy0qvDT2e7uUdtj6/VZE=
 Content-Type: application/octet-stream
 Date: %s
 
@@ -237,14 +240,14 @@ sfweruewpinbeewa`,
 	{
 		name: "PutObjectFromString",
 		request: func(a *API) (interface{}, error) {
-			return nil, a.PutObjectFromString("bucket_name", "object_name", "wefpofjwefew")
+			return nil, a.PutObjectFromString("bucket-name", "object/name", "wefpofjwefew")
 		},
-		expectedRequest: `PUT /bucket_name/object_name HTTP/1.1
-Host: %s
+		expectedRequest: `PUT /object/name HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Content-Length: 12
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:cUN83rKdXAq2MRbzQZYWJC4hIRg=
+Authorization: OSS ayahghai0juiSie:gbvg8Xcdy0qvDT2e7uUdtj6/VZE=
 Content-Type: application/octet-stream
 Date: %s
 
@@ -265,11 +268,11 @@ wefpofjwefew`,
 			}
 			return nil, nil
 		},
-		expectedRequest: `GET /bucket_name/object_name HTTP/1.1
-Host: %s
+		expectedRequest: `GET /object/name HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:gkiiIu1xWb5BtqGgF4Pb52mHJWs=
+Authorization: OSS ayahghai0juiSie:pZol4Z6em1QCAz53w4OatKsdi3w=
 Date: %s`,
 		response: `HTTP/1.1 200 OK
 x-oss-request-id: 3a89276f-2e2d-7965-3ff9-51c875b99c41
@@ -289,14 +292,14 @@ abcdef`,
 	{
 		name: "GetBucketACL",
 		request: func(a *API) (interface{}, error) {
-			r, err := a.GetBucketACL("bucket_name")
+			r, err := a.GetBucketACL("bucket-name")
 			return r, err
 		},
-		expectedRequest: `GET /bucket_name/?acl HTTP/1.1
-Host: %s
+		expectedRequest: `GET /?acl HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:LKyy+96PVVFIFgIYgwz3DD3CEzs=
+Authorization: OSS ayahghai0juiSie:boNBCRWMvPxob0Wkv+5qB9RNGeQ=
 Date: %s`,
 		response: `HTTP/1.1 200 OK
 x-oss-request-id: 6f720c98-40fe-6de0-047b-e7fb08c4059b
@@ -333,11 +336,11 @@ Server: AliyunOSS
 			r, err := a.GetBucketLocation(testBucketName)
 			return r, err
 		},
-		expectedRequest: `GET /bucket_name/?location HTTP/1.1
-Host: %s
+		expectedRequest: `GET /?location HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:ycP0hM0Uk40gkqXhljFeHVTWkko=
+Authorization: OSS ayahghai0juiSie:LrbZbg8dvqId7QbH9j8+JjuNAwQ=
 Date: %s`,
 		response: `HTTP/1.1 200
 x-oss-request-id: 513836E0F687780D1A690708
@@ -358,11 +361,11 @@ Server: AliyunOSS
 		request: func(a *API) (interface{}, error) {
 			return nil, a.DeleteBucket(testBucketName)
 		},
-		expectedRequest: `DELETE /bucket_name/ HTTP/1.1
-Host: %s
+		expectedRequest: `DELETE / HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:L4mtpy/LSUGq1J/oNTOd/lnMEw8=
+Authorization: OSS ayahghai0juiSie:FXJsV//QmBZqMczqQkR2Lm+QUKY=
 Date: %s`,
 		response:         "HTTP/1.1 200\n",
 		expectedResponse: nil,
@@ -374,12 +377,12 @@ Date: %s`,
 			r, err := a.AppendObjectFromFile(testBucketName, testObjectName, testFileName, 0)
 			return r, err
 		},
-		expectedRequest: `POST /bucket_name/object_name?append&position=0 HTTP/1.1
-Host: %s
+		expectedRequest: `POST /object/name?append&position=0 HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Content-Length: 16
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:pTwcHEynVLcFuA99DVwYrxr2nlk=
+Authorization: OSS ayahghai0juiSie:PwNSrS1NZvpPH6pfzPiIvQWH0G8=
 Content-Type: application/octet-stream
 Date: %s
 
@@ -403,11 +406,11 @@ x-oss-request-id: 559CC9BDC755F95A64485981
 			r, err := a.HeadObject(testBucketName, testObjectName)
 			return r, err
 		},
-		expectedRequest: `HEAD /bucket_name/object_name HTTP/1.1
-Host: %s
+		expectedRequest: `HEAD /object/name HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:nK5UyJ5cD6+AShftVF8YQI2+Oo4=
+Authorization: OSS ayahghai0juiSie:B29hiJ0Fu10nq+kyeb4+vM6Cwns=
 Date: %s`,
 		response: `HTTP/1.1 200 OK
 x-oss-request-id: 06d4be30-2216-9264-757a-8f8b19b254bb
@@ -426,11 +429,11 @@ Content-Length: 344606
 		request: func(a *API) (interface{}, error) {
 			return nil, a.DeleteObject(testBucketName, testObjectName)
 		},
-		expectedRequest: `DELETE /bucket_name/object_name HTTP/1.1
-Host: %s
+		expectedRequest: `DELETE /object/name HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:SAfVfVFR6w1tFpfqE0xBGZaryb8=
+Authorization: OSS ayahghai0juiSie:V1ehjYUAX1v6/ZUCzNKbCLKXQWE=
 Date: %s`,
 		response:         "HTTP/1.1 200 OK\n",
 		expectedResponse: nil,
@@ -442,16 +445,15 @@ Date: %s`,
 			r, err := a.DeleteObjects(testBucketName, false, "obj1", "obj2", "obj3")
 			return r, err
 		},
-		expectedRequest: `POST /bucket_name/?delete HTTP/1.1
-Host: %s
+		expectedRequest: `POST /?delete HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
-Content-Length: 172
+Content-Length: 133
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:Jk4IiThihXCj8bmIwFPbc7kHbco=
-Content-Md5: Tbx4zkqDSc6oNRnTo4dndg==
+Authorization: OSS ayahghai0juiSie:TmXuZ8SpwHR8lvCewR/jnnoR1qA=
+Content-Md5: JDhCJwY/U4gHz5o/Q4eCoQ==
 Date: %s
 
-<?xml version="1.0" encoding="UTF-8"?>
 <Delete><Quiet>false</Quiet><Object><Key>obj1</Key></Object><Object><Key>obj2</Key></Object><Object><Key>obj3</Key></Object></Delete>`,
 		response: `HTTP/1.1 200 OK
 x-oss-request-id: 78320852-7eee-b697-75e1-b6db0f4849e7
@@ -491,17 +493,17 @@ Server: AliyunOSS
 	{
 		name: "CopyObject",
 		request: func(a *API) (interface{}, error) {
-			r, err := a.CopyObject("source_bucket", "source_object", "target_bucket", "target_object")
+			r, err := a.CopyObject("source-bucket", "source-object", "target-bucket", "target-object")
 			return r, err
 		},
-		expectedRequest: `PUT /target_bucket/target_object HTTP/1.1
-Host: %s
+		expectedRequest: `PUT /target-object HTTP/1.1
+Host: target-bucket.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Content-Length: 0
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:mRUja421nH8GsCJJ4vWuQszdW8g=
+Authorization: OSS ayahghai0juiSie:83kiZ9FOf79+NONgJAXk00Hzk4g=
 Date: %s
-X-Oss-Copy-Source: /source_bucket/source_object`,
+X-Oss-Copy-Source: /source-bucket/source-object`,
 		response: `HTTP/1.1 200 OK
 x-oss-request-id: 3dfb2597-72a0-b3f7-320f-8b6627a96e68
 Content-Type: application/xml
@@ -527,12 +529,12 @@ Server: AliyunOSS
 			r, err := a.InitUpload(testBucketName, testObjectName)
 			return r, err
 		},
-		expectedRequest: `POST /bucket_name/object_name?uploads HTTP/1.1
-Host: %s
+		expectedRequest: `POST /object/name?uploads HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Content-Length: 0
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:i0ZMmOYrcPZibjOyuazIcpqP45Q=
+Authorization: OSS ayahghai0juiSie:tuMEuJhbZGSP1wsWYvOI2awfPFw=
 Content-Type: application/octet-stream
 Date: %s`,
 		response: `HTTP/1.1 200 OK
@@ -545,12 +547,12 @@ Content-Type: application/xml
 
 <?xml version="1.0" encoding="UTF-8"?>
 <InitiateMultipartUploadResult xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">
-    <Bucket>bucket_name</Bucket>
+    <Bucket>bucket-name</Bucket>
     <Key>multipart.data</Key>
     <UploadId>0004B9894A22E5B1888A1E29F8236E2D</UploadId>
 </InitiateMultipartUploadResult>`,
 		expectedResponse: &InitiateMultipartUploadResult{
-			Bucket:   "bucket_name",
+			Bucket:   "bucket-name",
 			Key:      "multipart.data",
 			UploadID: "0004B9894A22E5B1888A1E29F8236E2D",
 		},
@@ -562,12 +564,12 @@ Content-Type: application/xml
 			r, err := a.UploadPart(testBucketName, testObjectName, "0004B9895DBBB6EC98E36", 1, strings.NewReader(`sfweruewpinbeewa`), 16)
 			return r, err
 		},
-		expectedRequest: `PUT /bucket_name/object_name?partNumber=1&uploadId=0004B9895DBBB6EC98E36 HTTP/1.1
-Host: %s
+		expectedRequest: `PUT /object/name?partNumber=1&uploadId=0004B9895DBBB6EC98E36 HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Content-Length: 16
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:im5VQx0x3baFKjafCmEiDxClVU0=
+Authorization: OSS ayahghai0juiSie:MUWh2GXHDWeyeURcpCDFJIQdPlM=
 Content-Type: application/octet-stream
 Date: %s
 
@@ -596,16 +598,16 @@ Date: Wed, 22 Feb 2012 08:32:21 GMT
 			r, err := a.CompleteUpload(testBucketName, testObjectName, "0004B9895DBBB6EC98E36", list)
 			return r, err
 		},
-		expectedRequest: `POST /bucket_name/object_name?uploadId=0004B9895DBBB6EC98E36 HTTP/1.1
-Host: %s
+		expectedRequest: `POST /object/name?uploadId=0004B9895DBBB6EC98E36 HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
-Content-Length: 174
+Content-Length: 135
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:vnZp7SnuGTXV5KPYq+GV+ws5Ff4=
-Content-Md5: zJBKGLrHC8XqtxxS7kZM+Q==
+Authorization: OSS ayahghai0juiSie:uhgZBIVEZXwHj/kbhGgqDH/q1yk=
+Content-Md5: 9ZCUaLPTyBu1a7wYPPi23w==
+Content-Type: application/octet-stream
 Date: %s
 
-<?xml version="1.0" encoding="UTF-8"?>
 <CompleteMultipartUpload><Part><PartNumber>1</PartNumber><ETag>C1B61751512FFC8B0E86675D114497A6</ETag></Part></CompleteMultipartUpload>`,
 		response: `HTTP/1.1 200 OK
 Server: AliyunOSS
@@ -635,11 +637,11 @@ Date: Fri, 24 Feb 2012 10:19:18 GMT
 		request: func(a *API) (interface{}, error) {
 			return nil, a.CancelUpload(testBucketName, testObjectName, "0004B9895DBBB6EC98E36")
 		},
-		expectedRequest: `DELETE /bucket_name/object_name?uploadId=0004B9895DBBB6EC98E36 HTTP/1.1
-Host: %s
+		expectedRequest: `DELETE /object/name?uploadId=0004B9895DBBB6EC98E36 HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:afD0ln6LveomIhMndS4klSzfCwM=
+Authorization: OSS ayahghai0juiSie:KbFCcxzGSPnjmGmVuC8RSv0Pi1I=
 Date: %s`,
 		response: `HTTP/1.1 204
 Server: AliyunOSS
@@ -656,11 +658,11 @@ Date: Wed, 22 Feb 2012 08:32:21 GMT
 			r, err := a.ListUploads(testBucketName, testObjectName)
 			return r, err
 		},
-		expectedRequest: `GET /bucket_name/?uploads HTTP/1.1
-Host: %s
+		expectedRequest: `GET /?uploads HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:EJSXM8cV0QJNk9jPFGgaeARRu5Y=
+Authorization: OSS ayahghai0juiSie:YcD3EXdEiXLUSdVkmxyE2lK14g0=
 Date: %s`,
 		response: `HTTP/1.1 200
 Server: AliyunOSS
@@ -729,11 +731,11 @@ Date: Thu, 23 Feb 2012 06:14:27 GMT
 			r, err := a.ListParts(testBucketName, testObjectName, "0004B9895DBBB6EC98E36")
 			return r, err
 		},
-		expectedRequest: `GET /bucket_name/object_name?uploadId=0004B9895DBBB6EC98E36 HTTP/1.1
-Host: %s
+		expectedRequest: `GET /object/name?uploadId=0004B9895DBBB6EC98E36 HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:/zw9uMvuU3TtkYmnFM1SVoXI6P8=
+Authorization: OSS ayahghai0juiSie:/JcXW8XD/ECBSA4cY5sIUi58J58=
 Date: %s`,
 		response: `HTTP/1.1 200
 Server: AliyunOSS
@@ -820,16 +822,15 @@ Date: Thu, 23 Feb 2012 07:13:28 GMT
 				},
 			})
 		},
-		expectedRequest: `PUT /bucket_name/?cors HTTP/1.1
-Host: %s
+		expectedRequest: `PUT /?cors HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
-Content-Length: 549
+Content-Length: 510
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:AZ9v6CeAbKAWaphXg3GHuZ26FuM=
-Content-Md5: dCyZ6ocGwvoNqax+nPRAlg==
+Authorization: OSS ayahghai0juiSie:EOcmfX5IgAYU6yrHEgMsSyjrxLk=
+Content-Md5: b3amOl4tM2Xd6JIKiHk9TQ==
 Date: %s
 
-<?xml version="1.0" encoding="UTF-8"?>
 <CORSConfiguration><CORSRule><AllowedOrigin>*</AllowedOrigin><AllowedMethod>PUT</AllowedMethod><AllowedMethod>GET</AllowedMethod><AllowedHeader>Authorization</AllowedHeader></CORSRule><CORSRule><AllowedOrigin>http://www.a.com</AllowedOrigin><AllowedOrigin>http://www.b.com</AllowedOrigin><AllowedMethod>GET</AllowedMethod><AllowedHeader>Authorization</AllowedHeader><ExposeHeader>x-oss-test</ExposeHeader><ExposeHeader>x-oss-test1</ExposeHeader><MaxAgeSeconds>100</MaxAgeSeconds></CORSRule></CORSConfiguration>`,
 		response: `HTTP/1.1 200 OK
 x-oss-request-id: 50519080C4689A033D00235F
@@ -847,11 +848,11 @@ Server: AliyunOSS
 			r, err := a.GetCORS(testBucketName)
 			return r, err
 		},
-		expectedRequest: `GET /bucket_name/?cors HTTP/1.1
-Host: %s
+		expectedRequest: `GET /?cors HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:PBEn27rJaD+O4E/2gN22KbaMbcE=
+Authorization: OSS ayahghai0juiSie:PM+ElDiB+ORFf9OqEhTVn5je2K0=
 Date: %s`,
 		response: `HTTP/1.1 200
 x-oss-request-id: 50519080C4689A033D00235F
@@ -888,11 +889,11 @@ Server: AliyunOSS
 		request: func(a *API) (interface{}, error) {
 			return nil, a.DeleteCORS(testBucketName)
 		},
-		expectedRequest: `DELETE /bucket_name/?cors HTTP/1.1
-Host: %s
+		expectedRequest: `DELETE /?cors HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:H63RU82G4AkVp+OFgDH3tcnnAKk=
+Authorization: OSS ayahghai0juiSie:8krD9dvjeiyw4fwlYhHCkQwIfOM=
 Date: %s`,
 		response: `HTTP/1.1 204 No Content
 x-oss-request-id: 5051845BC4689A033D0022BC
@@ -929,15 +930,14 @@ Server: AliyunOSS
 			}
 			return nil, a.PutLifecycle(testBucketName, lifecycle)
 		},
-		expectedRequest: `PUT /bucket_name/?lifecycle HTTP/1.1
-Host: %s
+		expectedRequest: `PUT /?lifecycle HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
-Content-Length: 379
+Content-Length: 340
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:jAZL2xQ14PYq0u74q2qG2/oyTrc=
+Authorization: OSS ayahghai0juiSie:3jdkrgCFCOELpNpH0K4rxkjK6AU=
 Date: %s
 
-<?xml version="1.0" encoding="UTF-8"?>
 <LifecycleConfiguration><Rule><ID>delete obsoleted files</ID><Prefix>obsoleted/</Prefix><Status>Enabled</Status><Expiration><Days>3</Days></Expiration></Rule><Rule><ID>delete temporary files</ID><Prefix>temporary/</Prefix><Status>Enabled</Status><Expiration><Date>2022-10-12T00:00:00.001Z</Date></Expiration></Rule></LifecycleConfiguration>`,
 		response: `HTTP/1.1 200 OK
 x-oss-request-id: 534B371674E88A4D8906008B
@@ -955,11 +955,11 @@ Server: AliyunOSS
 			r, err := a.GetLifecycle(testBucketName)
 			return r, err
 		},
-		expectedRequest: `GET /bucket_name/?lifecycle HTTP/1.1
-Host: %s
+		expectedRequest: `GET /?lifecycle HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:VeeOLgEBYNESI3mHMiottgBN7rY=
+Authorization: OSS ayahghai0juiSie:7aTx+kQARBcKul23R01R1Rw6yvU=
 Date: %s`,
 		response: `HTTP/1.1 200
 x-oss-request-id: 534B372974E88A4D89060099
@@ -998,11 +998,11 @@ Server: AliyunOSS
 		request: func(a *API) (interface{}, error) {
 			return nil, a.DeleteLifecycle(testBucketName)
 		},
-		expectedRequest: `DELETE /bucket_name/?lifecycle HTTP/1.1
-Host: %s
+		expectedRequest: `DELETE /?lifecycle HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:8FY0kYeWcG4XIu18eCK3mig6qAI=
+Authorization: OSS ayahghai0juiSie:OImj+a+NC4oGhFL3lsSRj8iY6XI=
 Date: %s`,
 		response: `HTTP/1.1 204 No Content
 x-oss-request-id: 534B372F74E88A4D89060124
@@ -1015,7 +1015,7 @@ Server: AliyunOSS
 	},
 }
 
-func TestAPIs(t *testing.T) {
+func TestAllOssAPIs(t *testing.T) {
 	for i := range apiTestcases {
 		testAPI(t, &apiTestcases[i])
 	}
@@ -1026,8 +1026,16 @@ func testAPI(t *testing.T, testcase *testcase) {
 		t.Fatalf(testcaseErr, testcase.name, err)
 	}
 	defer server.Close()
-	api := New("localhost:"+server.Port(), testID, testSecret)
+	api := New(testEndpoint, testID, testSecret)
 	api.now = testTime
+	api.SetHTTPClient(&http.Client{
+		Transport: &http.Transport{
+			Dial: func(network, addr string) (net.Conn, error) {
+				// Hijack the address to 127.0.0.1 for testing
+				return net.Dial(network, "127.0.0.1:"+server.Port())
+			},
+		},
+	})
 	response, err := testcase.request(api)
 	if v := reflect.ValueOf(response); !v.IsValid() || (v.Kind() == reflect.Ptr && v.IsNil()) {
 		response = nil
@@ -1035,7 +1043,7 @@ func testAPI(t *testing.T, testcase *testcase) {
 	if !reflect.DeepEqual(err, testcase.expectedError) {
 		t.Fatalf(testcaseExpectBut, testcase.name, testcase.expectedError, err)
 	}
-	expectedRequest := fmt.Sprintf(testcase.expectedRequest, "localhost:"+server.Port(), userAgent, testTimeText)
+	expectedRequest := fmt.Sprintf(testcase.expectedRequest, userAgent, testTimeText)
 	if server.Err != nil {
 		t.Fatalf(testcaseErr, testcase.name, err)
 	}

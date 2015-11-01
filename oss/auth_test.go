@@ -7,7 +7,7 @@ import (
 )
 
 func TestAuth(t *testing.T) {
-	req, err := http.NewRequest("PUT", "/oss-example/nelson", nil)
+	req, err := http.NewRequest("PUT", "http://oss-example.oss-cn-hangzhou.aliyuncs.com/nelson", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -17,7 +17,12 @@ func TestAuth(t *testing.T) {
 	req.Header.Set("X-OSS-Meta-Author", "foo@bar.com")
 	req.Header.Set("X-OSS-Magic", "abracadabra")
 	req.Header.Set("Content-Md5", "ODBGOERFMDMzQTczRUY3NUE3NzA5QzdFNUYzMDQxNEM=")
-	auth := authorization{req: req, secret: []byte("OtxrzxIsfpFjA7SwPzILwy8Bw21TLhquhboDYROV")}
+	auth := authorization{
+		req:    req,
+		bucket: "oss-example",
+		object: "",
+		secret: []byte("OtxrzxIsfpFjA7SwPzILwy8Bw21TLhquhboDYROV"),
+	}
 	if actual, expected := string(auth.canonicalizedOSSHeaders()),
 		"x-oss-magic:abracadabra\nx-oss-meta-author:foo@bar.com\n"; actual != expected {
 		t.Fatalf(expectBut, expected, actual)

@@ -15,6 +15,10 @@ const (
 	testcaseErr       = "testcase %s: %v"
 )
 
+func init() {
+	pythonSDKCompatibleMode = true
+}
+
 type response struct {
 	headers []string
 	body    string

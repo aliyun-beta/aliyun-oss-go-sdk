@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -37,36 +38,36 @@ func New(endPoint, accessKeyID, accessKeySecret string) *API {
 
 // GetService list all buckets
 func (a *API) GetService() (res *ListAllMyBucketsResult, _ error) {
-	return res, a.do("GET", "", &res)
+	return res, a.do("GET", "", "", &res)
 }
 
 // PutBucket creates a new bucket
 func (a *API) PutBucket(name string, acl ACLType) error {
-	return a.do("PUT", name+"/", nil, ACL(acl))
+	return a.do("PUT", name, "", nil, ACL(acl))
 }
 
 func (a *API) GetBucket(name string, options ...Option) (res *ListBucketResult, _ error) {
-	return res, a.do("GET", name+"/", &res, options...)
+	return res, a.do("GET", name, "", &res, options...)
 }
 
 func (a *API) GetBucketACL(name string) (res *AccessControlPolicy, _ error) {
-	return res, a.do("GET", name+"/?acl", &res)
+	return res, a.do("GET", name, "?acl", &res)
 }
 
 func (a *API) GetBucketLocation(name string) (res *LocationConstraint, _ error) {
-	return res, a.do("GET", name+"/?location", &res)
+	return res, a.do("GET", name, "?location", &res)
 }
 
 func (a *API) DeleteBucket(name string) error {
-	return a.do("DELETE", name+"/", nil)
+	return a.do("DELETE", name, "", nil)
 }
 
 func (a *API) GetObject(bucket, object string, w io.Writer, options ...Option) error {
-	return a.do("GET", bucket+"/"+object, &writerResult{w})
+	return a.do("GET", bucket, object, &writerResult{w})
 }
 
 func (a *API) PutObject(bucket, object string, rd io.Reader, options ...Option) error {
-	return a.do("PUT", bucket+"/"+object, nil, append([]Option{httpBody(rd)}, options...)...)
+	return a.do("PUT", bucket, object, nil, append([]Option{httpBody(rd)}, options...)...)
 }
 
 func (a *API) PutObjectFromString(bucket, object, str string, options ...Option) error {
@@ -83,7 +84,7 @@ func (a *API) PutObjectFromFile(bucket, object, file string, options ...Option) 
 }
 
 func (a *API) AppendObject(bucket, object string, rd io.Reader, position AppendPosition, options ...Option) (res AppendPosition, _ error) {
-	return res, a.do("POST", fmt.Sprintf("%s/%s?append&position=%d", bucket, object, position), &res, append([]Option{httpBody(rd)}, options...)...)
+	return res, a.do("POST", bucket, fmt.Sprintf("%s?append&position=%d", object, position), &res, append([]Option{httpBody(rd)}, options...)...)
 }
 
 func (a *API) AppendObjectFromFile(bucket, object, file string, position AppendPosition, options ...Option) (res AppendPosition, _ error) {
@@ -96,71 +97,71 @@ func (a *API) AppendObjectFromFile(bucket, object, file string, position AppendP
 }
 
 func (a *API) HeadObject(bucket, object string) (res Header, _ error) {
-	return res, a.do("HEAD", bucket+"/"+object, &res)
+	return res, a.do("HEAD", bucket, object, &res)
 }
 
 func (a *API) DeleteObject(bucket, object string) error {
-	return a.do("DELETE", bucket+"/"+object, nil)
+	return a.do("DELETE", bucket, object, nil)
 }
 
 func (a *API) DeleteObjects(bucket string, quiet bool, objects ...string) (res *DeleteResult, _ error) {
-	return res, a.do("POST", bucket+"/?delete", &res, xmlBody(newDelete(objects, quiet)), ContentMD5)
+	return res, a.do("POST", bucket, "?delete", &res, xmlBody(newDelete(objects, quiet)), ContentMD5)
 }
 
 func (a *API) CopyObject(sourceBucket, sourceObject, targetBucket, targetObject string, options ...Option) (res *CopyObjectResult, _ error) {
-	return res, a.do("PUT", targetBucket+"/"+targetObject, &res, append(options, CopySource(sourceBucket, sourceObject))...)
+	return res, a.do("PUT", targetBucket, targetObject, &res, append(options, CopySource(sourceBucket, sourceObject))...)
 }
 
 func (a *API) InitUpload(bucket, object string, options ...Option) (res *InitiateMultipartUploadResult, _ error) {
-	return res, a.do("POST", bucket+"/"+object+"?uploads", &res, append(options, ContentType("application/octet-stream"))...)
+	return res, a.do("POST", bucket, object+"?uploads", &res, append(options, ContentType("application/octet-stream"))...)
 }
 
 func (a *API) UploadPart(bucket, object string, uploadID string, partNumber int, rd io.Reader, size int64) (res *UploadPartResult, _ error) {
-	return res, a.do("PUT", fmt.Sprintf("%s/%s?partNumber=%d&uploadId=%s", bucket, object, partNumber, uploadID), &res, httpBody(&io.LimitedReader{R: rd, N: size}), ContentLength(size))
+	return res, a.do("PUT", bucket, fmt.Sprintf("%s?partNumber=%d&uploadId=%s", object, partNumber, uploadID), &res, httpBody(&io.LimitedReader{R: rd, N: size}), ContentLength(size))
 }
 
 func (a *API) CompleteUpload(bucket, object string, uploadID string, list *CompleteMultipartUpload) (res *CompleteMultipartUploadResult, _ error) {
-	return res, a.do("POST", fmt.Sprintf("%s/%s?uploadId=%s", bucket, object, uploadID), &res, xmlBody(list), ContentMD5)
+	return res, a.do("POST", bucket, fmt.Sprintf("%s?uploadId=%s", object, uploadID), &res, xmlBody(list), ContentMD5, ContentType("application/octet-stream"))
 }
 
 func (a *API) CancelUpload(bucket, object string, uploadID string) error {
-	return a.do("DELETE", fmt.Sprintf("%s/%s?uploadId=%s", bucket, object, uploadID), nil)
+	return a.do("DELETE", bucket, fmt.Sprintf("%s?uploadId=%s", object, uploadID), nil)
 }
 
 func (a *API) ListUploads(bucket, object string) (res *ListMultipartUploadsResult, _ error) {
-	return res, a.do("GET", bucket+"/"+"?uploads", &res)
+	return res, a.do("GET", bucket, "?uploads", &res)
 }
 
 func (a *API) ListParts(bucket, object, uploadID string) (res *ListPartsResult, _ error) {
-	return res, a.do("GET", fmt.Sprintf("%s/%s?uploadId=%s", bucket, object, uploadID), &res)
+	return res, a.do("GET", bucket, fmt.Sprintf("%s?uploadId=%s", object, uploadID), &res)
 }
 
 func (a *API) PutCORS(bucket string, cors *CORSConfiguration) error {
-	return a.do("PUT", bucket+"/?cors", nil, xmlBody(cors), ContentMD5)
+	return a.do("PUT", bucket, "?cors", nil, xmlBody(cors), ContentMD5)
 }
 
 func (a *API) GetCORS(bucket string) (res *CORSConfiguration, _ error) {
-	return res, a.do("GET", bucket+"/?cors", &res)
+	return res, a.do("GET", bucket, "?cors", &res)
 }
 
 func (a *API) DeleteCORS(bucket string) error {
-	return a.do("DELETE", bucket+"/?cors", nil)
+	return a.do("DELETE", bucket, "?cors", nil)
 }
 
 func (a *API) PutLifecycle(bucket string, lifecycle *LifecycleConfiguration) error {
-	return a.do("PUT", bucket+"/?lifecycle", nil, xmlBody(lifecycle))
+	return a.do("PUT", bucket, "?lifecycle", nil, xmlBody(lifecycle))
 }
 
 func (a *API) GetLifecycle(bucket string) (res *LifecycleConfiguration, _ error) {
-	return res, a.do("GET", bucket+"/?lifecycle", &res)
+	return res, a.do("GET", bucket, "?lifecycle", &res)
 }
 
 func (a *API) DeleteLifecycle(bucket string) error {
-	return a.do("DELETE", bucket+"/?lifecycle", nil)
+	return a.do("DELETE", bucket, "?lifecycle", nil)
 }
 
-func (a *API) do(method, resource string, result interface{}, options ...Option) error {
-	req, err := a.newRequest(method, resource, options)
+func (a *API) do(method, bucket, object string, result interface{}, options ...Option) error {
+	req, err := a.newRequest(method, bucket, object, options)
 	if err != nil {
 		return err
 	}
@@ -172,8 +173,12 @@ func (a *API) do(method, resource string, result interface{}, options ...Option)
 	return a.handleResponse(resp, result)
 }
 
-func (a *API) newRequest(method, resource string, options []Option) (*http.Request, error) {
-	req, err := http.NewRequest(method, fmt.Sprintf("http://%s/%s", a.endPoint, resource), nil)
+func (a *API) newRequest(method, bucket, object string, options []Option) (*http.Request, error) {
+	uri, err := ossURL(a.endPoint, bucket, object)
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(method, uri, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -185,9 +190,36 @@ func (a *API) newRequest(method, resource string, options []Option) (*http.Reque
 	req.Header.Set("Accept-Encoding", "identity")
 	req.Header.Set("Date", a.now().UTC().Format(gmtTime))
 	req.Header.Set("User-Agent", userAgent)
-	auth := authorization{req: req, secret: []byte(a.accessKeySecret)}
+	auth := authorization{
+		req:    req,
+		bucket: bucket,
+		object: object,
+		secret: []byte(a.accessKeySecret),
+	}
 	req.Header.Set("Authorization", "OSS "+a.accessKeyID+":"+auth.value())
 	return req, nil
+}
+
+var (
+	rxBucketName = regexp.MustCompile(`[a-z0-9][a-z0-9\-]{2,62}`)
+	rxObjectName = regexp.MustCompile(`[^/\][^\r\n]*`)
+)
+
+func ossURL(host, bucket, object string) (string, error) {
+	scheme := "http://"
+	if bucket == "" && object == "" {
+		return scheme + host, nil
+	}
+	if !rxBucketName.MatchString(bucket) {
+		return "", ErrInvalidBucketName
+	}
+	if object != "" && !rxObjectName.MatchString(object) || len(object) > 1023 {
+		return "", ErrInvalidObjectName
+	}
+	if !isOSSDomain(host) {
+		return scheme + fmt.Sprintf("%s/%s/%s", host, bucket, object), nil
+	}
+	return scheme + fmt.Sprintf("%s.%s/%s", bucket, host, object), nil
 }
 
 func (a *API) handleResponse(resp *http.Response, result interface{}) error {

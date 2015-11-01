@@ -6,6 +6,49 @@ import (
 	"testing"
 )
 
+func TestBucketHost(t *testing.T) {
+	{
+		req, err := http.NewRequest("GET", "http://oss-cn-hangzhou.aliyuncs.com", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		bucketHost("abc")(req)
+		if expected, actual := "abc.oss-cn-hangzhou.aliyuncs.com", req.Host; actual != expected {
+			t.Fatalf(expectBut, expected, actual)
+		}
+	}
+	{
+		req, err := http.NewRequest("GET", "http://127.0.0.1", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		bucketHost("abc")(req)
+		if expected, actual := "127.0.0.1", req.Host; actual != expected {
+			t.Fatalf(expectBut, expected, actual)
+		}
+	}
+	{
+		req, err := http.NewRequest("GET", "http://127.0.0.1:8080", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		bucketHost("abc")(req)
+		if expected, actual := "127.0.0.1:8080", req.Host; actual != expected {
+			t.Fatalf(expectBut, expected, actual)
+		}
+	}
+	{
+		req, err := http.NewRequest("GET", "http://localhost:8080", nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		bucketHost("abc")(req)
+		if expected, actual := "localhost:8080", req.Host; actual != expected {
+			t.Fatalf(expectBut, expected, actual)
+		}
+	}
+}
+
 type optionTestCase struct {
 	option Option
 	key    string
@@ -46,36 +89,6 @@ var headerTestcases = []optionTestCase{
 	{
 		option: Expires("Thu, 01 Dec 1994 16:00:00 GMT"),
 		key:    "Expires",
-		value:  "Thu, 01 Dec 1994 16:00:00 GMT",
-	},
-	{
-		option: ResponseContentType("plain/text"),
-		key:    "Response-Content-Type",
-		value:  "plain/text",
-	},
-	{
-		option: ResponseContentLanguage("en"),
-		key:    "Response-Content-Language",
-		value:  "en",
-	},
-	{
-		option: ResponseCacheControl("no-cache"),
-		key:    "Response-Cache-Control",
-		value:  "no-cache",
-	},
-	{
-		option: ResponseContentDisposition("Attachment; filename=example.txt"),
-		key:    "Response-Content-Disposition",
-		value:  "Attachment; filename=example.txt",
-	},
-	{
-		option: ResponseContentEncoding("gzip"),
-		key:    "Response-Content-Encoding",
-		value:  "gzip",
-	},
-	{
-		option: ResponseExpires("Thu, 01 Dec 1994 16:00:00 GMT"),
-		key:    "Response-Expires",
 		value:  "Thu, 01 Dec 1994 16:00:00 GMT",
 	},
 	{
@@ -186,6 +199,36 @@ var paramTestCases = []optionTestCase{
 		key:    "encoding-type",
 		value:  "ascii",
 	},
+	{
+		option: ResponseContentType("plain/text"),
+		key:    "Response-Content-Type",
+		value:  "plain/text",
+	},
+	{
+		option: ResponseContentLanguage("en"),
+		key:    "Response-Content-Language",
+		value:  "en",
+	},
+	{
+		option: ResponseCacheControl("no-cache"),
+		key:    "Response-Cache-Control",
+		value:  "no-cache",
+	},
+	{
+		option: ResponseContentDisposition("Attachment; filename=example.txt"),
+		key:    "Response-Content-Disposition",
+		value:  "Attachment; filename=example.txt",
+	},
+	{
+		option: ResponseContentEncoding("gzip"),
+		key:    "Response-Content-Encoding",
+		value:  "gzip",
+	},
+	{
+		option: ResponseExpires("Thu, 01 Dec 1994 16:00:00 GMT"),
+		key:    "Response-Expires",
+		value:  "Thu, 01 Dec 1994 16:00:00 GMT",
+	},
 }
 
 func TestParamOptions(t *testing.T) {
@@ -215,8 +258,7 @@ func TestBucketLocationContraint(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if expected, actual := `<?xml version="1.0" encoding="UTF-8"?>
-<CreateBucketConfiguration><LocationConstraint>oss-cn-beijing</LocationConstraint></CreateBucketConfiguration>`, string(body); actual != expected {
+	if expected, actual := `<CreateBucketConfiguration><LocationConstraint>oss-cn-beijing</LocationConstraint></CreateBucketConfiguration>`, string(body); actual != expected {
 		t.Fatalf(expectBut, expected, actual)
 	}
 }

@@ -71,7 +71,9 @@ func newDelete(objects []string, quiet bool) *Delete {
 func xmlBody(obj interface{}) Option {
 	return func(req *http.Request) error {
 		var w bytes.Buffer
-		w.WriteString(xml.Header)
+		if !pythonSDKCompatibleMode {
+			w.WriteString(xml.Header)
+		}
 		if err := xml.NewEncoder(&w).Encode(obj); err != nil {
 			return err
 		}

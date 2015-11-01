@@ -6,7 +6,17 @@ Quick Start
 
 ```bash
 go get -u github.com/aliyun/aliyun-oss-go-sdk/oss
+go test -v github.com/aliyun/aliyun-oss-go-sdk/oss
 ```
+
+Highlights
+----------
+* Complete set of Aliyun OSS API
+* 100% test coverage
+* Idiomatic and flexible programming interface
+* Clean and orthogonal implementation
+* Named options for setting headers & parameters
+* Extremely easy to extend for new APIs
 
 Differences with Python SDK
 ---------------------------
@@ -15,17 +25,16 @@ Differences with Python SDK
 * Go HTTP client does not support 100-Continue (will be supported after Go 1.6, see https://github.com/golang/go/issues/3665)
 * MIME type of txt file has default charset utf-8
 * Go handles HTTP better than Python
-  - Go GET request does not have Content-Length header
+  - Go GET request does not have redundant "Content-Length: 0" header
   - Parameters will be omitted if the argument is not set
   - HTTP header keys are automatically converted into canonical format, e.g.
     x-oss-acl becomes X-Oss-Acl
-  - Go always send URL parameters in canonical order
+  - Go always sends URL parameters and headers in canonical order
 
 Unclear issues in Spec
 ----------------------
 
-* Resource or ResourceType in Error XML?
-* Host: <bucketname>.oss-cn-hangzhou.aliyuncs.com?
+* Resource or ResourceType or both in Error XML?
 
 Author
 ------

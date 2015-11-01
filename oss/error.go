@@ -2,15 +2,23 @@ package oss
 
 import (
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"net/http"
 )
 
+var (
+	ErrInvalidBucketName = errors.New("invalid bucket name")
+	ErrInvalidObjectName = errors.New("invalid object name")
+)
+
 type Error struct {
-	Code      string `xml:"Code"`
-	Message   string `xml:"Message"`
-	RequestID string `xml:"RequestId"`
-	HostID    string `xml:"HostId"`
+	Code         string
+	Message      string
+	RequestID    string `xml:"RequestId"`
+	Resource     string
+	ResourceType string
+	HostID       string `xml:"HostId"`
 
 	HTTPStatusCode int    `xml:"-"`
 	HTTPStatus     string `xml:"-"`

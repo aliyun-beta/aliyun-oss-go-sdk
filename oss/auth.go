@@ -15,6 +15,8 @@ import (
 
 type authorization struct {
 	req    *http.Request
+	bucket string
+	object string
 	secret []byte
 }
 
@@ -71,9 +73,10 @@ func (a *authorization) data() []byte {
 
 func (a *authorization) canonicalizedResource() string {
 	uri := *a.req.URL
-	uri.Host = ""
 	uri.Scheme = ""
-	return uri.String()
+	uri.Host = ""
+	uri.Path = a.bucket + uri.Path
+	return "/" + uri.String()
 }
 
 func (a *authorization) value() string {
