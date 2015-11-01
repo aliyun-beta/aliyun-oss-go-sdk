@@ -14,13 +14,9 @@ type API struct {
 	endPoint        string
 	accessKeyID     string
 	accessKeySecret string
+	securityToken   string
 	now             func() time.Time
 	client          *http.Client
-}
-
-// SetHTTPClient sets the underlying http.Client object used by the OSS client.
-func (a *API) SetHTTPClient(client *http.Client) {
-	a.client = client
 }
 
 // New creates an API object
@@ -32,6 +28,16 @@ func New(endPoint, accessKeyID, accessKeySecret string) *API {
 		now:             time.Now,
 		client:          http.DefaultClient,
 	}
+}
+
+// SetHTTPClient sets the underlying http.Client object used by the OSS client.
+func (a *API) SetHTTPClient(client *http.Client) {
+	a.client = client
+}
+
+// SetSecurityToken sets the STS token for temporary access
+func (a *API) SetSecurityToken(token string) {
+	a.securityToken = token
 }
 
 // GetService list all buckets
@@ -225,6 +231,9 @@ func (a *API) newRequest(method, bucket, object string, options []Option) (*http
 	req.Header.Set("Accept-Encoding", "identity")
 	req.Header.Set("Date", a.now().UTC().Format(gmtTime))
 	req.Header.Set("User-Agent", userAgent)
+	if a.securityToken != "" {
+		req.Header.Set("X-Oss-Security-Token", a.securityToken)
+	}
 	auth := authorization{
 		req:    req,
 		bucket: bucket,
