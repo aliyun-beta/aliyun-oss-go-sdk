@@ -486,6 +486,44 @@ Server: AliyunOSS
 	},
 
 	{
+		name: "GetBucketWebsite",
+		request: func(a *API) (interface{}, error) {
+			r, err := a.GetBucketWebsite(testBucketName)
+			return r, err
+		},
+		expectedRequest: `GET /?website HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
+User-Agent: %s
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:r+KluO4YIu/eW9blDlcsGiUFpxc=
+Date: %s`,
+		response: `HTTP/1.1 200
+x-oss-request-id: 50519080C4689A033D00235F
+Date: Thu, 13 Sep 2012 07:51:28 GMT
+Connection: close
+Content-Length: 270
+Server: AliyunOSS
+
+<?xml version="1.0" encoding="UTF-8"?>
+<WebsiteConfiguration xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">
+<IndexDocument>
+<Suffix>index.html</Suffix>
+    </IndexDocument>
+    <ErrorDocument>
+        <Key>error.html</Key>
+    </ErrorDocument>
+</WebsiteConfiguration>`,
+		expectedResponse: &WebsiteConfiguration{
+			IndexDocument: IndexDocument{
+				Suffix: "index.html",
+			},
+			ErrorDocument: ErrorDocument{
+				Key: "error.html",
+			},
+		},
+	},
+
+	{
 		name: "DeleteBucket",
 		request: func(a *API) (interface{}, error) {
 			return nil, a.DeleteBucket(testBucketName)

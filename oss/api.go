@@ -86,8 +86,14 @@ func (a *API) GetBucketLocation(name string) (res *LocationConstraint, _ error) 
 	return res, a.do("GET", name, "?location", &res)
 }
 
+// GetBucketLogging returns a bucket's logging configuration
 func (a *API) GetBucketLogging(name string) (res *BucketLoggingStatus, _ error) {
 	return res, a.do("GET", name, "?logging", &res)
+}
+
+// GetBucketWebsite returns a bucket's configuration as a static website
+func (a *API) GetBucketWebsite(name string) (res *WebsiteConfiguration, _ error) {
+	return res, a.do("GET", name, "?website", &res)
 }
 
 func (a *API) DeleteBucket(name string) error {

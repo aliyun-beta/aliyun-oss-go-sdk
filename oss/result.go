@@ -178,6 +178,9 @@ func (r *LifecycleConfiguration) parse(resp *http.Response) error {
 func (r *BucketLoggingStatus) parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
+func (r *WebsiteConfiguration) parse(resp *http.Response) error {
+	return xml.NewDecoder(resp.Body).Decode(r)
+}
 
 type writerResult struct {
 	io.Writer
