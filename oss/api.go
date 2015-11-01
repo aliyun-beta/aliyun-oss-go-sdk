@@ -131,6 +131,10 @@ func (a *API) CancelUpload(bucket, object string, uploadID string) error {
 	return a.do("DELETE", fmt.Sprintf("%s/%s?uploadId=%s", bucket, object, uploadID), nil)
 }
 
+func (a *API) ListUploads(bucket, object string) (res *ListMultipartUploadsResult, _ error) {
+	return res, a.do("GET", bucket+"/"+"?uploads", &res)
+}
+
 func (a *API) do(method, resource string, result interface{}, options ...Option) error {
 	req, err := a.newRequest(method, resource, options)
 	if err != nil {

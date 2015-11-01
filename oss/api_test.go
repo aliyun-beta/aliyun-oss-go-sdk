@@ -599,6 +599,77 @@ Date: Wed, 22 Feb 2012 08:32:21 GMT
 `,
 		expectedResponse: nil,
 	},
+	{
+		request: func(a *API) (interface{}, error) {
+			r, err := a.ListUploads(testBucketName, testObjectName)
+			return r, err
+		},
+		expectedRequest: `GET /bucket_name/?uploads HTTP/1.1
+Host: %s
+User-Agent: %s
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:EJSXM8cV0QJNk9jPFGgaeARRu5Y=
+Date: %s`,
+		response: `HTTP/1.1 200
+Server: AliyunOSS
+Connection: close
+Content-length: 1839
+Content-type: application/xml
+x-oss-request-id: 58a41847-3d93-1905-20db-ba6f561ce67a
+Date: Thu, 23 Feb 2012 06:14:27 GMT
+
+<?xml version="1.0" encoding="UTF-8"?>
+<ListMultipartUploadsResult xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">
+    <Bucket>oss-example</Bucket>
+    <KeyMarker></KeyMarker>
+    <UploadIdMarker></UploadIdMarker>
+    <NextKeyMarker>oss.avi</NextKeyMarker>
+    <NextUploadIdMarker>0004B99B8E707874FC2D692FA5D77D3F</NextUploadIdMarker>
+    <Delimiter></Delimiter>
+    <Prefix></Prefix>
+    <MaxUploads>1000</MaxUploads>
+    <IsTruncated>false</IsTruncated>
+    <Upload>
+        <Key>multipart.data</Key>
+        <UploadId>0004B999EF518A1FE585B0C9360DC4C8</UploadId>
+        <Initiated>2012-02-23T04:18:23.000Z</Initiated>
+    </Upload>
+    <Upload>
+        <Key>multipart.data</Key>
+        <UploadId>0004B999EF5A239BB9138C6227D69F95</UploadId>
+        <Initiated>2012-02-23T04:18:23.000Z</Initiated>
+    </Upload>
+    <Upload>
+        <Key>oss.avi</Key>
+        <UploadId>0004B99B8E707874FC2D692FA5D77D3F</UploadId>
+        <Initiated>2012-02-23T06:14:27.000Z</Initiated>
+    </Upload>
+</ListMultipartUploadsResult>`,
+		expectedResponse: &ListMultipartUploadsResult{
+			Bucket:             "oss-example",
+			NextKeyMarker:      "oss.avi",
+			NextUploadIDMarker: "0004B99B8E707874FC2D692FA5D77D3F",
+			MaxUploads:         1000,
+			IsTruncated:        false,
+			Upload: []Upload{
+				{
+					Key:       "multipart.data",
+					UploadID:  "0004B999EF518A1FE585B0C9360DC4C8",
+					Initiated: parseTime(time.RFC3339Nano, "2012-02-23T04:18:23.000Z"),
+				},
+				{
+					Key:       "multipart.data",
+					UploadID:  "0004B999EF5A239BB9138C6227D69F95",
+					Initiated: parseTime(time.RFC3339Nano, "2012-02-23T04:18:23.000Z"),
+				},
+				{
+					Key:       "oss.avi",
+					UploadID:  "0004B99B8E707874FC2D692FA5D77D3F",
+					Initiated: parseTime(time.RFC3339Nano, "2012-02-23T06:14:27.000Z"),
+				},
+			},
+		},
+	},
 }
 
 func TestGetObjectToFile(t *testing.T) {

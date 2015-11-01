@@ -12,76 +12,94 @@ type responseParser interface {
 	parse(resp *http.Response) error
 }
 
-type ListAllMyBucketsResult struct {
-	Owner   Owner
-	Buckets []Bucket `xml:"Buckets>Bucket"`
-}
+type (
+	ListAllMyBucketsResult struct {
+		Owner   Owner
+		Buckets []Bucket `xml:"Buckets>Bucket"`
+	}
+	Owner struct {
+		ID          string
+		DisplayName string
+	}
+	Bucket struct {
+		Location     string
+		Name         string
+		CreationDate time.Time
+	}
 
-type Owner struct {
-	ID          string
-	DisplayName string
-}
+	ListBucketResult struct {
+		Name           string
+		Prefix         string
+		Marker         string
+		MaxKeys        int
+		Delimiter      string
+		IsTruncated    bool
+		Contents       []Content
+		CommonPrefixes []string `xml:"CommonPrefixes>Prefix"`
+	}
+	Content struct {
+		Key          string
+		LastModified time.Time
+		ETag         string
+		Type         string
+		Size         int
+		StorageClass string
+		Owner        Owner
+	}
 
-type Bucket struct {
-	Location     string
-	Name         string
-	CreationDate time.Time
-}
+	AccessControlPolicy struct {
+		Owner             Owner
+		AccessControlList AccessControlList
+	}
+	AccessControlList struct {
+		Grant string
+	}
 
-type ListBucketResult struct {
-	Name           string
-	Prefix         string
-	Marker         string
-	MaxKeys        int
-	Delimiter      string
-	IsTruncated    bool
-	Contents       []Content
-	CommonPrefixes []string `xml:"CommonPrefixes>Prefix"`
-}
-type Content struct {
-	Key          string
-	LastModified time.Time
-	ETag         string
-	Type         string
-	Size         int
-	StorageClass string
-	Owner        Owner
-}
+	LocationConstraint struct {
+		Value string `xml:",chardata"`
+	}
 
-type AccessControlPolicy struct {
-	Owner             Owner
-	AccessControlList AccessControlList
-}
+	AppendPosition int
 
-type AccessControlList struct {
-	Grant string
-}
+	Header map[string][]string
 
-type LocationConstraint struct {
-	Value string `xml:",chardata"`
-}
+	DeleteResult struct {
+		Deleted []Deleted
+	}
+	Deleted struct {
+		Key string
+	}
 
-type AppendPosition int
+	CopyObjectResult struct {
+		LastModified string
+		ETag         string
+	}
 
-type Header map[string][]string
+	InitiateMultipartUploadResult struct {
+		Bucket   string
+		Key      string
+		UploadID string `xml:"UploadId"`
+	}
 
-type DeleteResult struct {
-	Deleted []Deleted
-}
-type Deleted struct {
-	Key string
-}
-
-type CopyObjectResult struct {
-	LastModified string
-	ETag         string
-}
-
-type InitiateMultipartUploadResult struct {
-	Bucket   string
-	Key      string
-	UploadID string `xml:"UploadId"`
-}
+	ListMultipartUploadsResult struct {
+		Bucket             string
+		EncodingType       string
+		KeyMarker          string
+		UploadIDMarker     string `xml:"UploadIdMarker"`
+		NextKeyMarker      string
+		NextUploadIDMarker string `xml:"NextUploadIdMarker"`
+		Delimiter          string
+		Prefix             string
+		MaxUploads         int
+		IsTruncated        bool
+		Upload             []Upload
+	}
+	Upload struct {
+		Key       string
+		UploadID  string `xml:"UploadId"`
+		Initiated time.Time
+	}
+)
 
 func (r *LocationConstraint) parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
@@ -117,6 +135,9 @@ func (r *InitiateMultipartUploadResult) parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
 func (r *CompleteMultipartUploadResult) parse(resp *http.Response) error {
+	return xml.NewDecoder(resp.Body).Decode(r)
+}
+func (r *ListMultipartUploadsResult) parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
 
