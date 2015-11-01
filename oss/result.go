@@ -99,6 +99,24 @@ type (
 		UploadID  string `xml:"UploadId"`
 		Initiated time.Time
 	}
+
+	ListPartsResult struct {
+		Bucket               string
+		EncodingType         string
+		Key                  string
+		UploadID             string `xml:"UploadId"`
+		PartNumberMarker     int
+		NextPartNumberMarker int
+		MaxParts             int
+		IsTruncated          bool
+		Part                 []Part
+	}
+	Part struct {
+		PartNumber   int
+		LastModified *time.Time `xml:"LastModified,omitempty"`
+		ETag         string
+		Size         int `xml:"Size,omitempty"`
+	}
 )
 
 func (r *LocationConstraint) parse(resp *http.Response) error {
@@ -138,6 +156,9 @@ func (r *CompleteMultipartUploadResult) parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
 func (r *ListMultipartUploadsResult) parse(resp *http.Response) error {
+	return xml.NewDecoder(resp.Body).Decode(r)
+}
+func (r *ListPartsResult) parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
 

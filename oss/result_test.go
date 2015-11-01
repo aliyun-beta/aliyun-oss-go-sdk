@@ -64,3 +64,8 @@ func parseTime(layout, value string) time.Time {
 	t, _ := time.Parse(layout, value)
 	return t
 }
+
+func parseTimePtr(layout, value string) *time.Time {
+	t, _ := time.Parse(layout, value)
+	return &t
+}

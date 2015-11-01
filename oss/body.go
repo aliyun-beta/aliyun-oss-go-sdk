@@ -92,11 +92,6 @@ type CompleteMultipartUpload struct {
 	Part []Part
 }
 
-type Part struct {
-	PartNumber int
-	ETag       string
-}
-
 func completeMultipartUpload(list *CompleteMultipartUpload) Option {
 	return func(req *http.Request) error {
 		var w bytes.Buffer

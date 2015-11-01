@@ -670,6 +670,82 @@ Date: Thu, 23 Feb 2012 06:14:27 GMT
 			},
 		},
 	},
+
+	{
+		request: func(a *API) (interface{}, error) {
+			r, err := a.ListParts(testBucketName, testObjectName, "0004B9895DBBB6EC98E36")
+			return r, err
+		},
+		expectedRequest: `GET /bucket_name/object_name?uploadId=0004B9895DBBB6EC98E36 HTTP/1.1
+Host: %s
+User-Agent: %s
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:/zw9uMvuU3TtkYmnFM1SVoXI6P8=
+Date: %s`,
+		response: `HTTP/1.1 200
+Server: AliyunOSS
+Connection: close
+Content-length: 1221
+Content-type: application/xml
+x-oss-request-id: 106452c8-10ff-812d-736e-c865294afc1c
+Date: Thu, 23 Feb 2012 07:13:28 GMT
+
+<?xml version="1.0" encoding="UTF-8"?>
+<ListPartsResult xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">
+    <Bucket>multipart_upload</Bucket>
+    <Key>multipart.data</Key>
+    <UploadId>0004B999EF5A239BB9138C6227D69F95</UploadId>
+    <NextPartNumberMarker>5</NextPartNumberMarker>
+    <MaxParts>1000</MaxParts>
+    <IsTruncated>false</IsTruncated>
+    <Part>
+        <PartNumber>1</PartNumber>
+        <LastModified>2012-02-23T07:01:34.000Z</LastModified>
+        <ETag>&quot;3349DC700140D7F86A078484278075A9&quot;</ETag>
+        <Size>6291456</Size>
+    </Part>
+    <Part>
+        <PartNumber>2</PartNumber>
+        <LastModified>2012-02-23T07:01:12.000Z</LastModified>
+        <ETag>&quot;3349DC700140D7F86A078484278075A9&quot;</ETag>
+        <Size>6291456</Size>
+    </Part>
+    <Part>
+        <PartNumber>5</PartNumber>
+        <LastModified>2012-02-23T07:02:03.000Z</LastModified>
+        <ETag>&quot;7265F4D211B56873A381D321F586E4A9&quot;</ETag>
+        <Size>1024</Size>
+    </Part>
+</ListPartsResult>`,
+		expectedResponse: &ListPartsResult{
+			Bucket:               "multipart_upload",
+			Key:                  "multipart.data",
+			UploadID:             "0004B999EF5A239BB9138C6227D69F95",
+			NextPartNumberMarker: 5,
+			MaxParts:             1000,
+			IsTruncated:          false,
+			Part: []Part{
+				{
+					PartNumber:   1,
+					LastModified: parseTimePtr(time.RFC3339Nano, "2012-02-23T07:01:34.000Z"),
+					ETag:         `"3349DC700140D7F86A078484278075A9"`,
+					Size:         6291456,
+				},
+				{
+					PartNumber:   2,
+					LastModified: parseTimePtr(time.RFC3339Nano, "2012-02-23T07:01:12.000Z"),
+					ETag:         `"3349DC700140D7F86A078484278075A9"`,
+					Size:         6291456,
+				},
+				{
+					PartNumber:   5,
+					LastModified: parseTimePtr(time.RFC3339Nano, "2012-02-23T07:02:03.000Z"),
+					ETag:         `"7265F4D211B56873A381D321F586E4A9"`,
+					Size:         1024,
+				},
+			},
+		},
+	},
 }
 
 func TestGetObjectToFile(t *testing.T) {

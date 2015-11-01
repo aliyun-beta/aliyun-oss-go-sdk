@@ -135,6 +135,10 @@ func (a *API) ListUploads(bucket, object string) (res *ListMultipartUploadsResul
 	return res, a.do("GET", bucket+"/"+"?uploads", &res)
 }
 
+func (a *API) ListParts(bucket, object, uploadID string) (res *ListPartsResult, _ error) {
+	return res, a.do("GET", fmt.Sprintf("%s/%s?uploadId=%s", bucket, object, uploadID), &res)
+}
+
 func (a *API) do(method, resource string, result interface{}, options ...Option) error {
 	req, err := a.newRequest(method, resource, options)
 	if err != nil {
