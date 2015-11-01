@@ -17,6 +17,7 @@ type API struct {
 	securityToken   string
 	now             func() time.Time
 	client          *http.Client
+	scheme          string
 }
 
 // New creates an API object
@@ -27,6 +28,7 @@ func New(endPoint, accessKeyID, accessKeySecret string) *API {
 		accessKeySecret: accessKeySecret,
 		now:             time.Now,
 		client:          http.DefaultClient,
+		scheme:          "http",
 	}
 }
 
@@ -38,6 +40,14 @@ func (a *API) SetHTTPClient(client *http.Client) {
 // SetSecurityToken sets the STS token for temporary access
 func (a *API) SetSecurityToken(token string) {
 	a.securityToken = token
+}
+
+// SetScheme sets the scheme for the API access: http or https, default is http.
+func (a *API) SetScheme(scheme string) {
+	switch scheme {
+	case "http", "https":
+		a.scheme = scheme
+	}
 }
 
 // GetService list all buckets
@@ -215,7 +225,7 @@ func (a *API) do(method, bucket, object string, result interface{}, options ...O
 }
 
 func (a *API) newRequest(method, bucket, object string, options []Option) (*http.Request, error) {
-	uri, err := ossURL(a.endPoint, bucket, object)
+	uri, err := ossURL(a.scheme, a.endPoint, bucket, object)
 	if err != nil {
 		return nil, err
 	}
@@ -249,8 +259,8 @@ var (
 	rxObjectName = regexp.MustCompile(`[^/\][^\r\n]*`)
 )
 
-func ossURL(host, bucket, object string) (string, error) {
-	scheme := "http://"
+func ossURL(scheme, host, bucket, object string) (string, error) {
+	scheme += "://"
 	if bucket == "" && object == "" {
 		return scheme + host, nil
 	}
