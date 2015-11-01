@@ -127,6 +127,10 @@ func (a *API) CompleteUpload(bucket, object string, uploadID string, list *Compl
 	return res, a.do("POST", fmt.Sprintf("%s/%s?uploadId=%s", bucket, object, uploadID), &res, completeMultipartUpload(list), ContentMD5)
 }
 
+func (a *API) CancelUpload(bucket, object string, uploadID string) error {
+	return a.do("DELETE", fmt.Sprintf("%s/%s?uploadId=%s", bucket, object, uploadID), nil)
+}
+
 func (a *API) do(method, resource string, result interface{}, options ...Option) error {
 	req, err := a.newRequest(method, resource, options)
 	if err != nil {

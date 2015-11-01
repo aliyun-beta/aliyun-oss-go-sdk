@@ -580,6 +580,25 @@ Date: Fri, 24 Feb 2012 10:19:18 GMT
 			ETag:     "B864DB6A936D376F9F8D3ED3BBE540DD-3",
 		},
 	},
+
+	{
+		request: func(a *API) (interface{}, error) {
+			return nil, a.CancelUpload(testBucketName, testObjectName, "0004B9895DBBB6EC98E36")
+		},
+		expectedRequest: `DELETE /bucket_name/object_name?uploadId=0004B9895DBBB6EC98E36 HTTP/1.1
+Host: %s
+User-Agent: %s
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:afD0ln6LveomIhMndS4klSzfCwM=
+Date: %s`,
+		response: `HTTP/1.1 204
+Server: AliyunOSS
+Connection: close
+x-oss-request-id: 059a22ba-6ba9-daed-5f3a-e48027df344d
+Date: Wed, 22 Feb 2012 08:32:21 GMT
+`,
+		expectedResponse: nil,
+	},
 }
 
 func TestGetObjectToFile(t *testing.T) {
