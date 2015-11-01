@@ -147,6 +147,10 @@ func (a *API) GetCORS(bucket string) (res *CORSConfiguration, _ error) {
 	return res, a.do("GET", bucket+"/?cors", &res)
 }
 
+func (a *API) DeleteCORS(bucket string) error {
+	return a.do("DELETE", bucket+"/?cors", nil)
+}
+
 func (a *API) do(method, resource string, result interface{}, options ...Option) error {
 	req, err := a.newRequest(method, resource, options)
 	if err != nil {

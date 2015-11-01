@@ -848,6 +848,27 @@ Server: AliyunOSS
 			},
 		},
 	},
+
+	{
+		name: "DeleteCORS",
+		request: func(a *API) (interface{}, error) {
+			return nil, a.DeleteCORS(testBucketName)
+		},
+		expectedRequest: `DELETE /bucket_name/?cors HTTP/1.1
+Host: %s
+User-Agent: %s
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:H63RU82G4AkVp+OFgDH3tcnnAKk=
+Date: %s`,
+		response: `HTTP/1.1 204 No Content
+x-oss-request-id: 5051845BC4689A033D0022BC
+Date: Fri, 24 Feb 2012 05:45:34 GMT
+Connection: close
+Content-Length: 0
+Server: AliyunOSS
+`,
+		expectedResponse: nil,
+	},
 }
 
 func TestGetObjectToFile(t *testing.T) {
