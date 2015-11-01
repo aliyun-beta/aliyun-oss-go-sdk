@@ -101,8 +101,19 @@ func (a *API) GetBucketReferer(name string) (res *RefererConfiguration, _ error)
 	return res, a.do("GET", name, "?referer", &res)
 }
 
+// GetBucketLifecycle returns a bucket's deletion configuration
+func (a *API) GetBucketLifecycle(bucket string) (res *LifecycleConfiguration, _ error) {
+	return res, a.do("GET", bucket, "?lifecycle", &res)
+}
+
+// DeleteBucket deletes a bucket
 func (a *API) DeleteBucket(name string) error {
 	return a.do("DELETE", name, "", nil)
+}
+
+// DeleteBucketLogging turns off the logging functionality
+func (a *API) DeleteBucketLogging(name string) error {
+	return a.do("DELETE", name, "?logging", nil)
 }
 
 func (a *API) GetObject(bucket, object string, w io.Writer, options ...Option) error {
@@ -189,10 +200,6 @@ func (a *API) GetCORS(bucket string) (res *CORSConfiguration, _ error) {
 
 func (a *API) DeleteCORS(bucket string) error {
 	return a.do("DELETE", bucket, "?cors", nil)
-}
-
-func (a *API) GetLifecycle(bucket string) (res *LifecycleConfiguration, _ error) {
-	return res, a.do("GET", bucket, "?lifecycle", &res)
 }
 
 func (a *API) DeleteLifecycle(bucket string) error {

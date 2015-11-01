@@ -560,6 +560,50 @@ Server: AliyunOSS
 	},
 
 	{
+		name: "GetBucketLifecycle",
+		request: func(a *API) (interface{}, error) {
+			r, err := a.GetBucketLifecycle(testBucketName)
+			return r, err
+		},
+		expectedRequest: `GET /?lifecycle HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
+User-Agent: %s
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:7aTx+kQARBcKul23R01R1Rw6yvU=
+Date: %s`,
+		response: `HTTP/1.1 200
+x-oss-request-id: 534B372974E88A4D89060099
+Date: Mon, 14 Apr 2014 01:17:29 GMT
+Connection: close
+Content-Length: 255
+Server: AliyunOSS
+
+<?xml version="1.0" encoding="UTF-8"?>
+<LifecycleConfiguration>
+  <Rule>
+    <ID>delete after one day</ID>
+    <Prefix>logs/</Prefix>
+    <Status>Enabled</Status>
+    <Expiration>
+      <Days>1</Days>
+    </Expiration>
+  </Rule>
+</LifecycleConfiguration>`,
+		expectedResponse: &LifecycleConfiguration{
+			Rule: []LifecycleRule{
+				{
+					ID:     "delete after one day",
+					Prefix: "logs/",
+					Status: "Enabled",
+					Expiration: Expiration{
+						Days: 1,
+					},
+				},
+			},
+		},
+	},
+
+	{
 		name: "DeleteBucket",
 		request: func(a *API) (interface{}, error) {
 			return nil, a.DeleteBucket(testBucketName)
@@ -569,6 +613,21 @@ Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
 Accept-Encoding: identity
 Authorization: OSS ayahghai0juiSie:FXJsV//QmBZqMczqQkR2Lm+QUKY=
+Date: %s`,
+		response:         "HTTP/1.1 200\n",
+		expectedResponse: nil,
+	},
+
+	{
+		name: "DeleteBucketLogging",
+		request: func(a *API) (interface{}, error) {
+			return nil, a.DeleteBucketLogging(testBucketName)
+		},
+		expectedRequest: `DELETE /?logging HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
+User-Agent: %s
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:a/VOgtY0UksF67OgcuQZYx2OdZs=
 Date: %s`,
 		response:         "HTTP/1.1 200\n",
 		expectedResponse: nil,
@@ -1177,50 +1236,6 @@ Content-Length: 0
 Server: AliyunOSS
 `,
 		expectedResponse: nil,
-	},
-
-	{
-		name: "GetLifecycle",
-		request: func(a *API) (interface{}, error) {
-			r, err := a.GetLifecycle(testBucketName)
-			return r, err
-		},
-		expectedRequest: `GET /?lifecycle HTTP/1.1
-Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
-User-Agent: %s
-Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:7aTx+kQARBcKul23R01R1Rw6yvU=
-Date: %s`,
-		response: `HTTP/1.1 200
-x-oss-request-id: 534B372974E88A4D89060099
-Date: Mon, 14 Apr 2014 01:17:29 GMT
-Connection: close
-Content-Length: 255
-Server: AliyunOSS
-
-<?xml version="1.0" encoding="UTF-8"?>
-<LifecycleConfiguration>
-  <Rule>
-    <ID>delete after one day</ID>
-    <Prefix>logs/</Prefix>
-    <Status>Enabled</Status>
-    <Expiration>
-      <Days>1</Days>
-    </Expiration>
-  </Rule>
-</LifecycleConfiguration>`,
-		expectedResponse: &LifecycleConfiguration{
-			Rule: []LifecycleRule{
-				{
-					ID:     "delete after one day",
-					Prefix: "logs/",
-					Status: "Enabled",
-					Expiration: Expiration{
-						Days: 1,
-					},
-				},
-			},
-		},
 	},
 
 	{
