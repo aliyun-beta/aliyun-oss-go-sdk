@@ -35,12 +35,18 @@ Unclear issues in Spec
 ----------------------
 
 * Resource or ResourceType or both in Error XML?
+* CanonicalizedResource should include only supported parameters or any parameters? (Python SDK include any parameters)
 
 Author
 ------
 
 [Hǎiliàng Wáng](https://github.com/h12w)
 
-## License
+License
+-------
 
 licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0.html)
+
+References
+----------
+* [OSS Document (Chinese)](https://docs.aliyun.com/#/pub/oss)
