@@ -96,6 +96,11 @@ func (a *API) GetBucketWebsite(name string) (res *WebsiteConfiguration, _ error)
 	return res, a.do("GET", name, "?website", &res)
 }
 
+// GetBucketReferer returns a bucket's referer whitelist
+func (a *API) GetBucketReferer(name string) (res *RefererConfiguration, _ error) {
+	return res, a.do("GET", name, "?referer", &res)
+}
+
 func (a *API) DeleteBucket(name string) error {
 	return a.do("DELETE", name, "", nil)
 }

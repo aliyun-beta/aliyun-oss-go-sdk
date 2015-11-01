@@ -11,12 +11,15 @@ go test -v github.com/aliyun/aliyun-oss-go-sdk/oss
 
 Highlights
 ----------
-* Complete set of Aliyun OSS API
-* 100% test coverage
-* Idiomatic and flexible programming interface
-* Clean and orthogonal implementation
-* Named options for setting headers & parameters
-* Extremely easy to extend for new APIs
+* Complete set of Aliyun OSS API with 100% coverage tests
+  - every documented API is implemented
+  - intuitive table driven tests
+* Idiomatic
+  - named options for setting headers & parameters
+  - XML is returned as a parsed struct
+  - error is returned as an error object
+* Easily extensible
+  - clean and orthogonal implementation
 
 Differences with Python SDK
 ---------------------------

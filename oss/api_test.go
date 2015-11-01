@@ -524,6 +524,42 @@ Server: AliyunOSS
 	},
 
 	{
+		name: "GetBucketReferer",
+		request: func(a *API) (interface{}, error) {
+			r, err := a.GetBucketReferer(testBucketName)
+			return r, err
+		},
+		expectedRequest: `GET /?referer HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
+User-Agent: %s
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:sPo+aFW5S/IPjbEmONETKOjDE2c=
+Date: %s`,
+		response: `HTTP/1.1 200
+x-oss-request-id: 50519080C4689A033D00235F
+Date: Thu, 13 Sep 2012 07:51:28 GMT
+Connection: close
+Content-Length: 242
+Server: AliyunOSS
+
+<?xml version="1.0" encoding="UTF-8"?>
+<RefererConfiguration>
+<AllowEmptyReferer>true</AllowEmptyReferer>
+<RefererList>
+<Referer>http://www.aliyun.com</Referer>
+<Referer>https://www.aliyun.com</Referer>
+</RefererList>
+</RefererConfiguration>`,
+		expectedResponse: &RefererConfiguration{
+			AllowEmptyReferer: true,
+			Referer: []string{
+				"http://www.aliyun.com",
+				"https://www.aliyun.com",
+			},
+		},
+	},
+
+	{
 		name: "DeleteBucket",
 		request: func(a *API) (interface{}, error) {
 			return nil, a.DeleteBucket(testBucketName)
