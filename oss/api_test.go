@@ -869,6 +869,51 @@ Server: AliyunOSS
 `,
 		expectedResponse: nil,
 	},
+
+	{
+		name: "PutLifecycle",
+		request: func(a *API) (interface{}, error) {
+			lifecycle := &LifecycleConfiguration{
+				Rule: []LifeCycleRule{
+					{
+						ID:     "delete obsoleted files",
+						Prefix: "obsoleted/",
+						Status: "Enabled",
+						Expiration: Expiration{
+							Days: 3,
+						},
+					},
+					{
+						ID:     "delete temporary files",
+						Prefix: "temporary/",
+						Status: "Enabled",
+						Expiration: Expiration{
+							Date: parseTimePtr(time.RFC3339Nano, "2022-10-12T00:00:00.001Z"),
+						},
+					},
+				},
+			}
+			return nil, a.PutLifecycle(testBucketName, lifecycle)
+		},
+		expectedRequest: `PUT /bucket_name/?lifecycle HTTP/1.1
+Host: %s
+User-Agent: %s
+Content-Length: 379
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:jAZL2xQ14PYq0u74q2qG2/oyTrc=
+Date: %s
+
+<?xml version="1.0" encoding="UTF-8"?>
+<LifecycleConfiguration><Rule><ID>delete obsoleted files</ID><Prefix>obsoleted/</Prefix><Status>Enabled</Status><Expiration><Days>3</Days></Expiration></Rule><Rule><ID>delete temporary files</ID><Prefix>temporary/</Prefix><Status>Enabled</Status><Expiration><Date>2022-10-12T00:00:00.001Z</Date></Expiration></Rule></LifecycleConfiguration>`,
+		response: `HTTP/1.1 200 OK
+x-oss-request-id: 534B371674E88A4D8906008B
+Date: Mon, 14 Apr 2014 01:17:10 GMT
+Content-Length: 0
+Connection: close
+Server: AliyunOSS
+`,
+		expectedResponse: nil,
+	},
 }
 
 func TestGetObjectToFile(t *testing.T) {

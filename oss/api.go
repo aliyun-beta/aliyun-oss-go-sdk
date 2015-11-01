@@ -139,8 +139,8 @@ func (a *API) ListParts(bucket, object, uploadID string) (res *ListPartsResult, 
 	return res, a.do("GET", fmt.Sprintf("%s/%s?uploadId=%s", bucket, object, uploadID), &res)
 }
 
-func (a *API) PutCORS(bucket string, corsConfig *CORSConfiguration) error {
-	return a.do("PUT", bucket+"/?cors", nil, xmlBody(corsConfig), ContentMD5)
+func (a *API) PutCORS(bucket string, cors *CORSConfiguration) error {
+	return a.do("PUT", bucket+"/?cors", nil, xmlBody(cors), ContentMD5)
 }
 
 func (a *API) GetCORS(bucket string) (res *CORSConfiguration, _ error) {
@@ -149,6 +149,10 @@ func (a *API) GetCORS(bucket string) (res *CORSConfiguration, _ error) {
 
 func (a *API) DeleteCORS(bucket string) error {
 	return a.do("DELETE", bucket+"/?cors", nil)
+}
+
+func (a *API) PutLifecycle(bucket string, lifecycle *LifecycleConfiguration) error {
+	return a.do("PUT", bucket+"/?lifecycle", nil, xmlBody(lifecycle))
 }
 
 func (a *API) do(method, resource string, result interface{}, options ...Option) error {

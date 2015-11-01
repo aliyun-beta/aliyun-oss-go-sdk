@@ -12,6 +12,7 @@ type responseParser interface {
 	parse(resp *http.Response) error
 }
 
+// XML result types
 type (
 	ListAllMyBucketsResult struct {
 		Owner   Owner
@@ -100,6 +101,13 @@ type (
 		Initiated time.Time
 	}
 
+	CompleteMultipartUploadResult struct {
+		Location string
+		Bucket   string
+		Key      string
+		ETag     string
+	}
+
 	ListPartsResult struct {
 		Bucket               string
 		EncodingType         string
@@ -164,6 +172,9 @@ func (r *ListPartsResult) parse(resp *http.Response) error {
 func (r *CORSConfiguration) parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
+func (r *LifecycleConfiguration) parse(resp *http.Response) error {
+	return xml.NewDecoder(resp.Body).Decode(r)
+}
 
 type writerResult struct {
 	io.Writer
@@ -181,11 +192,4 @@ type UploadPartResult struct {
 func (r *UploadPartResult) parse(resp *http.Response) error {
 	r.ETag = resp.Header.Get("ETag")
 	return nil
-}
-
-type CompleteMultipartUploadResult struct {
-	Location string
-	Bucket   string
-	Key      string
-	ETag     string
 }

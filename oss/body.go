@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 )
 
 type (
@@ -38,6 +39,20 @@ type (
 		AllowedHeader []string
 		ExposeHeader  []string
 		MaxAgeSeconds int `xml:"MaxAgeSeconds,omitempty"`
+	}
+
+	LifecycleConfiguration struct {
+		Rule []LifeCycleRule
+	}
+	LifeCycleRule struct {
+		ID         string
+		Prefix     string
+		Status     string
+		Expiration Expiration
+	}
+	Expiration struct {
+		Days int        `xml:"Days,omitempty"`
+		Date *time.Time `xml:"Date,omitempty"`
 	}
 )
 
