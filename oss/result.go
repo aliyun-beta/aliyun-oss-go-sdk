@@ -12,15 +12,6 @@ type responseParser interface {
 	parse(resp *http.Response) error
 }
 
-/*
-	if w, ok := result.(io.Writer); ok {
-		_, err = io.Copy(w, resp.Body)
-		return err
-	} else if result != nil {
-		return xml.NewDecoder(resp.Body).Decode(result)
-	}
-*/
-
 type ListAllMyBucketsResult struct {
 	Owner   Owner
 	Buckets []Bucket `xml:"Buckets>Bucket"`
