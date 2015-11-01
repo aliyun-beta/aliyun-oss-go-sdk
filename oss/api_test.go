@@ -891,6 +891,47 @@ X-Oss-Acl: public-read`,
 	},
 
 	{
+		name: "GetObjectACL",
+		request: func(a *API) (interface{}, error) {
+			r, err := a.GetObjectACL(testBucketName, testObjectName)
+			return r, err
+		},
+		expectedRequest: `GET /object/name?acl HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
+User-Agent: %s
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:EbdVS7t4lipCbC4PPjUbwgOIToo=
+Date: %s`,
+		response: `HTTP/1.1 200 OK
+x-oss-request-id: 6f720c98-40fe-6de0-047b-e7fb08c4059b
+Date: Fri, 24 Feb 2012 04:11:23 GMT
+Content-Length: 253
+Content-Tupe: application/xml
+Connection: close
+Server: AliyunOSS
+
+<?xml version="1.0" ?>
+<AccessControlPolicy>
+    <Owner>
+        <ID>00220120222</ID>
+        <DisplayName>user_example</DisplayName>
+    </Owner>
+    <AccessControlList>
+        <Grant>public-read</Grant>
+    </AccessControlList>
+</AccessControlPolicy>`,
+		expectedResponse: &AccessControlPolicy{
+			Owner: Owner{
+				ID:          "00220120222",
+				DisplayName: "user_example",
+			},
+			AccessControlList: AccessControlList{
+				Grant: "public-read",
+			},
+		},
+	},
+
+	{
 		name: "InitUpload",
 		request: func(a *API) (interface{}, error) {
 			r, err := a.InitUpload(testBucketName, testObjectName)
