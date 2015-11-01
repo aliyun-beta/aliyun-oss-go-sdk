@@ -634,6 +634,21 @@ Date: %s`,
 	},
 
 	{
+		name: "DeleteBucketWebsite",
+		request: func(a *API) (interface{}, error) {
+			return nil, a.DeleteBucketWebsite(testBucketName)
+		},
+		expectedRequest: `DELETE /?website HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
+User-Agent: %s
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:t0fB2Mn0sevKbSXp/c5q2XTGK3M=
+Date: %s`,
+		response:         "HTTP/1.1 200\n",
+		expectedResponse: nil,
+	},
+
+	{
 		name: "PutObjectFromFile",
 		request: func(a *API) (interface{}, error) {
 			return nil, a.PutObjectFromFile("bucket-name", testObjectName, testFileName)

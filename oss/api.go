@@ -116,6 +116,11 @@ func (a *API) DeleteBucketLogging(name string) error {
 	return a.do("DELETE", name, "?logging", nil)
 }
 
+// DeleteBucketWebsite turns off the website functionality
+func (a *API) DeleteBucketWebsite(name string) error {
+	return a.do("DELETE", name, "?website", nil)
+}
+
 func (a *API) GetObject(bucket, object string, w io.Writer, options ...Option) error {
 	return a.do("GET", bucket, object, &writerResult{w})
 }
