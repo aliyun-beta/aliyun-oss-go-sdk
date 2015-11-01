@@ -50,19 +50,23 @@ func typeByExtension(file string) string {
 	return typ
 }
 
+func xmlBody(obj interface{}) Option {
+	return func(req *http.Request) error {
+		var w bytes.Buffer
+		w.WriteString(xml.Header)
+		if err := xml.NewEncoder(&w).Encode(obj); err != nil {
+			return err
+		}
+		return httpBody(bytes.NewReader(w.Bytes()))(req)
+	}
+}
+
 type CreateBucketConfiguration struct {
 	LocationConstraint string
 }
 
 func BucketLocation(value string) Option {
-	return func(req *http.Request) error {
-		var w bytes.Buffer
-		w.WriteString(xml.Header)
-		if err := xml.NewEncoder(&w).Encode(CreateBucketConfiguration{LocationConstraint: value}); err != nil {
-			return err
-		}
-		return httpBody(bytes.NewReader(w.Bytes()))(req)
-	}
+	return xmlBody(&CreateBucketConfiguration{LocationConstraint: value})
 }
 
 type Delete struct {
@@ -73,32 +77,14 @@ type Object struct {
 	Key string
 }
 
-func deleteObjects(objects []string, quiet bool) Option {
-	return func(req *http.Request) error {
-		var w bytes.Buffer
-		w.WriteString(xml.Header)
-		del := Delete{Quiet: quiet}
-		for _, key := range objects {
-			del.Object = append(del.Object, Object{Key: key})
-		}
-		if err := xml.NewEncoder(&w).Encode(del); err != nil {
-			return err
-		}
-		return httpBody(bytes.NewReader(w.Bytes()))(req)
+func newDelete(objects []string, quiet bool) *Delete {
+	del := &Delete{Quiet: quiet}
+	for _, key := range objects {
+		del.Object = append(del.Object, Object{Key: key})
 	}
+	return del
 }
 
 type CompleteMultipartUpload struct {
 	Part []Part
-}
-
-func completeMultipartUpload(list *CompleteMultipartUpload) Option {
-	return func(req *http.Request) error {
-		var w bytes.Buffer
-		w.WriteString(xml.Header)
-		if err := xml.NewEncoder(&w).Encode(list); err != nil {
-			return err
-		}
-		return httpBody(bytes.NewReader(w.Bytes()))(req)
-	}
 }

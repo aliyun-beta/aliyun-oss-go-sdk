@@ -108,7 +108,7 @@ func (a *API) DeleteObject(bucket, object string) error {
 }
 
 func (a *API) DeleteObjects(bucket string, quiet bool, objects ...string) (res *DeleteResult, _ error) {
-	return res, a.do("POST", bucket+"/?delete", &res, deleteObjects(objects, quiet), ContentMD5)
+	return res, a.do("POST", bucket+"/?delete", &res, xmlBody(newDelete(objects, quiet)), ContentMD5)
 }
 
 func (a *API) CopyObject(sourceBucket, sourceObject, targetBucket, targetObject string, options ...Option) (res *CopyObjectResult, _ error) {
@@ -124,7 +124,7 @@ func (a *API) UploadPart(bucket, object string, uploadID string, partNumber int,
 }
 
 func (a *API) CompleteUpload(bucket, object string, uploadID string, list *CompleteMultipartUpload) (res *CompleteMultipartUploadResult, _ error) {
-	return res, a.do("POST", fmt.Sprintf("%s/%s?uploadId=%s", bucket, object, uploadID), &res, completeMultipartUpload(list), ContentMD5)
+	return res, a.do("POST", fmt.Sprintf("%s/%s?uploadId=%s", bucket, object, uploadID), &res, xmlBody(list), ContentMD5)
 }
 
 func (a *API) CancelUpload(bucket, object string, uploadID string) error {
