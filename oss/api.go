@@ -191,6 +191,11 @@ func (a *API) HeadObject(bucket, object string) (res Header, _ error) {
 	return res, a.do("HEAD", bucket, object, &res)
 }
 
+// PutObjectACL sets acess right for an object
+func (a *API) PutObjectACL(bucket, object string, acl ACLType) error {
+	return a.do("PUT", bucket, object+"?acl", nil, ACL(acl))
+}
+
 func (a *API) InitUpload(bucket, object string, options ...Option) (res *InitiateMultipartUploadResult, _ error) {
 	return res, a.do("POST", bucket, object+"?uploads", &res, append(options, ContentType("application/octet-stream"))...)
 }

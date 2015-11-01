@@ -874,6 +874,23 @@ Content-Length: 344606
 	},
 
 	{
+		name: "PutObjectACL",
+		request: func(a *API) (interface{}, error) {
+			return nil, a.PutObjectACL(testBucketName, testObjectName, PublicReadACL)
+		},
+		expectedRequest: `PUT /object/name?acl HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
+User-Agent: %s
+Content-Length: 0
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:Z31vuwnUDv9rezqnsdANa3+Utfs=
+Date: %s
+X-Oss-Acl: public-read`,
+		response:         "HTTP/1.1 200 OK\n",
+		expectedResponse: nil,
+	},
+
+	{
 		name: "InitUpload",
 		request: func(a *API) (interface{}, error) {
 			r, err := a.InitUpload(testBucketName, testObjectName)

@@ -8,6 +8,7 @@ import (
 )
 
 type (
+	// Option for an http.Request
 	Option func(*http.Request) error
 )
 
