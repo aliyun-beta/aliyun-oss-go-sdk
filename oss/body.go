@@ -87,3 +87,23 @@ func deleteObjects(objects []string, quiet bool) Option {
 		return httpBody(bytes.NewReader(w.Bytes()))(req)
 	}
 }
+
+type CompleteMultipartUpload struct {
+	Part []Part
+}
+
+type Part struct {
+	PartNumber int
+	ETag       string
+}
+
+func completeMultipartUpload(list *CompleteMultipartUpload) Option {
+	return func(req *http.Request) error {
+		var w bytes.Buffer
+		w.WriteString(xml.Header)
+		if err := xml.NewEncoder(&w).Encode(list); err != nil {
+			return err
+		}
+		return httpBody(bytes.NewReader(w.Bytes()))(req)
+	}
+}

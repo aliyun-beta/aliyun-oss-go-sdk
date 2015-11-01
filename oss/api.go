@@ -115,12 +115,16 @@ func (a *API) CopyObject(sourceBucket, sourceObject, targetBucket, targetObject 
 	return res, a.do("PUT", targetBucket+"/"+targetObject, &res, append(options, CopySource(sourceBucket, sourceObject))...)
 }
 
-func (a *API) InitMultipartUpload(bucket, object string, options ...Option) (res *InitiateMultipartUploadResult, _ error) {
+func (a *API) InitUpload(bucket, object string, options ...Option) (res *InitiateMultipartUploadResult, _ error) {
 	return res, a.do("POST", bucket+"/"+object+"?uploads", &res, append(options, ContentType("application/octet-stream"))...)
 }
 
-func (a *API) UploadPart(bucket, object string, uploadID string, partNumber int, rd io.Reader, size int64) error {
-	return a.do("PUT", fmt.Sprintf("%s/%s?partNumber=%d&uploadId=%s", bucket, object, partNumber, uploadID), nil, httpBody(&io.LimitedReader{R: rd, N: size}), ContentLength(size))
+func (a *API) UploadPart(bucket, object string, uploadID string, partNumber int, rd io.Reader, size int64) (res *UploadPartResult, _ error) {
+	return res, a.do("PUT", fmt.Sprintf("%s/%s?partNumber=%d&uploadId=%s", bucket, object, partNumber, uploadID), &res, httpBody(&io.LimitedReader{R: rd, N: size}), ContentLength(size))
+}
+
+func (a *API) CompleteUpload(bucket, object string, uploadID string, list *CompleteMultipartUpload) (res *CompleteMultipartUploadResult, _ error) {
+	return res, a.do("POST", fmt.Sprintf("%s/%s?uploadId=%s", bucket, object, uploadID), &res, completeMultipartUpload(list), ContentMD5)
 }
 
 func (a *API) do(method, resource string, result interface{}, options ...Option) error {

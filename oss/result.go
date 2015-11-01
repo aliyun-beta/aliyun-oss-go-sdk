@@ -116,6 +116,9 @@ func (r *CopyObjectResult) parse(resp *http.Response) error {
 func (r *InitiateMultipartUploadResult) parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
+func (r *CompleteMultipartUploadResult) parse(resp *http.Response) error {
+	return xml.NewDecoder(resp.Body).Decode(r)
+}
 
 type writerResult struct {
 	io.Writer
@@ -134,4 +137,20 @@ func (r *writeCloserResult) parse(resp *http.Response) error {
 	defer r.WriteCloser.Close()
 	_, err := io.Copy(r.WriteCloser, resp.Body)
 	return err
+}
+
+type UploadPartResult struct {
+	ETag string
+}
+
+func (r *UploadPartResult) parse(resp *http.Response) error {
+	r.ETag = resp.Header.Get("ETag")
+	return nil
+}
+
+type CompleteMultipartUploadResult struct {
+	Location string
+	Bucket   string
+	Key      string
+	ETag     string
 }

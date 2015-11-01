@@ -476,7 +476,7 @@ Server: AliyunOSS
 
 	{
 		request: func(a *API) (interface{}, error) {
-			r, err := a.InitMultipartUpload(testBucketName, testObjectName)
+			r, err := a.InitUpload(testBucketName, testObjectName)
 			return r, err
 		},
 		expectedRequest: `POST /bucket_name/object_name?uploads HTTP/1.1
@@ -510,7 +510,8 @@ Content-Type: application/xml
 
 	{
 		request: func(a *API) (interface{}, error) {
-			return nil, a.UploadPart(testBucketName, testObjectName, "0004B9895DBBB6EC98E36", 1, strings.NewReader(`sfweruewpinbeewa`), 16)
+			r, err := a.UploadPart(testBucketName, testObjectName, "0004B9895DBBB6EC98E36", 1, strings.NewReader(`sfweruewpinbeewa`), 16)
+			return r, err
 		},
 		expectedRequest: `PUT /bucket_name/object_name?partNumber=1&uploadId=0004B9895DBBB6EC98E36 HTTP/1.1
 Host: %s
@@ -529,7 +530,55 @@ ETag: 7265F4D211B56873A381D321F586E4A9
 x-oss-request-id: 3e6aba62-1eae-d246-6118-8ff42cd0c21a
 Date: Wed, 22 Feb 2012 08:32:21 GMT
 `,
-		expectedResponse: nil,
+		expectedResponse: &UploadPartResult{ETag: "7265F4D211B56873A381D321F586E4A9"},
+	},
+
+	{
+		request: func(a *API) (interface{}, error) {
+			list := &CompleteMultipartUpload{
+				Part: []Part{
+					{
+						PartNumber: 1,
+						ETag:       `C1B61751512FFC8B0E86675D114497A6`,
+					},
+				},
+			}
+			r, err := a.CompleteUpload(testBucketName, testObjectName, "0004B9895DBBB6EC98E36", list)
+			return r, err
+		},
+		expectedRequest: `POST /bucket_name/object_name?uploadId=0004B9895DBBB6EC98E36 HTTP/1.1
+Host: %s
+User-Agent: %s
+Content-Length: 174
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:zcxSjO/5scyvFT4yXvmgKWnbhDE=
+Content-Md5: zJBKGLrHC8XqtxxS7kZM+Q==
+Content-Type: application/octet-stream
+Date: %s
+
+<?xml version="1.0" encoding="UTF-8"?>
+<CompleteMultipartUpload><Part><PartNumber>1</PartNumber><ETag>C1B61751512FFC8B0E86675D114497A6</ETag></Part></CompleteMultipartUpload>`,
+		response: `HTTP/1.1 200 OK
+Server: AliyunOSS
+Content-Length: 356
+Content-Type: Application/xml
+Connection: close
+x-oss-request-id: 594f0751-3b1e-168f-4501-4ac71d217d6e
+Date: Fri, 24 Feb 2012 10:19:18 GMT
+
+<?xml version="1.0" encoding="UTF-8"?>
+<CompleteMultipartUploadResult xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">
+    <Location>http://oss-example.oss-cn-hangzhou.aliyuncs.com /multipart.data</Location>
+    <Bucket>oss-example</Bucket>
+    <Key>multipart.data</Key>
+    <ETag>B864DB6A936D376F9F8D3ED3BBE540DD-3</ETag>
+</CompleteMultipartUploadResult>`,
+		expectedResponse: &CompleteMultipartUploadResult{
+			Location: "http://oss-example.oss-cn-hangzhou.aliyuncs.com /multipart.data",
+			Bucket:   "oss-example",
+			Key:      "multipart.data",
+			ETag:     "B864DB6A936D376F9F8D3ED3BBE540DD-3",
+		},
 	},
 }
 
