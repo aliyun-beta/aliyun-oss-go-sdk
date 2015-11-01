@@ -993,6 +993,38 @@ Date: Wed, 22 Feb 2012 08:32:21 GMT
 	},
 
 	{
+		name: "UploadPartCopy",
+		request: func(a *API) (interface{}, error) {
+			r, err := a.UploadPartCopy(testBucketName, testObjectName, "0004B9895DBBB6EC98E36", 1, "source-bucket", "source-object")
+			return r, err
+		},
+		expectedRequest: `PUT /object/name?partNumber=1&uploadId=0004B9895DBBB6EC98E36 HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
+User-Agent: %s
+Content-Length: 0
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:lY62AzamlvOzTWITUm1mPjp7D5Q=
+Date: %s
+X-Oss-Copy-Source: /source-bucket/source-object`,
+		response: `HTTP/1.1 200 OK
+Server: AliyunOSS
+Content-Length: 232
+Connection: close
+x-oss-request-id: 3e6aba62-1eae-d246-6118-8ff42cd0c21a
+Date: Thu, 17 Jul 2014 06:27:54 GMT'
+
+<?xml version="1.0" encoding="UTF-8"?>
+<CopyPartResult xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">
+    <LastModified>2014-07-17T06:27:54.000Z</LastModified>
+    <ETag>"5B3C1A2E053D763E1B002CC607C5A0FE"</ETag>
+</CopyPartResult>`,
+		expectedResponse: &CopyPartResult{
+			LastModified: parseTime(time.RFC3339Nano, "2014-07-17T06:27:54.000Z"),
+			ETag:         `"5B3C1A2E053D763E1B002CC607C5A0FE"`,
+		},
+	},
+
+	{
 		name: "CompleteUpload",
 		request: func(a *API) (interface{}, error) {
 			list := &CompleteMultipartUpload{
@@ -1041,9 +1073,9 @@ Date: Fri, 24 Feb 2012 10:19:18 GMT
 	},
 
 	{
-		name: "CancelUpload",
+		name: "AbortUpload",
 		request: func(a *API) (interface{}, error) {
-			return nil, a.CancelUpload(testBucketName, testObjectName, "0004B9895DBBB6EC98E36")
+			return nil, a.AbortUpload(testBucketName, testObjectName, "0004B9895DBBB6EC98E36")
 		},
 		expectedRequest: `DELETE /object/name?uploadId=0004B9895DBBB6EC98E36 HTTP/1.1
 Host: bucket-name.oss-cn-hangzhou.aliyuncs.com

@@ -102,6 +102,11 @@ type (
 		Initiated time.Time
 	}
 
+	CopyPartResult struct {
+		LastModified time.Time
+		ETag         string
+	}
+
 	CompleteMultipartUploadResult struct {
 		Location string
 		Bucket   string
@@ -183,6 +188,9 @@ func (r *WebsiteConfiguration) parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
 func (r *RefererConfiguration) parse(resp *http.Response) error {
+	return xml.NewDecoder(resp.Body).Decode(r)
+}
+func (r *CopyPartResult) parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
 

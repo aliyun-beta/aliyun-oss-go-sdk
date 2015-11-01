@@ -201,26 +201,37 @@ func (a *API) GetObjectACL(bucket, object string) (res *AccessControlPolicy, _ e
 	return res, a.do("GET", bucket, object+"?acl", &res)
 }
 
+// InitUpload starts an multipart upload process
 func (a *API) InitUpload(bucket, object string, options ...Option) (res *InitiateMultipartUploadResult, _ error) {
 	return res, a.do("POST", bucket, object+"?uploads", &res, append(options, ContentType("application/octet-stream"))...)
 }
 
+// UploadPart updates a trunk of data from an io.Reader
 func (a *API) UploadPart(bucket, object string, uploadID string, partNumber int, rd io.Reader, size int64) (res *UploadPartResult, _ error) {
 	return res, a.do("PUT", bucket, fmt.Sprintf("%s?partNumber=%d&uploadId=%s", object, partNumber, uploadID), &res, httpBody(&io.LimitedReader{R: rd, N: size}), ContentLength(size))
 }
 
+// UploadPartCopy updates a trunk of data from an existing object
+func (a *API) UploadPartCopy(bucket, object string, uploadID string, partNumber int, sourceBucket, sourceObject string, options ...Option) (res *CopyPartResult, _ error) {
+	return res, a.do("PUT", bucket, fmt.Sprintf("%s?partNumber=%d&uploadId=%s", object, partNumber, uploadID), &res, CopySource(sourceBucket, sourceObject))
+}
+
+// CompleteUpload notifies that the multipart upload is complete
 func (a *API) CompleteUpload(bucket, object string, uploadID string, list *CompleteMultipartUpload) (res *CompleteMultipartUploadResult, _ error) {
 	return res, a.do("POST", bucket, fmt.Sprintf("%s?uploadId=%s", object, uploadID), &res, xmlBody(list), ContentMD5, ContentType("application/octet-stream"))
 }
 
-func (a *API) CancelUpload(bucket, object string, uploadID string) error {
+// AbortUpload aborts a multipart upload
+func (a *API) AbortUpload(bucket, object string, uploadID string) error {
 	return a.do("DELETE", bucket, fmt.Sprintf("%s?uploadId=%s", object, uploadID), nil)
 }
 
+// ListUploads lists all ongoing multipart uploads
 func (a *API) ListUploads(bucket, object string) (res *ListMultipartUploadsResult, _ error) {
 	return res, a.do("GET", bucket, "?uploads", &res)
 }
 
+// ListParts lists successful uploaded parts of a multipart upload
 func (a *API) ListParts(bucket, object, uploadID string) (res *ListPartsResult, _ error) {
 	return res, a.do("GET", bucket, fmt.Sprintf("%s?uploadId=%s", object, uploadID), &res)
 }
