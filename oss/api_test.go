@@ -1,6 +1,7 @@
 package oss
 
 import (
+	"bytes"
 	"fmt"
 	"reflect"
 	"strings"
@@ -249,6 +250,39 @@ Date: %s
 
 wefpofjwefew`,
 		response:         "HTTP/1.1 200 OK\n",
+		expectedResponse: nil,
+	},
+
+	{
+		name: "GetObject",
+		request: func(a *API) (interface{}, error) {
+			w := new(bytes.Buffer)
+			if err := a.GetObject(testBucketName, testObjectName, w); err != nil {
+				return nil, err
+			}
+			if expected, actual := "abcdef", string(w.Bytes()); actual != expected {
+				return nil, fmt.Errorf(expectBut, expected, actual)
+			}
+			return nil, nil
+		},
+		expectedRequest: `GET /bucket_name/object_name HTTP/1.1
+Host: %s
+User-Agent: %s
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:gkiiIu1xWb5BtqGgF4Pb52mHJWs=
+Date: %s`,
+		response: `HTTP/1.1 200 OK
+x-oss-request-id: 3a89276f-2e2d-7965-3ff9-51c875b99c41
+x-oss-object-type: Normal
+Date: Fri, 24 Feb 2012 06:38:30 GMT
+Last-Modified: Fri, 24 Feb 2012 06:07:48 GMT
+ETag: "5B3C1A2E053D763E1B002CC607C5A0FE "
+Content-Type: text/plain
+Content-Length: 6
+Connection: close
+Server: AliyunOSS
+
+abcdef`,
 		expectedResponse: nil,
 	},
 
@@ -981,54 +1015,18 @@ Server: AliyunOSS
 	},
 }
 
-func TestGetObjectToFile(t *testing.T) {
-	rec, err := NewMockServer(`HTTP/1.1 200 OK
-x-oss-request-id: 3a89276f-2e2d-7965-3ff9-51c875b99c41
-x-oss-object-type: Normal
-Date: Fri, 24 Feb 2012 06:38:30 GMT
-Last-Modified: Fri, 24 Feb 2012 06:07:48 GMT
-ETag: "5B3C1A2E053D763E1B002CC607C5A0FE "
-Content-Type: text/plain
-Content-Length: 7
-Server: AliyunOSS
-
-abcdef`)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer rec.Close()
-	api := New(rec.URL(), testID, testSecret)
-	api.now = testTime
-	err = api.GetObjectToFile(testBucketName, testObjectName, "file.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	expected := fmt.Sprintf(`GET /bucket_name/object_name HTTP/1.1
-Host: %s
-User-Agent: %s
-Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:gkiiIu1xWb5BtqGgF4Pb52mHJWs=
-Date: %s`, rec.URL(), userAgent, testTimeText)
-	if rec.Err != nil {
-		t.Fatal(err)
-	}
-	if rec.Request != expected {
-		t.Fatalf(expectBut, expected, rec.Request)
-	}
-}
-
 func TestAPIs(t *testing.T) {
 	for i := range apiTestcases {
 		testAPI(t, &apiTestcases[i])
 	}
 }
 func testAPI(t *testing.T, testcase *testcase) {
-	rec, err := NewMockServer(testcase.response)
+	server, err := NewMockServer(testcase.response)
 	if err != nil {
 		t.Fatalf(testcaseErr, testcase.name, err)
 	}
-	defer rec.Close()
-	api := New(rec.URL(), testID, testSecret)
+	defer server.Close()
+	api := New("localhost:"+server.Port(), testID, testSecret)
 	api.now = testTime
 	response, err := testcase.request(api)
 	if v := reflect.ValueOf(response); !v.IsValid() || (v.Kind() == reflect.Ptr && v.IsNil()) {
@@ -1037,12 +1035,12 @@ func testAPI(t *testing.T, testcase *testcase) {
 	if !reflect.DeepEqual(err, testcase.expectedError) {
 		t.Fatalf(testcaseExpectBut, testcase.name, testcase.expectedError, err)
 	}
-	expectedRequest := fmt.Sprintf(testcase.expectedRequest, rec.URL(), userAgent, testTimeText)
-	if rec.Err != nil {
+	expectedRequest := fmt.Sprintf(testcase.expectedRequest, "localhost:"+server.Port(), userAgent, testTimeText)
+	if server.Err != nil {
 		t.Fatalf(testcaseErr, testcase.name, err)
 	}
-	if rec.Request != expectedRequest {
-		t.Fatalf(testcaseExpectBut, testcase.name, expectedRequest, rec.Request)
+	if server.Request != expectedRequest {
+		t.Fatalf(testcaseExpectBut, testcase.name, expectedRequest, server.Request)
 	}
 	if !reflect.DeepEqual(response, testcase.expectedResponse) {
 		t.Fatalf(testcaseExpectBut, testcase.name, testcase.expectedResponse, response)

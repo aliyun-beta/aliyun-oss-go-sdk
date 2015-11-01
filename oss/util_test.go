@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strconv"
 	"strings"
 )
 
@@ -67,8 +68,8 @@ func NewMockServer(resp string) (*MockServer, error) {
 	return rec, nil
 }
 
-func (r *MockServer) URL() string {
-	return r.listener.Addr().String()
+func (r *MockServer) Port() string {
+	return strconv.Itoa(r.listener.Addr().(*net.TCPAddr).Port)
 }
 
 func (r *MockServer) listen() {

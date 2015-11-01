@@ -19,6 +19,11 @@ type API struct {
 	client          *http.Client
 }
 
+// SetHTTPClient sets the underlying http.Client object used by the OSS client.
+func (a *API) SetHTTPClient(client *http.Client) {
+	a.client = client
+}
+
 // New creates an API object
 func New(endPoint, accessKeyID, accessKeySecret string) *API {
 	return &API{
@@ -58,15 +63,6 @@ func (a *API) DeleteBucket(name string) error {
 
 func (a *API) GetObject(bucket, object string, w io.Writer, options ...Option) error {
 	return a.do("GET", bucket+"/"+object, &writerResult{w})
-}
-
-func (a *API) GetObjectToFile(bucket, object, fileName string, options ...Option) error {
-	w, err := os.Create(fileName)
-	if err != nil {
-		return err
-	}
-	defer w.Close()
-	return a.GetObject(bucket, object, w, options...)
 }
 
 func (a *API) PutObject(bucket, object string, rd io.Reader, options ...Option) error {
