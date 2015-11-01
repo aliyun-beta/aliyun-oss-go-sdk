@@ -51,26 +51,43 @@ func (a *API) PutBucketACL(name string, acl ACLType) error {
 	return a.do("PUT", name, "?acl", nil, ACL(acl))
 }
 
-// PutBucketLogging is used to configure a bucket's logging behavior
+// PutBucketLogging configures a bucket's logging behavior
 func (a *API) PutBucketLogging(name string, status *BucketLoggingStatus) error {
 	return a.do("PUT", name, "?logging", nil, xmlBody(status))
 }
 
-// PutBucketWebsite is used to configure a bucket as a static website
+// PutBucketWebsite configures a bucket as a static website
 func (a *API) PutBucketWebsite(name string, config *WebsiteConfiguration) error {
 	return a.do("PUT", name, "?website", nil, xmlBody(config))
 }
 
+// PutBucketReferer configures a bucket's referer whitelist
+func (a *API) PutBucketReferer(name string, config *RefererConfiguration) error {
+	return a.do("PUT", name, "?referer", nil, xmlBody(config))
+}
+
+// PutBucketLifecycle configures the automatic deletion of a bucket
+func (a *API) PutBucketLifecycle(bucket string, lifecycle *LifecycleConfiguration) error {
+	return a.do("PUT", bucket, "?lifecycle", nil, xmlBody(lifecycle))
+}
+
+// GetBucket returns all the objects in a bucket
 func (a *API) GetBucket(name string, options ...Option) (res *ListBucketResult, _ error) {
 	return res, a.do("GET", name, "", &res, options...)
 }
 
+// GetBucketACL returns the access rule for a bucket
 func (a *API) GetBucketACL(name string) (res *AccessControlPolicy, _ error) {
 	return res, a.do("GET", name, "?acl", &res)
 }
 
+// GetBucketLocation returns the location of a bucket
 func (a *API) GetBucketLocation(name string) (res *LocationConstraint, _ error) {
 	return res, a.do("GET", name, "?location", &res)
+}
+
+func (a *API) GetBucketLogging(name string) (res *BucketLoggingStatus, _ error) {
+	return res, a.do("GET", name, "?logging", &res)
 }
 
 func (a *API) DeleteBucket(name string) error {
@@ -161,10 +178,6 @@ func (a *API) GetCORS(bucket string) (res *CORSConfiguration, _ error) {
 
 func (a *API) DeleteCORS(bucket string) error {
 	return a.do("DELETE", bucket, "?cors", nil)
-}
-
-func (a *API) PutLifecycle(bucket string, lifecycle *LifecycleConfiguration) error {
-	return a.do("PUT", bucket, "?lifecycle", nil, xmlBody(lifecycle))
 }
 
 func (a *API) GetLifecycle(bucket string) (res *LifecycleConfiguration, _ error) {

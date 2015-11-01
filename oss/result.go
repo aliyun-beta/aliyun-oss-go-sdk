@@ -175,6 +175,9 @@ func (r *CORSConfiguration) parse(resp *http.Response) error {
 func (r *LifecycleConfiguration) parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
+func (r *BucketLoggingStatus) parse(resp *http.Response) error {
+	return xml.NewDecoder(resp.Body).Decode(r)
+}
 
 type writerResult struct {
 	io.Writer

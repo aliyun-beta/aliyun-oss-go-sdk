@@ -225,6 +225,80 @@ Server: AliyunOSS
 	},
 
 	{
+		name: "PutBucketReferer",
+		request: func(a *API) (interface{}, error) {
+			return nil, a.PutBucketReferer("bucket-name", &RefererConfiguration{
+				AllowEmptyReferer: true,
+				Referer: []string{
+					"http://www.aliyun.com",
+					"https://www.aliyun.com",
+				},
+			})
+		},
+		expectedRequest: `PUT /?referer HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
+User-Agent: %s
+Content-Length: 196
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:vPGa/wuveVoHH857+l04tOpZn3A=
+Date: %s
+
+<RefererConfiguration><AllowEmptyReferer>true</AllowEmptyReferer><RefererList><Referer>http://www.aliyun.com</Referer><Referer>https://www.aliyun.com</Referer></RefererList></RefererConfiguration>`,
+		response: `HTTP/1.1 200 OK
+x-oss-request-id: 19a86d66-3492-0465-12af-7bec0938d0f9
+Date: Fri, 04 May 2012 03:21:12 GMT
+Content-Length: 0
+Connection: close
+Server: AliyunOSS
+`,
+		expectedResponse: nil,
+	},
+
+	{
+		name: "PutBucketLifecycle",
+		request: func(a *API) (interface{}, error) {
+			lifecycle := &LifecycleConfiguration{
+				Rule: []LifecycleRule{
+					{
+						ID:     "delete obsoleted files",
+						Prefix: "obsoleted/",
+						Status: "Enabled",
+						Expiration: Expiration{
+							Days: 3,
+						},
+					},
+					{
+						ID:     "delete temporary files",
+						Prefix: "temporary/",
+						Status: "Enabled",
+						Expiration: Expiration{
+							Date: parseTimePtr(time.RFC3339Nano, "2022-10-12T00:00:00.001Z"),
+						},
+					},
+				},
+			}
+			return nil, a.PutBucketLifecycle(testBucketName, lifecycle)
+		},
+		expectedRequest: `PUT /?lifecycle HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
+User-Agent: %s
+Content-Length: 340
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:3jdkrgCFCOELpNpH0K4rxkjK6AU=
+Date: %s
+
+<LifecycleConfiguration><Rule><ID>delete obsoleted files</ID><Prefix>obsoleted/</Prefix><Status>Enabled</Status><Expiration><Days>3</Days></Expiration></Rule><Rule><ID>delete temporary files</ID><Prefix>temporary/</Prefix><Status>Enabled</Status><Expiration><Date>2022-10-12T00:00:00.001Z</Date></Expiration></Rule></LifecycleConfiguration>`,
+		response: `HTTP/1.1 200 OK
+x-oss-request-id: 534B371674E88A4D8906008B
+Date: Mon, 14 Apr 2014 01:17:10 GMT
+Content-Length: 0
+Connection: close
+Server: AliyunOSS
+`,
+		expectedResponse: nil,
+	},
+
+	{
 		name: "GetBucket",
 		request: func(a *API) (interface{}, error) {
 			r, err := a.GetBucket(testBucketName)
@@ -293,77 +367,6 @@ Server: AliyunOSS
 				"fun/movie/",
 			},
 		},
-	},
-
-	{
-		name: "PutObjectFromFile",
-		request: func(a *API) (interface{}, error) {
-			return nil, a.PutObjectFromFile("bucket-name", testObjectName, testFileName)
-		},
-		expectedRequest: `PUT /object/name HTTP/1.1
-Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
-User-Agent: %s
-Content-Length: 16
-Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:gbvg8Xcdy0qvDT2e7uUdtj6/VZE=
-Content-Type: application/octet-stream
-Date: %s
-
-sfweruewpinbeewa`,
-		response:         "HTTP/1.1 200 OK\n",
-		expectedResponse: nil,
-	},
-
-	{
-		name: "PutObjectFromString",
-		request: func(a *API) (interface{}, error) {
-			return nil, a.PutObjectFromString("bucket-name", "object/name", "wefpofjwefew")
-		},
-		expectedRequest: `PUT /object/name HTTP/1.1
-Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
-User-Agent: %s
-Content-Length: 12
-Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:gbvg8Xcdy0qvDT2e7uUdtj6/VZE=
-Content-Type: application/octet-stream
-Date: %s
-
-wefpofjwefew`,
-		response:         "HTTP/1.1 200 OK\n",
-		expectedResponse: nil,
-	},
-
-	{
-		name: "GetObject",
-		request: func(a *API) (interface{}, error) {
-			w := new(bytes.Buffer)
-			if err := a.GetObject(testBucketName, testObjectName, w); err != nil {
-				return nil, err
-			}
-			if expected, actual := "abcdef", string(w.Bytes()); actual != expected {
-				return nil, fmt.Errorf(expectBut, expected, actual)
-			}
-			return nil, nil
-		},
-		expectedRequest: `GET /object/name HTTP/1.1
-Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
-User-Agent: %s
-Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:pZol4Z6em1QCAz53w4OatKsdi3w=
-Date: %s`,
-		response: `HTTP/1.1 200 OK
-x-oss-request-id: 3a89276f-2e2d-7965-3ff9-51c875b99c41
-x-oss-object-type: Normal
-Date: Fri, 24 Feb 2012 06:38:30 GMT
-Last-Modified: Fri, 24 Feb 2012 06:07:48 GMT
-ETag: "5B3C1A2E053D763E1B002CC607C5A0FE "
-Content-Type: text/plain
-Content-Length: 6
-Connection: close
-Server: AliyunOSS
-
-abcdef`,
-		expectedResponse: nil,
 	},
 
 	{
@@ -445,6 +448,126 @@ Accept-Encoding: identity
 Authorization: OSS ayahghai0juiSie:FXJsV//QmBZqMczqQkR2Lm+QUKY=
 Date: %s`,
 		response:         "HTTP/1.1 200\n",
+		expectedResponse: nil,
+	},
+
+	{
+		name: "GetBucketLogging",
+		request: func(a *API) (interface{}, error) {
+			r, err := a.GetBucketLogging(testBucketName)
+			return r, err
+		},
+		expectedRequest: `GET /?logging HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
+User-Agent: %s
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:1iVz2H1ae00yFT6f5zf9KNIV2n4=
+Date: %s`,
+		response: `HTTP/1.1 200
+x-oss-request-id: 7faf664d-0cad-852e-4b38-2ac2232e7e7f
+Date: Fri, 04 May 2012 05:31:04 GMT
+Connection: close
+Content-Length: 259
+Server: AliyunOSS
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BucketLoggingStatus xmlns="http://doc.oss-cn-hangzhou.aliyuncs.com">
+<LoggingEnabled>
+<TargetBucket>mybucketlogs</TargetBucket>
+<TargetPrefix>mybucket-access_log/</TargetPrefix>
+</LoggingEnabled>
+</BucketLoggingStatus>`,
+		expectedResponse: &BucketLoggingStatus{
+			LoggingEnabled: LoggingEnabled{
+				TargetBucket: "mybucketlogs",
+				TargetPrefix: "mybucket-access_log/",
+			},
+		},
+	},
+
+	{
+		name: "DeleteBucket",
+		request: func(a *API) (interface{}, error) {
+			return nil, a.DeleteBucket(testBucketName)
+		},
+		expectedRequest: `DELETE / HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
+User-Agent: %s
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:FXJsV//QmBZqMczqQkR2Lm+QUKY=
+Date: %s`,
+		response:         "HTTP/1.1 200\n",
+		expectedResponse: nil,
+	},
+
+	{
+		name: "PutObjectFromFile",
+		request: func(a *API) (interface{}, error) {
+			return nil, a.PutObjectFromFile("bucket-name", testObjectName, testFileName)
+		},
+		expectedRequest: `PUT /object/name HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
+User-Agent: %s
+Content-Length: 16
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:gbvg8Xcdy0qvDT2e7uUdtj6/VZE=
+Content-Type: application/octet-stream
+Date: %s
+
+sfweruewpinbeewa`,
+		response:         "HTTP/1.1 200 OK\n",
+		expectedResponse: nil,
+	},
+
+	{
+		name: "PutObjectFromString",
+		request: func(a *API) (interface{}, error) {
+			return nil, a.PutObjectFromString("bucket-name", "object/name", "wefpofjwefew")
+		},
+		expectedRequest: `PUT /object/name HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
+User-Agent: %s
+Content-Length: 12
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:gbvg8Xcdy0qvDT2e7uUdtj6/VZE=
+Content-Type: application/octet-stream
+Date: %s
+
+wefpofjwefew`,
+		response:         "HTTP/1.1 200 OK\n",
+		expectedResponse: nil,
+	},
+
+	{
+		name: "GetObject",
+		request: func(a *API) (interface{}, error) {
+			w := new(bytes.Buffer)
+			if err := a.GetObject(testBucketName, testObjectName, w); err != nil {
+				return nil, err
+			}
+			if expected, actual := "abcdef", string(w.Bytes()); actual != expected {
+				return nil, fmt.Errorf(expectBut, expected, actual)
+			}
+			return nil, nil
+		},
+		expectedRequest: `GET /object/name HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
+User-Agent: %s
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:pZol4Z6em1QCAz53w4OatKsdi3w=
+Date: %s`,
+		response: `HTTP/1.1 200 OK
+x-oss-request-id: 3a89276f-2e2d-7965-3ff9-51c875b99c41
+x-oss-object-type: Normal
+Date: Fri, 24 Feb 2012 06:38:30 GMT
+Last-Modified: Fri, 24 Feb 2012 06:07:48 GMT
+ETag: "5B3C1A2E053D763E1B002CC607C5A0FE "
+Content-Type: text/plain
+Content-Length: 6
+Connection: close
+Server: AliyunOSS
+
+abcdef`,
 		expectedResponse: nil,
 	},
 
@@ -977,50 +1100,6 @@ x-oss-request-id: 5051845BC4689A033D0022BC
 Date: Fri, 24 Feb 2012 05:45:34 GMT
 Connection: close
 Content-Length: 0
-Server: AliyunOSS
-`,
-		expectedResponse: nil,
-	},
-
-	{
-		name: "PutLifecycle",
-		request: func(a *API) (interface{}, error) {
-			lifecycle := &LifecycleConfiguration{
-				Rule: []LifecycleRule{
-					{
-						ID:     "delete obsoleted files",
-						Prefix: "obsoleted/",
-						Status: "Enabled",
-						Expiration: Expiration{
-							Days: 3,
-						},
-					},
-					{
-						ID:     "delete temporary files",
-						Prefix: "temporary/",
-						Status: "Enabled",
-						Expiration: Expiration{
-							Date: parseTimePtr(time.RFC3339Nano, "2022-10-12T00:00:00.001Z"),
-						},
-					},
-				},
-			}
-			return nil, a.PutLifecycle(testBucketName, lifecycle)
-		},
-		expectedRequest: `PUT /?lifecycle HTTP/1.1
-Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
-User-Agent: %s
-Content-Length: 340
-Accept-Encoding: identity
-Authorization: OSS ayahghai0juiSie:3jdkrgCFCOELpNpH0K4rxkjK6AU=
-Date: %s
-
-<LifecycleConfiguration><Rule><ID>delete obsoleted files</ID><Prefix>obsoleted/</Prefix><Status>Enabled</Status><Expiration><Days>3</Days></Expiration></Rule><Rule><ID>delete temporary files</ID><Prefix>temporary/</Prefix><Status>Enabled</Status><Expiration><Date>2022-10-12T00:00:00.001Z</Date></Expiration></Rule></LifecycleConfiguration>`,
-		response: `HTTP/1.1 200 OK
-x-oss-request-id: 534B371674E88A4D8906008B
-Date: Mon, 14 Apr 2014 01:17:10 GMT
-Content-Length: 0
-Connection: close
 Server: AliyunOSS
 `,
 		expectedResponse: nil,

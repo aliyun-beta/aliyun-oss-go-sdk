@@ -78,6 +78,12 @@ type (
 	ErrorDocument struct {
 		Key string
 	}
+
+	// RefererConfiguration is the container for referer configuration
+	RefererConfiguration struct {
+		AllowEmptyReferer bool
+		Referer           []string `xml:"RefererList>Referer"`
+	}
 )
 
 func BucketLocation(value string) Option {
