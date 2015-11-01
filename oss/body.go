@@ -54,6 +54,30 @@ type (
 		Days int        `xml:"Days,omitempty"`
 		Date *time.Time `xml:"Date,omitempty"`
 	}
+
+	// BucketLoggingStatus  is the container for logging status information
+	BucketLoggingStatus struct {
+		LoggingEnabled LoggingEnabled
+	}
+	// LoggingEnabled is the container for logging information
+	LoggingEnabled struct {
+		TargetBucket string
+		TargetPrefix string
+	}
+
+	// WebsiteConfiguration is the container for static website configuration
+	WebsiteConfiguration struct {
+		IndexDocument IndexDocument
+		ErrorDocument ErrorDocument
+	}
+	// IndexDocument is the container for the Suffix element
+	IndexDocument struct {
+		Suffix string
+	}
+	// ErrorDocument is the container for Key element No
+	ErrorDocument struct {
+		Key string
+	}
 )
 
 func BucketLocation(value string) Option {

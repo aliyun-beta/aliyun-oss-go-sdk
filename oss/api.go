@@ -51,6 +51,16 @@ func (a *API) PutBucketACL(name string, acl ACLType) error {
 	return a.do("PUT", name, "?acl", nil, ACL(acl))
 }
 
+// PutBucketLogging is used to configure a bucket's logging behavior
+func (a *API) PutBucketLogging(name string, status *BucketLoggingStatus) error {
+	return a.do("PUT", name, "?logging", nil, xmlBody(status))
+}
+
+// PutBucketWebsite is used to configure a bucket as a static website
+func (a *API) PutBucketWebsite(name string, config *WebsiteConfiguration) error {
+	return a.do("PUT", name, "?website", nil, xmlBody(config))
+}
+
 func (a *API) GetBucket(name string, options ...Option) (res *ListBucketResult, _ error) {
 	return res, a.do("GET", name, "", &res, options...)
 }

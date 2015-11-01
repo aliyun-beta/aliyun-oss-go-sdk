@@ -165,6 +165,66 @@ X-Oss-Acl: public-read`,
 	},
 
 	{
+		name: "PutBucketLogging",
+		request: func(a *API) (interface{}, error) {
+			return nil, a.PutBucketLogging("bucket-name", &BucketLoggingStatus{
+				LoggingEnabled: LoggingEnabled{
+					TargetBucket: "doc-log",
+					TargetPrefix: "MyLog-",
+				},
+			})
+		},
+		expectedRequest: `PUT /?logging HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
+User-Agent: %s
+Content-Length: 147
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:5rVsETIss359jA9q2k8+RTwk09g=
+Date: %s
+
+<BucketLoggingStatus><LoggingEnabled><TargetBucket>doc-log</TargetBucket><TargetPrefix>MyLog-</TargetPrefix></LoggingEnabled></BucketLoggingStatus>`,
+		response: `HTTP/1.1 200 OK
+x-oss-request-id: 19a86d66-3492-0465-12af-7bec0938d0f9
+Date: Fri, 04 May 2012 03:21:12 GMT
+Content-Length: 0
+Connection: close
+Server: AliyunOSS
+`,
+		expectedResponse: nil,
+	},
+
+	{
+		name: "PutBucketWebsite",
+		request: func(a *API) (interface{}, error) {
+			return nil, a.PutBucketWebsite("bucket-name", &WebsiteConfiguration{
+				IndexDocument: IndexDocument{
+					Suffix: "index.html",
+				},
+				ErrorDocument: ErrorDocument{
+					Key: "error.html",
+				},
+			})
+		},
+		expectedRequest: `PUT /?website HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
+User-Agent: %s
+Content-Length: 155
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:cYJRyRil8SL+NTHnjgc37kHDPFI=
+Date: %s
+
+<WebsiteConfiguration><IndexDocument><Suffix>index.html</Suffix></IndexDocument><ErrorDocument><Key>error.html</Key></ErrorDocument></WebsiteConfiguration>`,
+		response: `HTTP/1.1 200 OK
+x-oss-request-id: 19a86d66-3492-0465-12af-7bec0938d0f9
+Date: Fri, 04 May 2012 03:21:12 GMT
+Content-Length: 0
+Connection: close
+Server: AliyunOSS
+`,
+		expectedResponse: nil,
+	},
+
+	{
 		name: "GetBucket",
 		request: func(a *API) (interface{}, error) {
 			r, err := a.GetBucket(testBucketName)
