@@ -21,6 +21,7 @@ Highlights
 Differences with Python SDK
 ---------------------------
 
+* APIs only in Go SDK: PutBucketACL
 * HTTP header User-Agent, e.g. aliyun-sdk-go/0.1.1 (Linux/3.16.0-51-generic/x86_64;go1.5.1)
 * Go HTTP client does not support 100-Continue (will be supported after Go 1.6, see https://github.com/golang/go/issues/3665)
 * MIME type of txt file has default charset utf-8

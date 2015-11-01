@@ -37,13 +37,18 @@ func New(endPoint, accessKeyID, accessKeySecret string) *API {
 }
 
 // GetService list all buckets
-func (a *API) GetService() (res *ListAllMyBucketsResult, _ error) {
-	return res, a.do("GET", "", "", &res)
+func (a *API) GetService(options ...Option) (res *ListAllMyBucketsResult, _ error) {
+	return res, a.do("GET", "", "", &res, options...)
 }
 
 // PutBucket creates a new bucket
 func (a *API) PutBucket(name string, acl ACLType) error {
 	return a.do("PUT", name, "", nil, ACL(acl))
+}
+
+// PutBucketACL sets acess right for a bucket
+func (a *API) PutBucketACL(name string, acl ACLType) error {
+	return a.do("PUT", name, "?acl", nil, ACL(acl))
 }
 
 func (a *API) GetBucket(name string, options ...Option) (res *ListBucketResult, _ error) {
