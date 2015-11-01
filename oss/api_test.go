@@ -958,6 +958,27 @@ Server: AliyunOSS
 			},
 		},
 	},
+
+	{
+		name: "DeleteLifecycle",
+		request: func(a *API) (interface{}, error) {
+			return nil, a.DeleteLifecycle(testBucketName)
+		},
+		expectedRequest: `DELETE /bucket_name/?lifecycle HTTP/1.1
+Host: %s
+User-Agent: %s
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:8FY0kYeWcG4XIu18eCK3mig6qAI=
+Date: %s`,
+		response: `HTTP/1.1 204 No Content
+x-oss-request-id: 534B372F74E88A4D89060124
+Date: Mon, 14 Apr 2014 01:17:35 GMT
+Connection: close
+Content-Length: 0
+Server: AliyunOSS
+`,
+		expectedResponse: nil,
+	},
 }
 
 func TestGetObjectToFile(t *testing.T) {

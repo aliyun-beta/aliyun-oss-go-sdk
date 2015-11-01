@@ -159,6 +159,10 @@ func (a *API) GetLifecycle(bucket string) (res *LifecycleConfiguration, _ error)
 	return res, a.do("GET", bucket+"/?lifecycle", &res)
 }
 
+func (a *API) DeleteLifecycle(bucket string) error {
+	return a.do("DELETE", bucket+"/?lifecycle", nil)
+}
+
 func (a *API) do(method, resource string, result interface{}, options ...Option) error {
 	req, err := a.newRequest(method, resource, options)
 	if err != nil {
