@@ -42,9 +42,9 @@ type (
 	}
 
 	LifecycleConfiguration struct {
-		Rule []LifeCycleRule
+		Rule []LifecycleRule
 	}
-	LifeCycleRule struct {
+	LifecycleRule struct {
 		ID         string
 		Prefix     string
 		Status     string

@@ -874,7 +874,7 @@ Server: AliyunOSS
 		name: "PutLifecycle",
 		request: func(a *API) (interface{}, error) {
 			lifecycle := &LifecycleConfiguration{
-				Rule: []LifeCycleRule{
+				Rule: []LifecycleRule{
 					{
 						ID:     "delete obsoleted files",
 						Prefix: "obsoleted/",
@@ -913,6 +913,50 @@ Connection: close
 Server: AliyunOSS
 `,
 		expectedResponse: nil,
+	},
+
+	{
+		name: "GetLifecycle",
+		request: func(a *API) (interface{}, error) {
+			r, err := a.GetLifecycle(testBucketName)
+			return r, err
+		},
+		expectedRequest: `GET /bucket_name/?lifecycle HTTP/1.1
+Host: %s
+User-Agent: %s
+Accept-Encoding: identity
+Authorization: OSS ayahghai0juiSie:VeeOLgEBYNESI3mHMiottgBN7rY=
+Date: %s`,
+		response: `HTTP/1.1 200
+x-oss-request-id: 534B372974E88A4D89060099
+Date: Mon, 14 Apr 2014 01:17:29 GMT
+Connection: close
+Content-Length: 255
+Server: AliyunOSS
+
+<?xml version="1.0" encoding="UTF-8"?>
+<LifecycleConfiguration>
+  <Rule>
+    <ID>delete after one day</ID>
+    <Prefix>logs/</Prefix>
+    <Status>Enabled</Status>
+    <Expiration>
+      <Days>1</Days>
+    </Expiration>
+  </Rule>
+</LifecycleConfiguration>`,
+		expectedResponse: &LifecycleConfiguration{
+			Rule: []LifecycleRule{
+				{
+					ID:     "delete after one day",
+					Prefix: "logs/",
+					Status: "Enabled",
+					Expiration: Expiration{
+						Days: 1,
+					},
+				},
+			},
+		},
 	},
 }
 
