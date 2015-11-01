@@ -4,7 +4,6 @@ import (
 	"encoding/xml"
 	"io"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 )
@@ -127,14 +126,21 @@ func (r *InitiateMultipartUploadResult) parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
 
-type file string
+type writerResult struct {
+	io.Writer
+}
 
-func (f file) parse(resp *http.Response) error {
-	w, err := os.Create(string(f))
-	if err != nil {
-		return err
-	}
-	defer w.Close()
-	_, err = io.Copy(w, resp.Body)
+func (r *writerResult) parse(resp *http.Response) error {
+	_, err := io.Copy(r.Writer, resp.Body)
+	return err
+}
+
+type writeCloserResult struct {
+	io.WriteCloser
+}
+
+func (r *writeCloserResult) parse(resp *http.Response) error {
+	defer r.WriteCloser.Close()
+	_, err := io.Copy(r.WriteCloser, resp.Body)
 	return err
 }

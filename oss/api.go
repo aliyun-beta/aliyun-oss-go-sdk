@@ -56,18 +56,25 @@ func (a *API) DeleteBucket(name string) error {
 	return a.do("DELETE", name+"/", nil)
 }
 
+func (a *API) GetObject(bucket, object string, w io.Writer, options ...Option) error {
+	return a.do("GET", bucket+"/"+object, &writerResult{w})
+}
+
 func (a *API) GetObjectToFile(bucket, object, fileName string, options ...Option) error {
-	// w, err := os.Create(file)
-	// if err != nil {
-	// 	return err
-	// }
-	// defer w.Close()
-	return a.do("GET", bucket+"/"+object, file(fileName))
+	w, err := os.Create(fileName)
+	if err != nil {
+		return err
+	}
+	defer w.Close()
+	return a.GetObject(bucket, object, w, options...)
+}
+
+func (a *API) PutObject(bucket, object string, rd io.Reader, options ...Option) error {
+	return a.do("PUT", bucket+"/"+object, nil, append([]Option{httpBody(rd)}, options...)...)
 }
 
 func (a *API) PutObjectFromString(bucket, object, str string, options ...Option) error {
-	return a.do("PUT", bucket+"/"+object, nil,
-		append([]Option{ContentType("application/octet-stream"), httpBody(strings.NewReader(str))}, options...)...)
+	return a.PutObject(bucket, object, strings.NewReader(str), options...)
 }
 
 func (a *API) PutObjectFromFile(bucket, object, file string, options ...Option) error {
@@ -76,7 +83,11 @@ func (a *API) PutObjectFromFile(bucket, object, file string, options ...Option) 
 		return err
 	}
 	defer rd.Close()
-	return a.do("PUT", bucket+"/"+object, nil, append([]Option{httpBody(rd)}, options...)...)
+	return a.PutObject(bucket, object, rd, options...)
+}
+
+func (a *API) AppendObject(bucket, object string, rd io.Reader, position AppendPosition, options ...Option) (res AppendPosition, _ error) {
+	return res, a.do("POST", fmt.Sprintf("%s/%s?append&position=%d", bucket, object, position), &res, append([]Option{httpBody(rd)}, options...)...)
 }
 
 func (a *API) AppendObjectFromFile(bucket, object, file string, position AppendPosition, options ...Option) (res AppendPosition, _ error) {
@@ -85,7 +96,7 @@ func (a *API) AppendObjectFromFile(bucket, object, file string, position AppendP
 		return 0, err
 	}
 	defer rd.Close()
-	return res, a.do("POST", fmt.Sprintf("%s/%s?append&position=%d", bucket, object, position), &res, append([]Option{httpBody(rd)}, options...)...)
+	return a.AppendObject(bucket, object, rd, position, options...)
 }
 
 func (a *API) HeadObject(bucket, object string) (res Header, _ error) {
