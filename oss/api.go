@@ -9,44 +9,60 @@ import (
 	"time"
 )
 
-// API is the entry object for all OSS methods
-type API struct {
-	endPoint        string
-	accessKeyID     string
-	accessKeySecret string
-	securityToken   string
-	now             func() time.Time
-	client          *http.Client
-	scheme          string
-}
+type (
+	// API is the entry object for all OSS methods
+	API struct {
+		endPoint        string
+		accessKeyID     string
+		accessKeySecret string
+		securityToken   string
+		client          *http.Client
+		scheme          string
+		now             func() time.Time
+	}
+	// APIOption provides optional configurations for an API object
+	APIOption func(*API)
+)
 
 // New creates an API object
-func New(endPoint, accessKeyID, accessKeySecret string) *API {
-	return &API{
+func New(endPoint, accessKeyID, accessKeySecret string, options ...APIOption) *API {
+	api := &API{
 		endPoint:        endPoint,
 		accessKeyID:     accessKeyID,
 		accessKeySecret: accessKeySecret,
-		now:             time.Now,
 		client:          http.DefaultClient,
 		scheme:          "http",
+		now:             time.Now,
+	}
+	for _, option := range options {
+		option(api)
+	}
+	return api
+}
+
+// HTTPClient sets the underlying http.Client object used by the OSS client.
+func HTTPClient(client *http.Client) APIOption {
+	return func(a *API) {
+		if client != nil {
+			a.client = client
+		}
 	}
 }
 
-// SetHTTPClient sets the underlying http.Client object used by the OSS client.
-func (a *API) SetHTTPClient(client *http.Client) {
-	a.client = client
+// SecurityToken sets the STS token for temporary access
+func SecurityToken(token string) APIOption {
+	return func(a *API) {
+		a.securityToken = token
+	}
 }
 
-// SetSecurityToken sets the STS token for temporary access
-func (a *API) SetSecurityToken(token string) {
-	a.securityToken = token
-}
-
-// SetScheme sets the scheme for the API access: http or https, default is http.
-func (a *API) SetScheme(scheme string) {
-	switch scheme {
-	case "http", "https":
-		a.scheme = scheme
+// URLScheme sets the scheme for the API access: http or https, default is http.
+func (a *API) URLScheme(scheme string) APIOption {
+	return func(a *API) {
+		switch scheme {
+		case "http", "https":
+			a.scheme = scheme
+		}
 	}
 }
 

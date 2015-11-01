@@ -1267,16 +1267,15 @@ func testAPI(t *testing.T, testcase *testcase) {
 		t.Fatalf(testcaseErr, testcase.name, err)
 	}
 	defer server.Close()
-	api := New(testEndpoint, testID, testSecret)
-	api.now = testTime
-	api.SetHTTPClient(&http.Client{
+	api := New(testEndpoint, testID, testSecret, HTTPClient(&http.Client{
 		Transport: &http.Transport{
 			Dial: func(network, addr string) (net.Conn, error) {
 				// Hijack the address to 127.0.0.1 for testing
 				return net.Dial(network, "127.0.0.1:"+server.Port())
 			},
 		},
-	})
+	}))
+	api.now = testTime
 	response, err := testcase.request(api)
 	if v := reflect.ValueOf(response); !v.IsValid() || (v.Kind() == reflect.Ptr && v.IsNil()) {
 		response = nil
