@@ -201,32 +201,32 @@ var paramTestCases = []optionTestCase{
 	},
 	{
 		option: ResponseContentType("plain/text"),
-		key:    "Response-Content-Type",
+		key:    "response-content-type",
 		value:  "plain/text",
 	},
 	{
 		option: ResponseContentLanguage("en"),
-		key:    "Response-Content-Language",
+		key:    "response-content-language",
 		value:  "en",
 	},
 	{
 		option: ResponseCacheControl("no-cache"),
-		key:    "Response-Cache-Control",
+		key:    "response-cache-control",
 		value:  "no-cache",
 	},
 	{
 		option: ResponseContentDisposition("Attachment; filename=example.txt"),
-		key:    "Response-Content-Disposition",
+		key:    "response-content-disposition",
 		value:  "Attachment; filename=example.txt",
 	},
 	{
 		option: ResponseContentEncoding("gzip"),
-		key:    "Response-Content-Encoding",
+		key:    "response-content-encoding",
 		value:  "gzip",
 	},
 	{
 		option: ResponseExpires("Thu, 01 Dec 1994 16:00:00 GMT"),
-		key:    "Response-Expires",
+		key:    "response-expires",
 		value:  "Thu, 01 Dec 1994 16:00:00 GMT",
 	},
 }

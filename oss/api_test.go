@@ -1344,6 +1344,39 @@ Server: AliyunOSS
 `,
 		expectedResponse: nil,
 	},
+
+	{
+		name: "OptionObject",
+		request: func(a *API) (interface{}, error) {
+			r, err := a.OptionObject(testBucketName, testObjectName,
+				AccessControlRequestMethod("PUT"),
+				AccessControlRequestHeaders("x-oss-test"),
+				Origin("http://www.example.com"))
+			return r, err
+		},
+		expectedRequest: `OPTIONS /object/name HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
+User-Agent: %s
+Accept-Encoding: identity
+Access-Control-Request-Headers: x-oss-test
+Access-Control-Request-Method: PUT
+Authorization: OSS ayahghai0juiSie:y5a3p8IEGw6n2bY9jUG4mu2ywVI=
+Date: %s
+Origin: http://www.example.com`,
+		response: `HTTP/1.1 200 OK
+x-oss-request-id: 5051845BC4689A033D0022BC
+Access-Control-Allow-Origin: http://www.example.com
+Access-Control-Allow-Methods: PUT
+Access-Control-Expose-Headers: x-oss-test
+Connection: close
+`,
+		expectedResponse: Header{
+			"X-Oss-Request-Id":              []string{"5051845BC4689A033D0022BC"},
+			"Access-Control-Allow-Origin":   []string{"http://www.example.com"},
+			"Access-Control-Allow-Methods":  []string{"PUT"},
+			"Access-Control-Expose-Headers": []string{"x-oss-test"},
+		},
+	},
 }
 
 func TestAllOssAPIs(t *testing.T) {

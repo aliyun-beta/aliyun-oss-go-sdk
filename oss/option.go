@@ -150,6 +150,22 @@ func ContentLength(length int64) Option {
 		return nil
 	}
 }
+
+// AccessControlRequestMethod is an option to set Access-Control-Request-Method header
+func AccessControlRequestMethod(value string) Option {
+	return setHeader("Access-Control-Request-Method", value)
+}
+
+// AccessControlRequestHeaders is an option to set Access-Control-Request-Headers header
+func AccessControlRequestHeaders(value string) Option {
+	return setHeader("Access-Control-Request-Headers", value)
+}
+
+// Origin is an option to set Origin header
+func Origin(value string) Option {
+	return setHeader("Origin", value)
+}
+
 func setHeader(key, value string) Option {
 	return func(req *http.Request) error {
 		req.Header.Set(key, value)

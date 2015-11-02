@@ -248,6 +248,11 @@ func (a *API) DeleteCORS(bucket string) error {
 	return a.do("DELETE", bucket, "?cors", nil)
 }
 
+// OptionObject queries OSS whether a CORS request is permitted or not
+func (a *API) OptionObject(bucket, object string, options ...Option) (res Header, _ error) {
+	return res, a.do("OPTIONS", bucket, object, &res, options...)
+}
+
 func (a *API) do(method, bucket, object string, result interface{}, options ...Option) error {
 	req, err := a.newRequest(method, bucket, object, options)
 	if err != nil {
