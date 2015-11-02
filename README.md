@@ -18,6 +18,7 @@ Highlights
   - named options for setting headers & parameters
   - XML is returned as a parsed struct
   - error is returned as an error object
+* No third party dependencies
 * Easily extensible
   - clean and orthogonal implementation
 
