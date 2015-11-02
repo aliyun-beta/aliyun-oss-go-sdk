@@ -1,12 +1,12 @@
 package oss
 
 import (
-	"syscall"
+	"golang.org/x/sys/unix"
 )
 
 func Uname() *Utsname {
-	var u syscall.Utsname
-	syscall.Uname(&u)
+	var u unix.Utsname
+	unix.Uname(&u)
 	return &Utsname{
 		SysName:    uToS(u.Sysname[:]),
 		NodeName:   uToS(u.Nodename[:]),

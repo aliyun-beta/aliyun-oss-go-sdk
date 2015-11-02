@@ -20,6 +20,7 @@ type authorization struct {
 	secret []byte
 }
 
+// ContentMD5 is the option for calculating and adding a Content-Md5 header for an HTTP request
 func ContentMD5(req *http.Request) error {
 	if _, ok := req.Header["Content-Md5"]; ok {
 		return errors.New("Content-Md5 is already set")

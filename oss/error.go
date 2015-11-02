@@ -8,10 +8,13 @@ import (
 )
 
 var (
+	// ErrInvalidBucketName happens when the bucket name is not valid
 	ErrInvalidBucketName = errors.New("invalid bucket name")
+	// ErrInvalidObjectName happens when the object name is not valid
 	ErrInvalidObjectName = errors.New("invalid object name")
 )
 
+// Error represents the XML error returned by OSS APIs
 type Error struct {
 	Code         string
 	Message      string
