@@ -229,6 +229,22 @@ func ResponseContentEncoding(value string) Option {
 func ResponseExpires(value string) Option {
 	return addParam("response-expires", value)
 }
+
+// MaxUploads is an option to set max-uploads parameter
+func MaxUploads(value int) Option {
+	return addParam("max-uploads", strconv.Itoa(value))
+}
+
+// KeyMarker is an option to set key-marker parameter
+func KeyMarker(value string) Option {
+	return addParam("key-marker", value)
+}
+
+// UploadIDMarker is an option to set upload-id-marker parameter
+func UploadIDMarker(value string) Option {
+	return addParam("upload-id-marker", value)
+}
+
 func addParam(key, value string) Option {
 	return func(req *http.Request) error {
 		q := req.URL.Query()

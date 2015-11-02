@@ -1243,9 +1243,9 @@ Date: Thu, 23 Feb 2012 07:13:28 GMT
 	},
 
 	{
-		name: "PutCORS",
+		name: "PutBucketCORS",
 		request: func(a *API) (interface{}, error) {
-			return nil, a.PutCORS(testBucketName, &CORSConfiguration{
+			return nil, a.PutBucketCORS(testBucketName, &CORSConfiguration{
 				CORSRule: []CORSRule{
 					{
 						AllowedOrigin: []string{"*"},
@@ -1283,9 +1283,9 @@ Server: AliyunOSS
 	},
 
 	{
-		name: "GetCORS",
+		name: "GetBucketCORS",
 		request: func(a *API) (interface{}, error) {
-			r, err := a.GetCORS(testBucketName)
+			r, err := a.GetBucketCORS(testBucketName)
 			return r, err
 		},
 		expectedRequest: `GET /?cors HTTP/1.1
@@ -1325,9 +1325,9 @@ Server: AliyunOSS
 	},
 
 	{
-		name: "DeleteCORS",
+		name: "DeleteBucketCORS",
 		request: func(a *API) (interface{}, error) {
-			return nil, a.DeleteCORS(testBucketName)
+			return nil, a.DeleteBucketCORS(testBucketName)
 		},
 		expectedRequest: `DELETE /?cors HTTP/1.1
 Host: bucket-name.oss-cn-hangzhou.aliyuncs.com

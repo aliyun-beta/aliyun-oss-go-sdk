@@ -227,24 +227,27 @@ func (a *API) AbortUpload(bucket, object string, uploadID string) error {
 }
 
 // ListUploads lists all ongoing multipart uploads
-func (a *API) ListUploads(bucket, object string) (res *ListMultipartUploadsResult, _ error) {
-	return res, a.do("GET", bucket, "?uploads", &res)
+func (a *API) ListUploads(bucket, object string, options ...Option) (res *ListMultipartUploadsResult, _ error) {
+	return res, a.do("GET", bucket, "?uploads", &res, options...)
 }
 
 // ListParts lists successful uploaded parts of a multipart upload
-func (a *API) ListParts(bucket, object, uploadID string) (res *ListPartsResult, _ error) {
-	return res, a.do("GET", bucket, fmt.Sprintf("%s?uploadId=%s", object, uploadID), &res)
+func (a *API) ListParts(bucket, object, uploadID string, options ...Option) (res *ListPartsResult, _ error) {
+	return res, a.do("GET", bucket, fmt.Sprintf("%s?uploadId=%s", object, uploadID), &res, options...)
 }
 
-func (a *API) PutCORS(bucket string, cors *CORSConfiguration) error {
+// PutBucketCORS sets CORS rules to a bucket
+func (a *API) PutBucketCORS(bucket string, cors *CORSConfiguration) error {
 	return a.do("PUT", bucket, "?cors", nil, xmlBody(cors), ContentMD5)
 }
 
-func (a *API) GetCORS(bucket string) (res *CORSConfiguration, _ error) {
+// GetBucketCORS gets CORS rules of a bucket
+func (a *API) GetBucketCORS(bucket string) (res *CORSConfiguration, _ error) {
 	return res, a.do("GET", bucket, "?cors", &res)
 }
 
-func (a *API) DeleteCORS(bucket string) error {
+// DeleteBucketCORS deletes the CORS rules of a bucket
+func (a *API) DeleteBucketCORS(bucket string) error {
 	return a.do("DELETE", bucket, "?cors", nil)
 }
 
