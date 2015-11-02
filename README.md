@@ -1,25 +1,32 @@
 Aliyun OSS Go SDK
 =================
 
-Quick Start
------------
+Installation
+------------
 
 ```bash
 go get -u github.com/aliyun/aliyun-oss-go-sdk/oss
-go test -v github.com/aliyun/aliyun-oss-go-sdk/oss
+go test -v -cover github.com/aliyun/aliyun-oss-go-sdk/oss
 ```
 
 Highlights
 ----------
-* Complete set of Aliyun OSS API with 100% coverage tests
-  - every documented API is implemented
-  - intuitive table driven tests
+* Complete set of Aliyun OSS API
+* 100% test coverage with intuitive table driven tests
+* Passed static tests: go fmt, goimports, golint, go vet and race detector
 * Idiomatic
   - named options for setting headers & parameters
   - XML is returned as a parsed struct
   - error is returned as an error object
 * Easily extensible
   - clean and orthogonal implementation
+
+Documentation
+-------------
+
+* [Quick Start](doc/quick-start.md)
+* [API Object](doc/api-object.md)
+* ...
 
 Differences with Python SDK
 ---------------------------
