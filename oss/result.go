@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// responseParser parses an HTTP response to an object
 type responseParser interface {
 	parse(resp *http.Response) error
 }
@@ -213,6 +214,7 @@ func (r *CopyPartResult) parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
 
+// writerResult writes http.Response.Body to an io.Writer
 type writerResult struct {
 	io.Writer
 }

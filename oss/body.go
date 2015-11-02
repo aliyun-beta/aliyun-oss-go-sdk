@@ -107,6 +107,7 @@ func newDelete(objects []string, quiet bool) *objectsToDelete {
 	return del
 }
 
+// xmlBody sets http.Request.Body with XML marshaled from an object
 func xmlBody(obj interface{}) Option {
 	return func(req *http.Request) error {
 		var w bytes.Buffer
@@ -122,6 +123,7 @@ func xmlBody(obj interface{}) Option {
 	}
 }
 
+// httpBody sets http.Request.Body and Content-Length/Type when possible
 func httpBody(body io.Reader) Option {
 	return func(req *http.Request) error {
 		rc, ok := body.(io.ReadCloser)
