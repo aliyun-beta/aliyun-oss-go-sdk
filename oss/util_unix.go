@@ -4,10 +4,10 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-func Uname() *Utsname {
+func getUname() *utsname {
 	var u unix.Utsname
 	unix.Uname(&u)
-	return &Utsname{
+	return &utsname{
 		SysName:    uToS(u.Sysname[:]),
 		NodeName:   uToS(u.Nodename[:]),
 		Release:    uToS(u.Release[:]),

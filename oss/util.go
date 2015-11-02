@@ -11,11 +11,11 @@ var (
 )
 
 func init() {
-	uname := Uname()
+	uname := getUname()
 	userAgent = fmt.Sprintf("aliyun-sdk-go/%s (%s/%s/%s;%s)", Version, uname.SysName, uname.Release, uname.Machine, runtime.Version())
 }
 
-type Utsname struct {
+type utsname struct {
 	SysName    string
 	NodeName   string
 	Release    string

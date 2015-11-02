@@ -14,25 +14,30 @@ import (
 )
 
 type (
-	CreateBucketConfiguration struct {
+	createBucketConfiguration struct {
+		XMLName            xml.Name `xml:"CreateBucketConfiguration"`
 		LocationConstraint string
 	}
 
-	Delete struct {
-		Quiet  bool
-		Object []Object
+	objectsToDelete struct {
+		XMLName xml.Name `xml:"Delete"`
+		Quiet   bool
+		Object  []objectToDelete
 	}
-	Object struct {
+	objectToDelete struct {
 		Key string
 	}
 
+	// CompleteMultipartUpload is the input for CompleteUpload API
 	CompleteMultipartUpload struct {
 		Part []Part
 	}
 
+	// CORSConfiguration represents the CORS rules of a bucket
 	CORSConfiguration struct {
 		CORSRule []CORSRule
 	}
+	//CORSRule represents a CORS rule
 	CORSRule struct {
 		AllowedOrigin []string
 		AllowedMethod []string
@@ -41,15 +46,18 @@ type (
 		MaxAgeSeconds int `xml:"MaxAgeSeconds,omitempty"`
 	}
 
+	// LifecycleConfiguration represents the deletion rule for a bucket
 	LifecycleConfiguration struct {
 		Rule []LifecycleRule
 	}
+	// LifecycleRule represents a deletion rule
 	LifecycleRule struct {
 		ID         string
 		Prefix     string
 		Status     string
 		Expiration Expiration
 	}
+	// Expiration represents the expiration time either by days or exact time
 	Expiration struct {
 		Days int        `xml:"Days,omitempty"`
 		Date *time.Time `xml:"Date,omitempty"`
@@ -86,14 +94,15 @@ type (
 	}
 )
 
+// BucketLocation is the option for setting bucket location when calling PutBucket
 func BucketLocation(value string) Option {
-	return xmlBody(&CreateBucketConfiguration{LocationConstraint: value})
+	return xmlBody(&createBucketConfiguration{LocationConstraint: value})
 }
 
-func newDelete(objects []string, quiet bool) *Delete {
-	del := &Delete{Quiet: quiet}
+func newDelete(objects []string, quiet bool) *objectsToDelete {
+	del := &objectsToDelete{Quiet: quiet}
 	for _, key := range objects {
-		del.Object = append(del.Object, Object{Key: key})
+		del.Object = append(del.Object, objectToDelete{Key: key})
 	}
 	return del
 }
