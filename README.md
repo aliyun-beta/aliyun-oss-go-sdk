@@ -12,15 +12,23 @@ go test -v -cover github.com/aliyun/aliyun-oss-go-sdk/oss
 Highlights
 ----------
 * Complete set of Aliyun OSS API
-* 100% test coverage with intuitive table driven tests
-* Passed static tests: go fmt, goimports, golint, go vet and race detector
+* Thouroughly tested
+  - 100% test coverage
+  - intuitive table driven tests
+  - full test suite takes only 0.1 second
+* Lint clean
+  - golint
+  - go fmt
+  - goimports
+  - go vet
+  - race detector
 * Idiomatic
+  - response is returned as a parsed object
+  - error is returned as a Go error
   - named options for setting headers & parameters
-  - XML is returned as a parsed struct
-  - error is returned as an error object
-* No third party dependencies
 * Easily extensible
   - clean and orthogonal implementation
+* No third party dependencies
 
 Documentation
 -------------
