@@ -1,5 +1,5 @@
 The OSS API Object
-==================
+------------------
 
 The OSS API object (oss.API) is the entry point to all the methods for manipulating
 buckets and the objects in the buckets.
@@ -11,8 +11,7 @@ XML is returned, it is parsed and returned as a normal Go error interface{}.
 Named optional parameters are provided on some of the methods, including the
 oss.New function.
 
-Create oss.API
---------------
+### Create oss.API
 
 An oss.API object is created with oss.New funtion.
 
@@ -20,19 +19,19 @@ An oss.API object is created with oss.New funtion.
 	api := oss.New(endPoint, accessKeyID, accessKeySecret)
 ```
 
-Use HTTPS protocol
+### Use HTTPS protocol
 
 ```go
 	api := oss.New(endPoint, accessKeyID, accessKeySecret, oss.URLScheme("https"))
 ```
 
-Set the security token for Aliyun STS access
+### Set the security token for Aliyun STS access
 
 ```go
 	api := oss.New(endPoint, accessKeyID, accessKeySecret, oss.SecurityToken("your security token"))
 ```
 
-Set the underlying http.Client object for tuning parameters and more
+### Set the underlying http.Client object for tuning parameters and more
 
 ```go
 	api := oss.New(endPoint, accessKeyID, accessKeySecret,
@@ -41,7 +40,7 @@ Set the underlying http.Client object for tuning parameters and more
 		}))
 ```
 
-Multiple optional arguments can be specified at the same time
+### Multiple optional arguments can be specified at the same time
 
 ```go
 	api := oss.New(endPoint, accessKeyID, accessKeySecret,
