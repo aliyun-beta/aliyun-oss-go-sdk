@@ -2,6 +2,7 @@ package oss
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -672,7 +673,7 @@ Server: AliyunOSS
 	{
 		name: "PutObject",
 		request: func(a *API) (interface{}, error) {
-			return nil, a.PutObject("bucket-name", "object/name", strings.NewReader("wefpofjwefew"))
+			return nil, a.PutObject(testBucketName, testObjectName, strings.NewReader("wefpofjwefew"))
 		},
 		expectedRequest: `PUT /object/name HTTP/1.1
 Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
@@ -1415,5 +1416,113 @@ func testAPI(t *testing.T, testcase *testcase) {
 	}
 	if !reflect.DeepEqual(response, testcase.expectedResponse) {
 		t.Fatalf(testcaseExpectBut, testcase.name, testcase.expectedResponse, response)
+	}
+}
+
+func TestSecurityToken(t *testing.T) {
+	expected := "sec-token"
+	api := New(testEndpoint, testID, testSecret, SecurityToken(expected))
+	req, err := api.newRequest("GET", testBucketName, testObjectName, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if actual := req.Header.Get("X-Oss-Security-Token"); actual != expected {
+		t.Fatalf(expectBut, expected, actual)
+	}
+}
+
+func TestURLScheme(t *testing.T) {
+	api := New(testEndpoint, testID, testSecret, URLScheme("https"))
+	req, err := api.newRequest("GET", testBucketName, testObjectName, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if expected, actual := fmt.Sprintf("https://%s.%s/%s", testBucketName, testEndpoint, testObjectName), req.URL.String(); actual != expected {
+		t.Fatalf(expectBut, expected, actual)
+	}
+}
+
+func TestInvalidBucketName(t *testing.T) {
+	api := New(testEndpoint, testID, testSecret)
+	for _, bucket := range []string{
+		"aBcde",  // capital letter
+		"abcde_", // invalid char
+		"-abcde", // not begin with lower caese letter or number
+		"ab",     // too short
+		strings.Repeat("a", 64), // too long
+	} {
+		if _, err := api.GetBucket(bucket); err != ErrInvalidBucketName {
+			t.Fatalf(testcaseExpectBut, bucket, ErrInvalidBucketName, err)
+		}
+	}
+}
+
+func TestInvalidObjectName(t *testing.T) {
+	api := New(testEndpoint, testID, testSecret)
+	for _, object := range []string{
+		"/abc",                    // start with /
+		`\abc`,                    // start with \
+		"abc\rde",                 // contains \r
+		"abc\nde",                 // contains \n
+		strings.Repeat("a", 1024), // too long
+	} {
+		if err := api.GetObject(testBucketName, object, new(bytes.Buffer)); err != ErrInvalidObjectName {
+			t.Fatalf(testcaseExpectBut, object, ErrInvalidObjectName, err)
+		}
+	}
+}
+
+func TestIPEndpoint(t *testing.T) {
+	api := New("127.0.0.1", testID, testSecret)
+	req, err := api.newRequest("GET", testBucketName, testObjectName, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if expected, actual := "http://127.0.0.1/bucket-name/object/name", req.URL.String(); actual != expected {
+		t.Fatalf(expectBut, expected, actual)
+	}
+}
+
+func TestConnectionFail(t *testing.T) {
+	errMessage := "injected failure"
+	api := New(testEndpoint, testID, testSecret, HTTPClient(&http.Client{
+		Transport: &http.Transport{
+			Dial: func(network, addr string) (net.Conn, error) {
+				return nil, errors.New(errMessage)
+			},
+		},
+	}))
+	if _, err := api.GetBucket(testBucketName); !strings.Contains(err.Error(), errMessage) {
+		t.Fatalf(expectBut, errMessage, err.Error())
+	}
+}
+
+func TestFailedOption(t *testing.T) {
+	injectedFailure := errors.New("injected failure")
+	failedOption := func(req *http.Request) error {
+		return injectedFailure
+	}
+	api := New(testEndpoint, testID, testSecret)
+	if _, err := api.GetService(failedOption); err != injectedFailure {
+		t.Fatalf(expectBut, injectedFailure, err)
+	}
+}
+
+func TestWrongResultType(t *testing.T) {
+	panicked := false
+	func() {
+		defer func() {
+			if err := recover(); err != nil {
+				panicked = true
+			}
+		}()
+		type wrongResult struct{} // wrongResult does not implement responseParser
+		api := New(testEndpoint, testID, testSecret)
+		api.handleResponse(&http.Response{
+			StatusCode: 200,
+		}, &wrongResult{})
+	}()
+	if !panicked {
+		t.Fatal("expect panicking")
 	}
 }

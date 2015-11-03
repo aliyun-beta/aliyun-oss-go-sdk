@@ -26,7 +26,7 @@ func ContentMD5(req *http.Request) error {
 		return errors.New("Content-Md5 is already set")
 	}
 	if req.Body == nil {
-		return errors.New("body is nil")
+		return errors.New("Content-Md5 requires non-nil body")
 	}
 	buf, _ := ioutil.ReadAll(req.Body)
 	req.Body = ioutil.NopCloser(bytes.NewReader(buf))

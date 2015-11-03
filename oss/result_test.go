@@ -2,6 +2,7 @@ package oss
 
 import (
 	"encoding/xml"
+	"net/http"
 	"reflect"
 	"testing"
 	"time"
@@ -68,4 +69,16 @@ func parseTime(layout, value string) time.Time {
 func parseTimePtr(layout, value string) *time.Time {
 	t, _ := time.Parse(layout, value)
 	return &t
+}
+
+func TestAppendPosition(t *testing.T) {
+	var pos AppendPosition
+	err := pos.parse(&http.Response{
+		Header: http.Header{
+			"X-Oss-Next-Append-Position": []string{"not int value"},
+		},
+	})
+	if err == nil {
+		t.Fatalf(expectBut, "error", err)
+	}
 }

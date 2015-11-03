@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"reflect"
 	"regexp"
 	"time"
@@ -57,7 +58,7 @@ func SecurityToken(token string) APIOption {
 }
 
 // URLScheme sets the scheme for the API access: http or https, default is http.
-func (a *API) URLScheme(scheme string) APIOption {
+func URLScheme(scheme string) APIOption {
 	return func(a *API) {
 		switch scheme {
 		case "http", "https":
@@ -274,9 +275,14 @@ func (a *API) newRequest(method, bucket, object string, options []Option) (*http
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest(method, uri, nil)
-	if err != nil {
-		return nil, err
+	req := &http.Request{
+		Method:     method,
+		URL:        uri,
+		Proto:      "HTTP/1.1",
+		ProtoMajor: 1,
+		ProtoMinor: 1,
+		Header:     make(http.Header),
+		Host:       uri.Host,
 	}
 	for _, option := range options {
 		if err := option(req); err != nil {
@@ -300,25 +306,25 @@ func (a *API) newRequest(method, bucket, object string, options []Option) (*http
 }
 
 var (
-	rxBucketName = regexp.MustCompile(`[a-z0-9][a-z0-9\-]{2,62}`)
-	rxObjectName = regexp.MustCompile(`[^/\][^\r\n]*`)
+	rxBucketName = regexp.MustCompile(`\A[a-z0-9][a-z0-9\-]{2,62}\z`)
+	rxObjectName = regexp.MustCompile(`\A[^/\\](|[^\r\n]*)\z`)
 )
 
-func ossURL(scheme, host, bucket, object string) (string, error) {
+func ossURL(scheme, host, bucket, object string) (*url.URL, error) {
 	scheme += "://"
 	if bucket == "" && object == "" {
-		return scheme + host, nil
+		return url.Parse(scheme + host)
 	}
 	if !rxBucketName.MatchString(bucket) {
-		return "", ErrInvalidBucketName
+		return nil, ErrInvalidBucketName
 	}
-	if object != "" && !rxObjectName.MatchString(object) || len(object) > 1023 {
-		return "", ErrInvalidObjectName
+	if len(object) > 1023 || object != "" && !rxObjectName.MatchString(object) {
+		return nil, ErrInvalidObjectName
 	}
 	if !isOSSDomain(host) {
-		return scheme + fmt.Sprintf("%s/%s/%s", host, bucket, object), nil
+		return url.Parse(scheme + fmt.Sprintf("%s/%s/%s", host, bucket, object))
 	}
-	return scheme + fmt.Sprintf("%s.%s/%s", bucket, host, object), nil
+	return url.Parse(scheme + fmt.Sprintf("%s.%s/%s", bucket, host, object))
 }
 
 func (a *API) handleResponse(resp *http.Response, result interface{}) error {
@@ -338,5 +344,5 @@ func (a *API) handleResponse(resp *http.Response, result interface{}) error {
 	if respParser, ok := result.(responseParser); ok {
 		return respParser.parse(resp)
 	}
-	panic(fmt.Sprintf("result %#v should implement responseParser interface", result))
+	panic(fmt.Sprintf("programming error: type of %#v should implement responseParser interface", result))
 }
