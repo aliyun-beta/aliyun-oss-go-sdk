@@ -26,9 +26,9 @@ Highlights
   - response is returned as a parsed object
   - error is returned as a Go error
   - named options for setting headers & parameters
-* Easily extensible
+* Great extensibility
   - clean and orthogonal implementation
-  - users can extend the SDK when a new API method is supported
+  - users can easily extend the SDK when a new API method is supported
 * No third party dependencies
 
 Documentation
