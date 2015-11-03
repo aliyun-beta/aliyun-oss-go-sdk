@@ -40,7 +40,7 @@ Documentation
 * [Object](doc/object.md)
 * [Optional Headers and Parameters](doc/options.md)
 * [Multipart Upload](doc/upload.md)
-* [Cross-Origin Resource Sharing(CORS)](doc/cors.md)
+* [Cross-Origin Resource Sharing (CORS)](doc/cors.md)
 * [Object Lifecycle Management](doc/lifecycle.md)
 * [Extending the SDK](doc/extend.md)
 
