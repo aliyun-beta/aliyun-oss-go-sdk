@@ -40,7 +40,7 @@ Documentation
 * [Optional Headers and Parameters](doc/options.md)
 * [Multipart Upload](doc/upload.md)
 * [Cross-Origin Resource Sharing(CORS)](doc/cors.md)
-* [Object lifecycle management](doc/lifecycle.md)
+* [Object Lifecycle Management](doc/lifecycle.md)
 * [Extending the SDK](doc/extend.md)
 
 Differences with Python SDK
