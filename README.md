@@ -33,9 +33,15 @@ Highlights
 Documentation
 -------------
 
-* [Quick Start](doc/quick-start.md)
+* [Overview](doc/overview.md)
 * [API Object](doc/api-object.md)
-* ...
+* [Bucket](doc/bucket.md)
+* [Object](doc/object.md)
+* [Options](doc/options.md)
+* [Multipart Upload](doc/upload.md)
+* [Cross-Origin Resource Sharing(CORS)](doc/cors.md)
+* [Object lifecycle management](doc/lifecycle.md)
+* [Extending the API](doc/extend.md)
 
 Differences with Python SDK
 ---------------------------
