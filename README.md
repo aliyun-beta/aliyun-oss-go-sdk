@@ -15,7 +15,7 @@ Highlights
 * Thouroughly tested
   - 100% test coverage
   - intuitive table driven tests
-  - full test suite takes only 0.1 second
+  - full test suite completes within 0.2 second
 * Lint clean
   - golint
   - go fmt
