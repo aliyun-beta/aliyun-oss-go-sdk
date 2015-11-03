@@ -37,11 +37,11 @@ Documentation
 * [API Object](doc/api-object.md)
 * [Bucket](doc/bucket.md)
 * [Object](doc/object.md)
-* [Options](doc/options.md)
+* [Optional Headers and Parameters](doc/options.md)
 * [Multipart Upload](doc/upload.md)
 * [Cross-Origin Resource Sharing(CORS)](doc/cors.md)
 * [Object lifecycle management](doc/lifecycle.md)
-* [Extending the API](doc/extend.md)
+* [Extending the SDK](doc/extend.md)
 
 Differences with Python SDK
 ---------------------------
