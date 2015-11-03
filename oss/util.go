@@ -22,14 +22,13 @@ func getSysInfo() sysInfo {
 	name := runtime.GOOS
 	release := "-"
 	machine := runtime.GOARCH
-	uname, _ := exec.LookPath("uname")
-	if out, err := exec.Command(uname, "-s").CombinedOutput(); err == nil {
+	if out, err := exec.Command("uname", "-s").CombinedOutput(); err == nil {
 		name = string(bytes.TrimSpace(out))
 	}
-	if out, err := exec.Command(uname, "-r").CombinedOutput(); err == nil {
+	if out, err := exec.Command("uname", "-r").CombinedOutput(); err == nil {
 		release = string(bytes.TrimSpace(out))
 	}
-	if out, err := exec.Command(uname, "-m").CombinedOutput(); err == nil {
+	if out, err := exec.Command("uname", "-m").CombinedOutput(); err == nil {
 		machine = string(bytes.TrimSpace(out))
 	}
 	return sysInfo{name: name, release: release, machine: machine}
