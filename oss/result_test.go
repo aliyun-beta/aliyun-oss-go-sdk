@@ -73,7 +73,7 @@ func parseTimePtr(layout, value string) *time.Time {
 
 func TestAppendPosition(t *testing.T) {
 	var pos AppendPosition
-	err := pos.parse(&http.Response{
+	err := pos.Parse(&http.Response{
 		Header: http.Header{
 			"X-Oss-Next-Append-Position": []string{"not int value"},
 		},

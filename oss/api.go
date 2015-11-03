@@ -342,8 +342,8 @@ func (a *API) handleResponse(resp *http.Response, result interface{}) error {
 			result = v.Interface()
 		}
 	}
-	if respParser, ok := result.(responseParser); ok {
-		return respParser.parse(resp)
+	if respParser, ok := result.(ResponseParser); ok {
+		return respParser.Parse(resp)
 	}
 	panic(fmt.Sprintf("programming error: type of %#v should implement responseParser interface", result))
 }

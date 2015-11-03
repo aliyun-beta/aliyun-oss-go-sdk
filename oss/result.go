@@ -8,9 +8,9 @@ import (
 	"time"
 )
 
-// responseParser parses an HTTP response to an object
-type responseParser interface {
-	parse(resp *http.Response) error
+// ResponseParser parses an HTTP response to an object
+type ResponseParser interface {
+	Parse(resp *http.Response) error
 }
 
 // XML result types
@@ -153,19 +153,28 @@ type (
 	}
 )
 
-func (r *LocationConstraint) parse(resp *http.Response) error {
+// Parse implements ResponseParser
+func (r *LocationConstraint) Parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
-func (r *ListAllMyBucketsResult) parse(resp *http.Response) error {
+
+// Parse implements ResponseParser
+func (r *ListAllMyBucketsResult) Parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
-func (r *ListBucketResult) parse(resp *http.Response) error {
+
+// Parse implements ResponseParser
+func (r *ListBucketResult) Parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
-func (r *AccessControlPolicy) parse(resp *http.Response) error {
+
+// Parse implements ResponseParser
+func (r *AccessControlPolicy) Parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
-func (r *AppendPosition) parse(resp *http.Response) error {
+
+// Parse implements ResponseParser
+func (r *AppendPosition) Parse(resp *http.Response) error {
 	i, err := strconv.Atoi(resp.Header.Get("X-Oss-Next-Append-Position"))
 	if err != nil {
 		return err
@@ -173,44 +182,70 @@ func (r *AppendPosition) parse(resp *http.Response) error {
 	*r = AppendPosition(i)
 	return nil
 }
-func (r *Header) parse(resp *http.Response) error {
+
+// Parse implements ResponseParser
+func (r *Header) Parse(resp *http.Response) error {
 	*r = Header(resp.Header)
 	return nil
 }
-func (r *DeleteResult) parse(resp *http.Response) error {
+
+// Parse implements ResponseParser
+func (r *DeleteResult) Parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
-func (r *CopyObjectResult) parse(resp *http.Response) error {
+
+// Parse implements ResponseParser
+func (r *CopyObjectResult) Parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
-func (r *InitiateMultipartUploadResult) parse(resp *http.Response) error {
+
+// Parse implements ResponseParser
+func (r *InitiateMultipartUploadResult) Parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
-func (r *CompleteMultipartUploadResult) parse(resp *http.Response) error {
+
+// Parse implements ResponseParser
+func (r *CompleteMultipartUploadResult) Parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
-func (r *ListMultipartUploadsResult) parse(resp *http.Response) error {
+
+// Parse implements ResponseParser
+func (r *ListMultipartUploadsResult) Parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
-func (r *ListPartsResult) parse(resp *http.Response) error {
+
+// Parse implements ResponseParser
+func (r *ListPartsResult) Parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
-func (r *CORSConfiguration) parse(resp *http.Response) error {
+
+// Parse implements ResponseParser
+func (r *CORSConfiguration) Parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
-func (r *LifecycleConfiguration) parse(resp *http.Response) error {
+
+// Parse implements ResponseParser
+func (r *LifecycleConfiguration) Parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
-func (r *BucketLoggingStatus) parse(resp *http.Response) error {
+
+// Parse implements ResponseParser
+func (r *BucketLoggingStatus) Parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
-func (r *WebsiteConfiguration) parse(resp *http.Response) error {
+
+// Parse implements ResponseParser
+func (r *WebsiteConfiguration) Parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
-func (r *RefererConfiguration) parse(resp *http.Response) error {
+
+// Parse implements ResponseParser
+func (r *RefererConfiguration) Parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
-func (r *CopyPartResult) parse(resp *http.Response) error {
+
+// Parse implements ResponseParser
+func (r *CopyPartResult) Parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
 
@@ -219,7 +254,8 @@ type writerResult struct {
 	io.Writer
 }
 
-func (r *writerResult) parse(resp *http.Response) error {
+// Parse implements ResponseParser
+func (r *writerResult) Parse(resp *http.Response) error {
 	_, err := io.Copy(r.Writer, resp.Body)
 	return err
 }
@@ -229,7 +265,8 @@ type UploadPartResult struct {
 	ETag string
 }
 
-func (r *UploadPartResult) parse(resp *http.Response) error {
+// Parse implements ResponseParser
+func (r *UploadPartResult) Parse(resp *http.Response) error {
 	r.ETag = resp.Header.Get("ETag")
 	return nil
 }

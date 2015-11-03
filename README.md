@@ -28,6 +28,7 @@ Highlights
   - named options for setting headers & parameters
 * Easily extensible
   - clean and orthogonal implementation
+  - users can extend the SDK when a new API method is supported
 * No third party dependencies
 
 Documentation
