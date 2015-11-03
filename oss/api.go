@@ -84,22 +84,22 @@ func (a *API) PutBucketACL(name string, acl ACLType) error {
 
 // PutBucketLogging configures a bucket's logging behavior
 func (a *API) PutBucketLogging(name string, status *BucketLoggingStatus) error {
-	return a.Do("PUT", name, "?logging", nil, xmlBody(status))
+	return a.Do("PUT", name, "?logging", nil, XMLBody(status))
 }
 
 // PutBucketWebsite configures a bucket as a static website
 func (a *API) PutBucketWebsite(name string, config *WebsiteConfiguration) error {
-	return a.Do("PUT", name, "?website", nil, xmlBody(config))
+	return a.Do("PUT", name, "?website", nil, XMLBody(config))
 }
 
 // PutBucketReferer configures a bucket's referer whitelist
 func (a *API) PutBucketReferer(name string, config *RefererConfiguration) error {
-	return a.Do("PUT", name, "?referer", nil, xmlBody(config))
+	return a.Do("PUT", name, "?referer", nil, XMLBody(config))
 }
 
 // PutBucketLifecycle configures the automatic deletion of a bucket
 func (a *API) PutBucketLifecycle(bucket string, lifecycle *LifecycleConfiguration) error {
-	return a.Do("PUT", bucket, "?lifecycle", nil, xmlBody(lifecycle))
+	return a.Do("PUT", bucket, "?lifecycle", nil, XMLBody(lifecycle))
 }
 
 // GetBucket returns all the objects in a bucket
@@ -159,7 +159,7 @@ func (a *API) DeleteBucketLifecycle(bucket string) error {
 
 // PutObject uploads a file from an io.Reader
 func (a *API) PutObject(bucket, object string, rd io.Reader, options ...Option) error {
-	return a.Do("PUT", bucket, object, nil, append([]Option{httpBody(rd)}, options...)...)
+	return a.Do("PUT", bucket, object, nil, append([]Option{HTTPBody(rd)}, options...)...)
 }
 
 // CopyObject copies an existing object on OSS to another object
@@ -174,7 +174,7 @@ func (a *API) GetObject(bucket, object string, w io.Writer, options ...Option) e
 
 // AppendObject uploads a file by append to it from an io.Reader
 func (a *API) AppendObject(bucket, object string, rd io.Reader, position AppendPosition, options ...Option) (res AppendPosition, _ error) {
-	return res, a.Do("POST", bucket, fmt.Sprintf("%s?append&position=%d", object, position), &res, append([]Option{httpBody(rd)}, options...)...)
+	return res, a.Do("POST", bucket, fmt.Sprintf("%s?append&position=%d", object, position), &res, append([]Option{HTTPBody(rd)}, options...)...)
 }
 
 // DeleteObject deletes an object
@@ -184,7 +184,7 @@ func (a *API) DeleteObject(bucket, object string) error {
 
 // DeleteObjects deletes multiple objects
 func (a *API) DeleteObjects(bucket string, quiet bool, objects ...string) (res *DeleteResult, _ error) {
-	return res, a.Do("POST", bucket, "?delete", &res, xmlBody(newDelete(objects, quiet)), ContentMD5)
+	return res, a.Do("POST", bucket, "?delete", &res, XMLBody(newDelete(objects, quiet)), ContentMD5)
 }
 
 // HeadObject returns only the metadata of an object in HTTP headers
@@ -209,7 +209,7 @@ func (a *API) InitUpload(bucket, object string, options ...Option) (res *Initiat
 
 // UploadPart updates a trunk of data from an io.Reader
 func (a *API) UploadPart(bucket, object string, uploadID string, partNumber int, rd io.Reader, size int64) (res *UploadPartResult, _ error) {
-	return res, a.Do("PUT", bucket, fmt.Sprintf("%s?partNumber=%d&uploadId=%s", object, partNumber, uploadID), &res, httpBody(&io.LimitedReader{R: rd, N: size}), ContentLength(size))
+	return res, a.Do("PUT", bucket, fmt.Sprintf("%s?partNumber=%d&uploadId=%s", object, partNumber, uploadID), &res, HTTPBody(&io.LimitedReader{R: rd, N: size}), ContentLength(size))
 }
 
 // UploadPartCopy updates a trunk of data from an existing object
@@ -219,7 +219,7 @@ func (a *API) UploadPartCopy(bucket, object string, uploadID string, partNumber 
 
 // CompleteUpload notifies that the multipart upload is complete
 func (a *API) CompleteUpload(bucket, object string, uploadID string, list *CompleteMultipartUpload) (res *CompleteMultipartUploadResult, _ error) {
-	return res, a.Do("POST", bucket, fmt.Sprintf("%s?uploadId=%s", object, uploadID), &res, xmlBody(list), ContentMD5, ContentType("application/octet-stream"))
+	return res, a.Do("POST", bucket, fmt.Sprintf("%s?uploadId=%s", object, uploadID), &res, XMLBody(list), ContentMD5, ContentType("application/octet-stream"))
 }
 
 // AbortUpload aborts a multipart upload
@@ -239,7 +239,7 @@ func (a *API) ListParts(bucket, object, uploadID string, options ...Option) (res
 
 // PutBucketCORS sets CORS rules to a bucket
 func (a *API) PutBucketCORS(bucket string, cors *CORSConfiguration) error {
-	return a.Do("PUT", bucket, "?cors", nil, xmlBody(cors), ContentMD5)
+	return a.Do("PUT", bucket, "?cors", nil, XMLBody(cors), ContentMD5)
 }
 
 // GetBucketCORS gets CORS rules of a bucket

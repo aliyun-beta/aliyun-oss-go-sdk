@@ -96,7 +96,7 @@ type (
 
 // BucketLocation is the option for setting bucket location when calling PutBucket
 func BucketLocation(value string) Option {
-	return xmlBody(&createBucketConfiguration{LocationConstraint: value})
+	return XMLBody(&createBucketConfiguration{LocationConstraint: value})
 }
 
 func newDelete(objects []string, quiet bool) *objectsToDelete {
@@ -107,8 +107,8 @@ func newDelete(objects []string, quiet bool) *objectsToDelete {
 	return del
 }
 
-// xmlBody sets http.Request.Body with XML marshaled from an object
-func xmlBody(obj interface{}) Option {
+// XMLBody sets http.Request.Body with XML marshaled from an object
+func XMLBody(obj interface{}) Option {
 	return func(req *http.Request) error {
 		var w bytes.Buffer
 		if err := xml.NewEncoder(&w).Encode(obj); err != nil {
@@ -120,8 +120,8 @@ func xmlBody(obj interface{}) Option {
 	}
 }
 
-// httpBody sets http.Request.Body and Content-Length/Type when possible
-func httpBody(body io.Reader) Option {
+// HTTPBody sets http.Request.Body and Content-Length/Type when possible
+func HTTPBody(body io.Reader) Option {
 	return func(req *http.Request) error {
 		rc, ok := body.(io.ReadCloser)
 		if !ok && body != nil {

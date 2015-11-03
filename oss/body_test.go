@@ -12,7 +12,7 @@ func TestHTTPBody(t *testing.T) {
 		body := "abc"
 		req, _ := http.NewRequest("GET", "", nil)
 		w := bytes.NewBuffer([]byte(body))
-		httpBody(w)(req)
+		HTTPBody(w)(req)
 		if int(req.ContentLength) != len(body) {
 			t.Fatalf(expectBut, len(body), req.ContentLength)
 		}
@@ -21,7 +21,7 @@ func TestHTTPBody(t *testing.T) {
 		body := "abcd"
 		req, _ := http.NewRequest("GET", "", nil)
 		w := bytes.NewReader([]byte(body))
-		httpBody(w)(req)
+		HTTPBody(w)(req)
 		if int(req.ContentLength) != len(body) {
 			t.Fatalf(expectBut, len(body), req.ContentLength)
 		}
@@ -33,7 +33,7 @@ func TestHTTPBody(t *testing.T) {
 		}
 		defer w.Close()
 		req, _ := http.NewRequest("GET", "", nil)
-		httpBody(w)(req)
+		HTTPBody(w)(req)
 		if int(req.ContentLength) != 16 {
 			t.Fatalf(expectBut, 16, req.ContentLength)
 		}
@@ -46,7 +46,7 @@ func TestXMLBodyError(t *testing.T) {
 			Ch chan int
 		}
 		req, _ := http.NewRequest("GET", "", nil)
-		if err := xmlBody(&X{make(chan int)})(req); err == nil {
+		if err := XMLBody(&X{make(chan int)})(req); err == nil {
 			t.Fatal("expect error but got nil")
 		}
 	}
