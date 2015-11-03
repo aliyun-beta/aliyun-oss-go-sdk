@@ -7,7 +7,6 @@ import (
 	"net"
 	"strconv"
 	"strings"
-	"testing"
 )
 
 const (
@@ -15,10 +14,6 @@ const (
 	testcaseExpectBut = "testcase %v:\n--- EXPECT ---\n%v\n--- BUT GOT ---\n%v"
 	testcaseErr       = "testcase %s: %v"
 )
-
-func init() {
-	pythonSDKCompatibleMode = true
-}
 
 type response struct {
 	headers []string

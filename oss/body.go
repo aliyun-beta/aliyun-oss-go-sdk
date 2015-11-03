@@ -111,9 +111,6 @@ func newDelete(objects []string, quiet bool) *objectsToDelete {
 func xmlBody(obj interface{}) Option {
 	return func(req *http.Request) error {
 		var w bytes.Buffer
-		if !pythonSDKCompatibleMode {
-			w.WriteString(xml.Header)
-		}
 		if err := xml.NewEncoder(&w).Encode(obj); err != nil {
 			return err
 		}
@@ -140,12 +137,7 @@ func httpBody(body io.Reader) Option {
 		case *strings.Reader:
 			req.ContentLength = int64(v.Len())
 		case *os.File:
-			fInfo, err := os.Stat(v.Name())
-			if err != nil {
-				return err
-			}
-			fileName = v.Name()
-			req.ContentLength = fInfo.Size()
+			req.ContentLength = tryGetFileSize(v)
 		}
 		req.Header.Set("Content-Type", typeByExtension(fileName))
 		return nil
@@ -157,4 +149,8 @@ func typeByExtension(file string) string {
 		typ = "application/octet-stream"
 	}
 	return typ
+}
+func tryGetFileSize(f *os.File) int64 {
+	fInfo, _ := f.Stat()
+	return fInfo.Size()
 }

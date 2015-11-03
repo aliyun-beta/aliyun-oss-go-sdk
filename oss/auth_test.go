@@ -3,6 +3,7 @@ package oss
 import (
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -37,17 +38,30 @@ func TestAuth(t *testing.T) {
 }
 
 func TestContentMD5(t *testing.T) {
-	f, err := os.Open("testdata/h-content-md5.html")
-	if err != nil {
-		t.Fatal(err)
+	{
+		f, err := os.Open("testdata/h-content-md5.html")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer f.Close()
+		req, _ := http.NewRequest("GET", "/", f)
+		ContentMD5(req)
+		if expected, actual := "0TMnkhCZtrIjdTtJk6x3+Q==", req.Header.Get("Content-Md5"); actual != expected {
+			t.Fatalf(expectBut, expected, actual)
+		}
 	}
-	defer f.Close()
-	req, err := http.NewRequest("GET", "/", f)
-	if err != nil {
-		t.Fatal(err)
+	{
+		req, _ := http.NewRequest("GET", "/", strings.NewReader("a"))
+		req.Header.Set("Content-Md5", "xxx")
+		if err := ContentMD5(req); err == nil {
+			t.Fatal("expect error but got nil")
+		}
 	}
-	ContentMD5(req)
-	if expected, actual := "0TMnkhCZtrIjdTtJk6x3+Q==", req.Header.Get("Content-Md5"); actual != expected {
-		t.Fatalf(expectBut, expected, actual)
+	{
+		req, _ := http.NewRequest("GET", "/", nil)
+		if err := ContentMD5(req); err == nil {
+			t.Fatal("expect error but got nil")
+		}
 	}
+
 }

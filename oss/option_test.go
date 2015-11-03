@@ -229,6 +229,21 @@ var paramTestCases = []optionTestCase{
 		key:    "response-expires",
 		value:  "Thu, 01 Dec 1994 16:00:00 GMT",
 	},
+	{
+		option: MaxUploads(100),
+		key:    "max-uploads",
+		value:  "100",
+	},
+	{
+		option: KeyMarker("abc"),
+		key:    "key-marker",
+		value:  "abc",
+	},
+	{
+		option: UploadIDMarker("xyz"),
+		key:    "upload-id-marker",
+		value:  "xyz",
+	},
 }
 
 func TestParamOptions(t *testing.T) {

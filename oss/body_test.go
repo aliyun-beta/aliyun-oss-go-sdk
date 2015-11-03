@@ -39,3 +39,15 @@ func TestHTTPBody(t *testing.T) {
 		}
 	}
 }
+
+func TestXMLBodyError(t *testing.T) {
+	{
+		type X struct {
+			Ch chan int
+		}
+		req, _ := http.NewRequest("GET", "", nil)
+		if err := xmlBody(&X{make(chan int)})(req); err == nil {
+			t.Fatal("expect error but got nil")
+		}
+	}
+}
