@@ -69,195 +69,196 @@ func URLScheme(scheme string) APIOption {
 
 // GetService list all buckets
 func (a *API) GetService(options ...Option) (res *ListAllMyBucketsResult, _ error) {
-	return res, a.do("GET", "", "", &res, options...)
+	return res, a.Do("GET", "", "", &res, options...)
 }
 
 // PutBucket creates a new bucket
 func (a *API) PutBucket(name string, acl ACLType) error {
-	return a.do("PUT", name, "", nil, ACL(acl))
+	return a.Do("PUT", name, "", nil, ACL(acl))
 }
 
 // PutBucketACL sets acess right for a bucket
 func (a *API) PutBucketACL(name string, acl ACLType) error {
-	return a.do("PUT", name, "?acl", nil, ACL(acl))
+	return a.Do("PUT", name, "?acl", nil, ACL(acl))
 }
 
 // PutBucketLogging configures a bucket's logging behavior
 func (a *API) PutBucketLogging(name string, status *BucketLoggingStatus) error {
-	return a.do("PUT", name, "?logging", nil, xmlBody(status))
+	return a.Do("PUT", name, "?logging", nil, xmlBody(status))
 }
 
 // PutBucketWebsite configures a bucket as a static website
 func (a *API) PutBucketWebsite(name string, config *WebsiteConfiguration) error {
-	return a.do("PUT", name, "?website", nil, xmlBody(config))
+	return a.Do("PUT", name, "?website", nil, xmlBody(config))
 }
 
 // PutBucketReferer configures a bucket's referer whitelist
 func (a *API) PutBucketReferer(name string, config *RefererConfiguration) error {
-	return a.do("PUT", name, "?referer", nil, xmlBody(config))
+	return a.Do("PUT", name, "?referer", nil, xmlBody(config))
 }
 
 // PutBucketLifecycle configures the automatic deletion of a bucket
 func (a *API) PutBucketLifecycle(bucket string, lifecycle *LifecycleConfiguration) error {
-	return a.do("PUT", bucket, "?lifecycle", nil, xmlBody(lifecycle))
+	return a.Do("PUT", bucket, "?lifecycle", nil, xmlBody(lifecycle))
 }
 
 // GetBucket returns all the objects in a bucket
 func (a *API) GetBucket(name string, options ...Option) (res *ListBucketResult, _ error) {
-	return res, a.do("GET", name, "", &res, options...)
+	return res, a.Do("GET", name, "", &res, options...)
 }
 
 // GetBucketACL returns the access rule for a bucket
 func (a *API) GetBucketACL(name string) (res *AccessControlPolicy, _ error) {
-	return res, a.do("GET", name, "?acl", &res)
+	return res, a.Do("GET", name, "?acl", &res)
 }
 
 // GetBucketLocation returns the location of a bucket
 func (a *API) GetBucketLocation(name string) (res *LocationConstraint, _ error) {
-	return res, a.do("GET", name, "?location", &res)
+	return res, a.Do("GET", name, "?location", &res)
 }
 
 // GetBucketLogging returns a bucket's logging configuration
 func (a *API) GetBucketLogging(name string) (res *BucketLoggingStatus, _ error) {
-	return res, a.do("GET", name, "?logging", &res)
+	return res, a.Do("GET", name, "?logging", &res)
 }
 
 // GetBucketWebsite returns a bucket's configuration as a static website
 func (a *API) GetBucketWebsite(name string) (res *WebsiteConfiguration, _ error) {
-	return res, a.do("GET", name, "?website", &res)
+	return res, a.Do("GET", name, "?website", &res)
 }
 
 // GetBucketReferer returns a bucket's referer whitelist
 func (a *API) GetBucketReferer(name string) (res *RefererConfiguration, _ error) {
-	return res, a.do("GET", name, "?referer", &res)
+	return res, a.Do("GET", name, "?referer", &res)
 }
 
 // GetBucketLifecycle returns a bucket's deletion configuration
 func (a *API) GetBucketLifecycle(bucket string) (res *LifecycleConfiguration, _ error) {
-	return res, a.do("GET", bucket, "?lifecycle", &res)
+	return res, a.Do("GET", bucket, "?lifecycle", &res)
 }
 
 // DeleteBucket deletes a bucket
 func (a *API) DeleteBucket(name string) error {
-	return a.do("DELETE", name, "", nil)
+	return a.Do("DELETE", name, "", nil)
 }
 
 // DeleteBucketLogging turns off the logging functionality
 func (a *API) DeleteBucketLogging(name string) error {
-	return a.do("DELETE", name, "?logging", nil)
+	return a.Do("DELETE", name, "?logging", nil)
 }
 
 // DeleteBucketWebsite turns off the website functionality
 func (a *API) DeleteBucketWebsite(name string) error {
-	return a.do("DELETE", name, "?website", nil)
+	return a.Do("DELETE", name, "?website", nil)
 }
 
 // DeleteBucketLifecycle deletes the lifecycle configuration of a bucket
 func (a *API) DeleteBucketLifecycle(bucket string) error {
-	return a.do("DELETE", bucket, "?lifecycle", nil)
+	return a.Do("DELETE", bucket, "?lifecycle", nil)
 }
 
 // PutObject uploads a file from an io.Reader
 func (a *API) PutObject(bucket, object string, rd io.Reader, options ...Option) error {
-	return a.do("PUT", bucket, object, nil, append([]Option{httpBody(rd)}, options...)...)
+	return a.Do("PUT", bucket, object, nil, append([]Option{httpBody(rd)}, options...)...)
 }
 
 // CopyObject copies an existing object on OSS to another object
 func (a *API) CopyObject(sourceBucket, sourceObject, targetBucket, targetObject string, options ...Option) (res *CopyObjectResult, _ error) {
-	return res, a.do("PUT", targetBucket, targetObject, &res, append(options, CopySource(sourceBucket, sourceObject))...)
+	return res, a.Do("PUT", targetBucket, targetObject, &res, append(options, CopySource(sourceBucket, sourceObject))...)
 }
 
 // GetObject returns an object and write it to an io.Writer
 func (a *API) GetObject(bucket, object string, w io.Writer, options ...Option) error {
-	return a.do("GET", bucket, object, &writerResult{w})
+	return a.Do("GET", bucket, object, &writerResult{w})
 }
 
 // AppendObject uploads a file by append to it from an io.Reader
 func (a *API) AppendObject(bucket, object string, rd io.Reader, position AppendPosition, options ...Option) (res AppendPosition, _ error) {
-	return res, a.do("POST", bucket, fmt.Sprintf("%s?append&position=%d", object, position), &res, append([]Option{httpBody(rd)}, options...)...)
+	return res, a.Do("POST", bucket, fmt.Sprintf("%s?append&position=%d", object, position), &res, append([]Option{httpBody(rd)}, options...)...)
 }
 
 // DeleteObject deletes an object
 func (a *API) DeleteObject(bucket, object string) error {
-	return a.do("DELETE", bucket, object, nil)
+	return a.Do("DELETE", bucket, object, nil)
 }
 
 // DeleteObjects deletes multiple objects
 func (a *API) DeleteObjects(bucket string, quiet bool, objects ...string) (res *DeleteResult, _ error) {
-	return res, a.do("POST", bucket, "?delete", &res, xmlBody(newDelete(objects, quiet)), ContentMD5)
+	return res, a.Do("POST", bucket, "?delete", &res, xmlBody(newDelete(objects, quiet)), ContentMD5)
 }
 
 // HeadObject returns only the metadata of an object in HTTP headers
 func (a *API) HeadObject(bucket, object string) (res Header, _ error) {
-	return res, a.do("HEAD", bucket, object, &res)
+	return res, a.Do("HEAD", bucket, object, &res)
 }
 
 // PutObjectACL sets acess right for an object
 func (a *API) PutObjectACL(bucket, object string, acl ACLType) error {
-	return a.do("PUT", bucket, object+"?acl", nil, ACL(acl))
+	return a.Do("PUT", bucket, object+"?acl", nil, ACL(acl))
 }
 
 // GetObjectACL returns the access rule for an object
 func (a *API) GetObjectACL(bucket, object string) (res *AccessControlPolicy, _ error) {
-	return res, a.do("GET", bucket, object+"?acl", &res)
+	return res, a.Do("GET", bucket, object+"?acl", &res)
 }
 
 // InitUpload starts an multipart upload process
 func (a *API) InitUpload(bucket, object string, options ...Option) (res *InitiateMultipartUploadResult, _ error) {
-	return res, a.do("POST", bucket, object+"?uploads", &res, append(options, ContentType("application/octet-stream"))...)
+	return res, a.Do("POST", bucket, object+"?uploads", &res, append(options, ContentType("application/octet-stream"))...)
 }
 
 // UploadPart updates a trunk of data from an io.Reader
 func (a *API) UploadPart(bucket, object string, uploadID string, partNumber int, rd io.Reader, size int64) (res *UploadPartResult, _ error) {
-	return res, a.do("PUT", bucket, fmt.Sprintf("%s?partNumber=%d&uploadId=%s", object, partNumber, uploadID), &res, httpBody(&io.LimitedReader{R: rd, N: size}), ContentLength(size))
+	return res, a.Do("PUT", bucket, fmt.Sprintf("%s?partNumber=%d&uploadId=%s", object, partNumber, uploadID), &res, httpBody(&io.LimitedReader{R: rd, N: size}), ContentLength(size))
 }
 
 // UploadPartCopy updates a trunk of data from an existing object
 func (a *API) UploadPartCopy(bucket, object string, uploadID string, partNumber int, sourceBucket, sourceObject string, options ...Option) (res *CopyPartResult, _ error) {
-	return res, a.do("PUT", bucket, fmt.Sprintf("%s?partNumber=%d&uploadId=%s", object, partNumber, uploadID), &res, CopySource(sourceBucket, sourceObject))
+	return res, a.Do("PUT", bucket, fmt.Sprintf("%s?partNumber=%d&uploadId=%s", object, partNumber, uploadID), &res, CopySource(sourceBucket, sourceObject))
 }
 
 // CompleteUpload notifies that the multipart upload is complete
 func (a *API) CompleteUpload(bucket, object string, uploadID string, list *CompleteMultipartUpload) (res *CompleteMultipartUploadResult, _ error) {
-	return res, a.do("POST", bucket, fmt.Sprintf("%s?uploadId=%s", object, uploadID), &res, xmlBody(list), ContentMD5, ContentType("application/octet-stream"))
+	return res, a.Do("POST", bucket, fmt.Sprintf("%s?uploadId=%s", object, uploadID), &res, xmlBody(list), ContentMD5, ContentType("application/octet-stream"))
 }
 
 // AbortUpload aborts a multipart upload
 func (a *API) AbortUpload(bucket, object string, uploadID string) error {
-	return a.do("DELETE", bucket, fmt.Sprintf("%s?uploadId=%s", object, uploadID), nil)
+	return a.Do("DELETE", bucket, fmt.Sprintf("%s?uploadId=%s", object, uploadID), nil)
 }
 
 // ListUploads lists all ongoing multipart uploads
 func (a *API) ListUploads(bucket, object string, options ...Option) (res *ListMultipartUploadsResult, _ error) {
-	return res, a.do("GET", bucket, "?uploads", &res, options...)
+	return res, a.Do("GET", bucket, "?uploads", &res, options...)
 }
 
 // ListParts lists successful uploaded parts of a multipart upload
 func (a *API) ListParts(bucket, object, uploadID string, options ...Option) (res *ListPartsResult, _ error) {
-	return res, a.do("GET", bucket, fmt.Sprintf("%s?uploadId=%s", object, uploadID), &res, options...)
+	return res, a.Do("GET", bucket, fmt.Sprintf("%s?uploadId=%s", object, uploadID), &res, options...)
 }
 
 // PutBucketCORS sets CORS rules to a bucket
 func (a *API) PutBucketCORS(bucket string, cors *CORSConfiguration) error {
-	return a.do("PUT", bucket, "?cors", nil, xmlBody(cors), ContentMD5)
+	return a.Do("PUT", bucket, "?cors", nil, xmlBody(cors), ContentMD5)
 }
 
 // GetBucketCORS gets CORS rules of a bucket
 func (a *API) GetBucketCORS(bucket string) (res *CORSConfiguration, _ error) {
-	return res, a.do("GET", bucket, "?cors", &res)
+	return res, a.Do("GET", bucket, "?cors", &res)
 }
 
 // DeleteBucketCORS deletes the CORS rules of a bucket
 func (a *API) DeleteBucketCORS(bucket string) error {
-	return a.do("DELETE", bucket, "?cors", nil)
+	return a.Do("DELETE", bucket, "?cors", nil)
 }
 
 // OptionObject queries OSS whether a CORS request is permitted or not
 func (a *API) OptionObject(bucket, object string, options ...Option) (res Header, _ error) {
-	return res, a.do("OPTIONS", bucket, object, &res, options...)
+	return res, a.Do("OPTIONS", bucket, object, &res, options...)
 }
 
-func (a *API) do(method, bucket, object string, result interface{}, options ...Option) error {
+// Do sends a general OSS request and returns the response.
+func (a *API) Do(method, bucket, object string, result interface{}, options ...Option) error {
 	req, err := a.newRequest(method, bucket, object, options)
 	if err != nil {
 		return err
