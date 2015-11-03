@@ -7,6 +7,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"testing"
 )
 
 const (
@@ -103,4 +104,8 @@ func (r *MockServer) Close() {
 
 func p(v ...interface{}) {
 	fmt.Println(v...)
+}
+
+func TestUserAgent(t *testing.T) {
+	p(userAgent)
 }
