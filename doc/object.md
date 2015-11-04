@@ -87,7 +87,7 @@ One or more optional headers can be provided when necessary.
 	fmt.Printf("%#v\n", res)
 ```
 
-### List objects in a bucket satisfying some conditions
+### List objects in a bucket satisfying some options
 
 ```go
 	// list all objects
@@ -100,10 +100,89 @@ One or more optional headers can be provided when necessary.
 
 ### Get an object
 
+Get the contents of an object and its associated header.
+
 ```go
 	buf := new(bytes.Buffer)
-	if err := api.GetObject("bucket-name", "object/name", buf); err != nil {
+	headers, err := api.GetObject("bucket-name", "object/name", buf)
+	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println(buf.String())
+	fmt.Println(headers)
+```
+
+### Get an object with options
+
+For example, read bytes 20 to 100 from an object.
+
+```go
+	buf := new(bytes.Buffer)
+	headers, err := api.GetObject("bucket-name", "object/name", buf,
+		oss.Range("bytes=20-100"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(buf.String())
+```
+
+### Save an object to a file
+
+```go
+	f, err := os.Create("file_name")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+	_, err := api.GetObject("bucket-name", "object/name", f)
+	if err != nil {
+		log.Fatal(err)
+	}
+```
+
+### Get object headers only
+
+```go
+	headers, err := api.HeadObject("bucket-name", "object/name")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(headers)
+```
+
+### Delete an Object
+
+```go
+	if err := api.DeleteObject("bucket-name", "object/name"); err != nil {
+		log.Fatal(err)
+	}
+```
+
+### Delete a number of objects at the same time
+
+```go
+	if err := api.DeleteObjects("bucket-name", "object1", "object2", "object3"); err != nil {
+		log.Fatal(err)
+	}
+```
+
+### Copy an object online
+
+```go
+	res, err := api.CopyObject("source-bucket", "source/object", "target-bucket", "target/object")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%#v\n", res)
+```
+
+### Modify an object's meta headers by copying to the same location
+
+```go
+	bucket, object := "bucket-name", "object/name"
+	res, err := api.CopyObject(bucket, object, bucket, object, oss.ContentType("image/png"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%#v\n", res)
 ```
