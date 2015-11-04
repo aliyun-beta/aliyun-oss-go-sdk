@@ -64,4 +64,14 @@ One or more optional headers can be provided when necessary.
 	}
 ```
 
-###
+### Append to an object
+
+```go
+	appendPos, err := api.AppendObject("bucket-name", "object/name",
+		strings.NewReader("appended contents"),
+		oss.AppendPosition(123))
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(appendPos)
+```
