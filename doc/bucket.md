@@ -9,6 +9,8 @@ Here is the Go regular expression that specifies a valid bucket name.
 	regexp.MustCompile(`\A[a-z0-9][a-z0-9\-]{2,62}\z`)
 ```
 
+Go SDK will check it before doing the real request to the server.
+
 ### Create a bucket
 
 ```go
