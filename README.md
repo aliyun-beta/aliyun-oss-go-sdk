@@ -25,7 +25,7 @@ Highlights
   - goimports
   - go vet
   - race detector
-* Idiomatic
+* Idiomatic & elegant
   - response is returned as a parsed object
   - error is returned as a Go error
   - named options for setting headers & parameters
