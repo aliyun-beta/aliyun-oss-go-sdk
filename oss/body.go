@@ -139,7 +139,9 @@ func HTTPBody(body io.Reader) Option {
 		case *os.File:
 			req.ContentLength = tryGetFileSize(v)
 		}
-		req.Header.Set("Content-Type", typeByExtension(fileName))
+		if req.Header.Get("Content-Type") == "" {
+			req.Header.Set("Content-Type", typeByExtension(fileName))
+		}
 		return nil
 	}
 }

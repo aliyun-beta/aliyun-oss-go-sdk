@@ -81,8 +81,11 @@ func (a *authorization) canonicalizedResource() string {
 }
 
 func (a *authorization) value() string {
-	h := hmac.New(sha1.New, a.secret)
-	h.Write(a.data())
+	return hmacSHA1(a.data(), a.secret)
+}
+func hmacSHA1(data []byte, secret []byte) string {
+	h := hmac.New(sha1.New, secret)
+	h.Write(data)
 	return base64.StdEncoding.EncodeToString(h.Sum(nil))
 }
 

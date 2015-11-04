@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"reflect"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -296,13 +297,15 @@ func (a *API) newRequest(method, bucket, object string, options []Option) (*http
 	if a.securityToken != "" {
 		req.Header.Set("X-Oss-Security-Token", a.securityToken)
 	}
-	auth := authorization{
-		req:    req,
-		bucket: bucket,
-		object: object,
-		secret: []byte(a.accessKeySecret),
+	if !strings.HasPrefix(req.Header.Get("Content-Type"), "multipart/form-data") {
+		auth := authorization{
+			req:    req,
+			bucket: bucket,
+			object: object,
+			secret: []byte(a.accessKeySecret),
+		}
+		req.Header.Set("Authorization", "OSS "+a.accessKeyID+":"+auth.value())
 	}
-	req.Header.Set("Authorization", "OSS "+a.accessKeyID+":"+auth.value())
 	return req, nil
 }
 

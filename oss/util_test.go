@@ -79,7 +79,7 @@ func (r *MockServer) listen() {
 		r.Err = err
 		return
 	}
-	request := make([]byte, 1024)
+	request := make([]byte, 4096)
 	n, err := r.conn.Read(request)
 	if err != nil {
 		r.Err = err

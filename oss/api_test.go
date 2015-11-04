@@ -939,6 +939,89 @@ Server: AliyunOSS
 	},
 
 	{
+		name: "PostObject",
+		request: func(a *API) (interface{}, error) {
+			policy := `{ "expiration": "2014-12-01T12:00:00.000Z",
+	"conditions": [
+		{"bucket": "johnsmith" },
+		["starts-with", "$key", "user/eric/"]
+ 	]
+}`
+			r, err := a.PostObject(testBucketName, "object/name/${filename}", testFileName, policy,
+				setMultipartBoundary("9431149156168"),
+				PostSuccessActionStatus("200"),
+				PostContentDisposition("content_disposition"),
+				PostMeta("uuid", "uuid"),
+				PostMeta("tag", "metadata"),
+			)
+			return r, err
+		},
+		expectedRequest: `POST / HTTP/1.1
+Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
+User-Agent: %s
+Content-Length: 1117
+Accept-Encoding: identity
+Content-Type: multipart/form-data; boundary=9431149156168
+Date: %s
+
+--9431149156168
+Content-Disposition: form-data; name="success_action_status"
+
+200
+--9431149156168
+Content-Disposition: form-data; name="Content-Disposition"
+
+content_disposition
+--9431149156168
+Content-Disposition: form-data; name="x-oss-meta-uuid"
+
+uuid
+--9431149156168
+Content-Disposition: form-data; name="x-oss-meta-tag"
+
+metadata
+--9431149156168
+Content-Disposition: form-data; name="key"
+
+/object/name/${filename}
+--9431149156168
+Content-Disposition: form-data; name="OSSAccessKeyId"
+
+ayahghai0juiSie
+--9431149156168
+Content-Disposition: form-data; name="policy"
+
+eyAiZXhwaXJhdGlvbiI6ICIyMDE0LTEyLTAxVDEyOjAwOjAwLjAwMFoiLAoJImNvbmRpdGlvbnMiOiBbCgkJeyJidWNrZXQiOiAiam9obnNtaXRoIiB9LAoJCVsic3RhcnRzLXdpdGgiLCAiJGtleSIsICJ1c2VyL2VyaWMvIl0KIAldCn0=
+--9431149156168
+Content-Disposition: form-data; name="Signature"
+
+5Zz5XefJa8YXZrC+yvECNF3lzhI=
+--9431149156168
+Content-Disposition: form-data; name="file"; filename="test"
+Content-Type: application/octet-stream
+
+sfweruewpinbeewa
+--9431149156168
+Content-Disposition: form-data; name="submit"
+
+Upload to OSS
+--9431149156168--`,
+		response: `HTTP/1.1 200 OK
+x-oss-request-id: 61d2042d-1b68-6708-5906-33d81921362e
+Date: Fri, 24 Feb 2014 06:03:28 GMT
+Content-Length: 0
+Connection: close
+Server: AliyunOSS
+`,
+		expectedResponse: Header{
+			"X-Oss-Request-Id": []string{"61d2042d-1b68-6708-5906-33d81921362e"},
+			"Date":             []string{"Fri, 24 Feb 2014 06:03:28 GMT"},
+			"Server":           []string{"AliyunOSS"},
+			"Content-Length":   []string{"0"},
+		},
+	},
+
+	{
 		name: "InitUpload",
 		request: func(a *API) (interface{}, error) {
 			r, err := a.InitUpload(testBucketName, testObjectName)

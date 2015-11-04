@@ -168,6 +168,9 @@ func Origin(value string) Option {
 
 func setHeader(key, value string) Option {
 	return func(req *http.Request) error {
+		if value == "" {
+			return nil
+		}
 		req.Header.Set(key, value)
 		return nil
 	}
@@ -247,6 +250,9 @@ func UploadIDMarker(value string) Option {
 
 func addParam(key, value string) Option {
 	return func(req *http.Request) error {
+		if value == "" {
+			return nil
+		}
 		q := req.URL.Query()
 		q.Add(key, value)
 		req.URL.RawQuery = q.Encode()
