@@ -1026,7 +1026,7 @@ Date: Thu, 17 Jul 2014 06:27:54 GMT'
     <ETag>"5B3C1A2E053D763E1B002CC607C5A0FE"</ETag>
 </CopyPartResult>`,
 		expectedResponse: &CopyPartResult{
-			LastModified: parseTime(time.RFC3339Nano, "2014-07-17T06:27:54.000Z"),
+			LastModified: parseTimePtr(time.RFC3339Nano, "2014-07-17T06:27:54.000Z"),
 			ETag:         `"5B3C1A2E053D763E1B002CC607C5A0FE"`,
 		},
 	},

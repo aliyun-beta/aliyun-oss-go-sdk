@@ -49,7 +49,7 @@ type (
 		LastModified time.Time
 		ETag         string
 		Type         string
-		Size         int
+		Size         int64
 		StorageClass string
 		Owner        Owner
 	}
@@ -120,7 +120,7 @@ type (
 
 	// CopyPartResult is returned by UploadPartCopy API
 	CopyPartResult struct {
-		LastModified time.Time
+		LastModified *time.Time
 		ETag         string
 	}
 
@@ -149,7 +149,7 @@ type (
 		PartNumber   int
 		LastModified *time.Time `xml:"LastModified,omitempty"`
 		ETag         string
-		Size         int `xml:"Size,omitempty"`
+		Size         int64 `xml:"Size,omitempty"`
 	}
 )
 
