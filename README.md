@@ -1,6 +1,9 @@
 Aliyun OSS Go SDK
 =================
 
+Aliyun OSS (Object Storage Service) Go SDK is a client SDK to access Aliyun OSS
+API, implemented in the Go programming language.
+
 Installation
 ------------
 
