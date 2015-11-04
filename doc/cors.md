@@ -6,14 +6,19 @@ OSS provides the ability to configure CORS rules on a bucket.
 ### Set CORS rules
 
 ```go
-	err := api.PutBucketCORS("bucket-name", &oss.CORSConfiguration{
-		CORSRule: []oss.CORSRule{
+	err := api.PutBucketCORS("bucket-name", &CORSConfiguration{
+		CORSRule: []CORSRule{
 			{
-				AllowedOrigin: []string{"xxxx"},
-				AllowedMethod: []string{"xxxx"},
-				AllowedHeader: []string{"xxxx"},
-				ExposeHeader:  []string{"xxxx"},
-				MaxAgeSeconds: 10000,
+				AllowedOrigin: []string{"*"},
+				AllowedMethod: []string{"PUT", "GET"},
+				AllowedHeader: []string{"Authorization"},
+			},
+			{
+				AllowedOrigin: []string{"http://www.a.com", "http://www.b.com"},
+				AllowedMethod: []string{"GET"},
+				AllowedHeader: []string{"Authorization"},
+				ExposeHeader:  []string{"x-oss-test", "x-oss-test1"},
+				MaxAgeSeconds: 100,
 			},
 		},
 	})
