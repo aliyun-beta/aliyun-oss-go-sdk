@@ -156,6 +156,11 @@ var headerTestcases = []optionTestCase{
 		key:    "X-Oss-Object-Acl",
 		value:  "private",
 	},
+	{
+		option: ServerSideEncryption(""),
+		key:    "X-Oss-Server-Side-Encryption",
+		value:  "",
+	},
 }
 
 func TestHeaderOptions(t *testing.T) {
@@ -243,6 +248,11 @@ var paramTestCases = []optionTestCase{
 		option: UploadIDMarker("xyz"),
 		key:    "upload-id-marker",
 		value:  "xyz",
+	},
+	{
+		option: UploadIDMarker(""),
+		key:    "upload-id-marker",
+		value:  "",
 	},
 }
 

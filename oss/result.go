@@ -184,19 +184,6 @@ func (r *AppendPosition) Parse(resp *http.Response) error {
 }
 
 // Parse implements ResponseParser
-func (r *Header) Parse(resp *http.Response) error {
-	*r = make(Header)
-	for k, v := range resp.Header {
-		switch k {
-		case "Content-Length":
-		default:
-			(*r)[k] = v
-		}
-	}
-	return nil
-}
-
-// Parse implements ResponseParser
 func (r *DeleteResult) Parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
@@ -256,6 +243,24 @@ func (r *CopyPartResult) Parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
 
+// Parse implements ResponseParser
+func (r *Header) Parse(resp *http.Response) error {
+	*r = copyHeader(resp.Header)
+	return nil
+}
+
+func copyHeader(h http.Header) Header {
+	header := make(Header)
+	for k, v := range h {
+		switch k {
+		case "Content-Length":
+		default:
+			header[k] = v
+		}
+	}
+	return header
+}
+
 // bodyAndHeader writes http.Response.Body to an io.Writer and also saves Header object
 type bodyAndHeader struct {
 	io.Writer
@@ -264,9 +269,7 @@ type bodyAndHeader struct {
 
 // Parse implements ResponseParser
 func (r *bodyAndHeader) Parse(resp *http.Response) error {
-	if err := r.Header.Parse(resp); err != nil {
-		return err
-	}
+	*r.Header = copyHeader(resp.Header)
 	_, err := io.Copy(r.Writer, resp.Body)
 	return err
 }

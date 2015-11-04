@@ -957,7 +957,7 @@ Server: AliyunOSS
 		expectedRequest: `POST / HTTP/1.1
 Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
-Content-Length: 1035
+Content-Length: 995
 Accept-Encoding: identity
 Content-Type: multipart/form-data; boundary=9431149156168
 Date: %s
@@ -996,7 +996,6 @@ Content-Disposition: form-data; name="Signature"
 i1hJRL3ygcYhMRFmJ8QbzVlVxmw=
 --9431149156168
 Content-Disposition: form-data; name="file"; filename="test"
-Content-Type: application/octet-stream
 
 sfweruewpinbeewa
 --9431149156168--`,

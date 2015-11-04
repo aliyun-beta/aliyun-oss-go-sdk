@@ -3,14 +3,20 @@ package oss
 import (
 	"bytes"
 	"encoding/base64"
+	"errors"
+	"fmt"
 	"io"
 	"mime/multipart"
+	"net/textproto"
 	"os"
 	"path"
+	"strings"
 )
 
+// PostOption is the option type for configuration multipart.Writer
 type PostOption func(*multipart.Writer) error
 
+// PostObject posts an object to OSS in MIME multipart format
 func (a *API) PostObject(bucket, object, filename, policy string, options ...PostOption) (res Header, _ error) {
 	buf := new(bytes.Buffer)
 	w := multipart.NewWriter(buf)
@@ -44,13 +50,24 @@ func postFile(filename string) PostOption {
 			return err
 		}
 		defer file.Close()
-		writer, err := w.CreateFormFile("file", path.Base(filename))
-		if err != nil {
-			return err
-		}
-		_, err = io.Copy(writer, file)
-		return err
+		h := make(textproto.MIMEHeader)
+		h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="file"; filename="%s"`, escapeQuotes(path.Base(filename))))
+		writer, _ := w.CreatePart(h)
+		return safeCopy(writer, file)
 	}
+}
+func safeCopy(w io.Writer, r io.Reader) error {
+	if w == nil || r == nil {
+		return errors.New("fail to copy")
+	}
+	_, err := io.Copy(w, r)
+	return err
+}
+
+var quoteEscaper = strings.NewReplacer("\\", "\\\\", `"`, "\\\"")
+
+func escapeQuotes(s string) string {
+	return quoteEscaper.Replace(s)
 }
 
 // postPolicy is a PostOption to set policy
@@ -119,9 +136,6 @@ func postAccessKeyID(value string) PostOption {
 }
 func setMultipartField(key, value string) PostOption {
 	return func(w *multipart.Writer) error {
-		if value == "" {
-			return nil
-		}
 		return w.WriteField(key, value)
 	}
 }
