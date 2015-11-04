@@ -75,3 +75,35 @@ One or more optional headers can be provided when necessary.
 	}
 	fmt.Println(appendPos)
 ```
+
+### List all objects in a bucket
+
+```go
+	// list all objects
+	res, err := api.GetBucket("bucket-name")
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("%#v\n", res)
+```
+
+### List objects in a bucket satisfying some conditions
+
+```go
+	// list all objects
+	res, err := api.GetBucket("bucket-name", oss.Prefix("pic"), oss.Delimiter("/"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Printf("%#v\n", res)
+```
+
+### Get an object
+
+```go
+	buf := new(bytes.Buffer)
+	if err := api.GetObject("bucket-name", "object/name", buf); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(buf.String())
+```

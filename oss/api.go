@@ -168,8 +168,8 @@ func (a *API) CopyObject(sourceBucket, sourceObject, targetBucket, targetObject 
 }
 
 // GetObject returns an object and write it to an io.Writer
-func (a *API) GetObject(bucket, object string, w io.Writer, options ...Option) error {
-	return a.Do("GET", bucket, object, &writerResult{w})
+func (a *API) GetObject(bucket, object string, w io.Writer, options ...Option) (res Header, _ error) {
+	return res, a.Do("GET", bucket, object, &bodyAndHeader{Writer: w, Header: &res})
 }
 
 // AppendObject uploads a file by append to it from an io.Reader

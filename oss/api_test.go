@@ -726,13 +726,14 @@ Server: AliyunOSS
 		name: "GetObject",
 		request: func(a *API) (interface{}, error) {
 			w := new(bytes.Buffer)
-			if err := a.GetObject(testBucketName, testObjectName, w); err != nil {
+			res, err := a.GetObject(testBucketName, testObjectName, w)
+			if err != nil {
 				return nil, err
 			}
 			if expected, actual := "abcdef", string(w.Bytes()); actual != expected {
 				return nil, fmt.Errorf(expectBut, expected, actual)
 			}
-			return nil, nil
+			return res, nil
 		},
 		expectedRequest: `GET /object/name HTTP/1.1
 Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
@@ -742,17 +743,22 @@ Authorization: OSS ayahghai0juiSie:pZol4Z6em1QCAz53w4OatKsdi3w=
 Date: %s`,
 		response: `HTTP/1.1 200 OK
 x-oss-request-id: 3a89276f-2e2d-7965-3ff9-51c875b99c41
-x-oss-object-type: Normal
 Date: Fri, 24 Feb 2012 06:38:30 GMT
 Last-Modified: Fri, 24 Feb 2012 06:07:48 GMT
-ETag: "5B3C1A2E053D763E1B002CC607C5A0FE "
 Content-Type: text/plain
 Content-Length: 6
-Connection: close
 Server: AliyunOSS
+Connection: close
 
 abcdef`,
-		expectedResponse: nil,
+		expectedResponse: Header{
+			"X-Oss-Request-Id": []string{"3a89276f-2e2d-7965-3ff9-51c875b99c41"},
+			"Date":             []string{"Fri, 24 Feb 2012 06:38:30 GMT"},
+			"Last-Modified":    []string{"Fri, 24 Feb 2012 06:07:48 GMT"},
+			"Content-Type":     []string{"text/plain"},
+			"Content-Length":   []string{"6"},
+			"Server":           []string{"AliyunOSS"},
+		},
 	},
 
 	{
@@ -1466,7 +1472,7 @@ func TestInvalidObjectName(t *testing.T) {
 		"abc\nde",                 // contains \n
 		strings.Repeat("a", 1024), // too long
 	} {
-		if err := api.GetObject(testBucketName, object, new(bytes.Buffer)); err != ErrInvalidObjectName {
+		if _, err := api.GetObject(testBucketName, object, new(bytes.Buffer)); err != ErrInvalidObjectName {
 			t.Fatalf(testcaseExpectBut, object, ErrInvalidObjectName, err)
 		}
 	}

@@ -249,13 +249,15 @@ func (r *CopyPartResult) Parse(resp *http.Response) error {
 	return xml.NewDecoder(resp.Body).Decode(r)
 }
 
-// writerResult writes http.Response.Body to an io.Writer
-type writerResult struct {
+// bodyAndHeader writes http.Response.Body to an io.Writer and also saves Header object
+type bodyAndHeader struct {
 	io.Writer
+	*Header
 }
 
 // Parse implements ResponseParser
-func (r *writerResult) Parse(resp *http.Response) error {
+func (r *bodyAndHeader) Parse(resp *http.Response) error {
+	*r.Header = Header(resp.Header)
 	_, err := io.Copy(r.Writer, resp.Body)
 	return err
 }
