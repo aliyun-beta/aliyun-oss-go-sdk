@@ -185,7 +185,14 @@ func (r *AppendPosition) Parse(resp *http.Response) error {
 
 // Parse implements ResponseParser
 func (r *Header) Parse(resp *http.Response) error {
-	*r = Header(resp.Header)
+	*r = make(Header)
+	for k, v := range resp.Header {
+		switch k {
+		case "Content-Length":
+		default:
+			(*r)[k] = v
+		}
+	}
 	return nil
 }
 
@@ -257,7 +264,9 @@ type bodyAndHeader struct {
 
 // Parse implements ResponseParser
 func (r *bodyAndHeader) Parse(resp *http.Response) error {
-	*r.Header = Header(resp.Header)
+	if err := r.Header.Parse(resp); err != nil {
+		return err
+	}
 	_, err := io.Copy(r.Writer, resp.Body)
 	return err
 }

@@ -756,7 +756,6 @@ abcdef`,
 			"Date":             []string{"Fri, 24 Feb 2012 06:38:30 GMT"},
 			"Last-Modified":    []string{"Fri, 24 Feb 2012 06:07:48 GMT"},
 			"Content-Type":     []string{"text/plain"},
-			"Content-Length":   []string{"6"},
 			"Server":           []string{"AliyunOSS"},
 		},
 	},
@@ -876,7 +875,6 @@ Content-Length: 344606
 		expectedResponse: Header{
 			"X-Oss-Request-Id": []string{"06d4be30-2216-9264-757a-8f8b19b254bb"},
 			"Etag":             []string{`"fba9dede5f27731c9771645a39863328"`},
-			"Content-Length":   []string{"344606"},
 		},
 	},
 
@@ -959,7 +957,7 @@ Server: AliyunOSS
 		expectedRequest: `POST / HTTP/1.1
 Host: bucket-name.oss-cn-hangzhou.aliyuncs.com
 User-Agent: %s
-Content-Length: 1117
+Content-Length: 1035
 Accept-Encoding: identity
 Content-Type: multipart/form-data; boundary=9431149156168
 Date: %s
@@ -983,7 +981,7 @@ metadata
 --9431149156168
 Content-Disposition: form-data; name="key"
 
-/object/name/${filename}
+object/name/${filename}
 --9431149156168
 Content-Disposition: form-data; name="OSSAccessKeyId"
 
@@ -995,16 +993,12 @@ eyAiZXhwaXJhdGlvbiI6ICIyMDE0LTEyLTAxVDEyOjAwOjAwLjAwMFoiLAoJImNvbmRpdGlvbnMiOiBb
 --9431149156168
 Content-Disposition: form-data; name="Signature"
 
-5Zz5XefJa8YXZrC+yvECNF3lzhI=
+i1hJRL3ygcYhMRFmJ8QbzVlVxmw=
 --9431149156168
 Content-Disposition: form-data; name="file"; filename="test"
 Content-Type: application/octet-stream
 
 sfweruewpinbeewa
---9431149156168
-Content-Disposition: form-data; name="submit"
-
-Upload to OSS
 --9431149156168--`,
 		response: `HTTP/1.1 200 OK
 x-oss-request-id: 61d2042d-1b68-6708-5906-33d81921362e
@@ -1017,7 +1011,6 @@ Server: AliyunOSS
 			"X-Oss-Request-Id": []string{"61d2042d-1b68-6708-5906-33d81921362e"},
 			"Date":             []string{"Fri, 24 Feb 2014 06:03:28 GMT"},
 			"Server":           []string{"AliyunOSS"},
-			"Content-Length":   []string{"0"},
 		},
 	},
 

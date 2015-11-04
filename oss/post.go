@@ -14,13 +14,13 @@ type PostOption func(*multipart.Writer) error
 func (a *API) PostObject(bucket, object, filename, policy string, options ...PostOption) (res Header, _ error) {
 	buf := new(bytes.Buffer)
 	w := multipart.NewWriter(buf)
+	policy = base64.StdEncoding.EncodeToString([]byte(policy))
 	options = append(options, []PostOption{
 		postObjectName(object),
 		postAccessKeyID(a.accessKeyID),
-		PostPolicy(policy),
+		postPolicy(policy),
 		postSignature(hmacSHA1([]byte(policy), []byte(a.accessKeySecret))),
 		postFile(filename),
-		postSubmit(),
 	}...)
 	for _, option := range options {
 		if err := option(w); err != nil {
@@ -53,9 +53,9 @@ func postFile(filename string) PostOption {
 	}
 }
 
-// PostPolicy is a PostOption to set policy
-func PostPolicy(value string) PostOption {
-	return setMultipartField("policy", base64.StdEncoding.EncodeToString([]byte(value)))
+// postPolicy is a PostOption to set policy
+func postPolicy(value string) PostOption {
+	return setMultipartField("policy", value)
 }
 
 // PostCacheControl is a PostOption to set Cache-Control
@@ -112,13 +112,10 @@ func postSignature(value string) PostOption {
 	return setMultipartField("Signature", value)
 }
 func postObjectName(value string) PostOption {
-	return setMultipartField("key", "/"+value)
+	return setMultipartField("key", value)
 }
 func postAccessKeyID(value string) PostOption {
 	return setMultipartField("OSSAccessKeyId", value)
-}
-func postSubmit() PostOption {
-	return setMultipartField("submit", "Upload to OSS")
 }
 func setMultipartField(key, value string) PostOption {
 	return func(w *multipart.Writer) error {
