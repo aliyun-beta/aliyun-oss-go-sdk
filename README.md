@@ -3,7 +3,6 @@ Aliyun OSS Go SDK
 
 [![Build
 Status](https://drone.io/github.com/h12w/aliyun-oss-go-sdk/status.png)](https://drone.io/github.com/h12w/aliyun-oss-go-sdk/latest)
-
 [![GoDoc](https://godoc.org/github.com/aliyun/aliyun-oss-go-sdk/oss?status.svg)](https://godoc.org/github.com/aliyun/aliyun-oss-go-sdk/oss)
 
 Aliyun OSS (Object Storage Service) Go SDK is a client SDK to access Aliyun OSS
