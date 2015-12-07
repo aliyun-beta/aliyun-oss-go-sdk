@@ -14,8 +14,8 @@ Installation
 ------------
 
 ```bash
-go get -u github.com/aliyun/aliyun-oss-go-sdk/oss
-go test -v -cover github.com/aliyun/aliyun-oss-go-sdk/oss
+go get -u github.com/aliyun-beta/aliyun-oss-go-sdk/oss
+go test -v -cover github.com/aliyun-beta/aliyun-oss-go-sdk/oss
 ```
 
 Highlights
